@@ -1,0 +1,10 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  name: delivery-safe-retry
+  generation: 1
+spec:
+  pipelineRef: delivery
+  tasks:
+    scan:
+      retryWith: [build]

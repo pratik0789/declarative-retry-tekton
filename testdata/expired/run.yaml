@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: expired-1
+  creationTimestamp: 2020-01-01T00:00:00Z
+spec:
+  pipelineRef: {name: expired}
+status:
+  childReferences:
+    - {name: fail-run, pipelineTaskName: fail, status: Failed}

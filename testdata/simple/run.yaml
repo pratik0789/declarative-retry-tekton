@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: delivery-1
+  uid: 11111111-1111-1111-1111-111111111111
+spec:
+  pipelineRef:
+    name: delivery
+status:
+  childReferences:
+    - name: delivery-1-clone
+      pipelineTaskName: clone
+    - name: delivery-1-build
+      pipelineTaskName: build
+    - name: delivery-1-scan
+      pipelineTaskName: scan

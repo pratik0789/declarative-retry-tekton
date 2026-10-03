@@ -1,0 +1,8 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: result-conflict-policy}
+spec:
+  pipelineRef: result-conflict
+  tasks:
+    fail:
+      retryWith: [build]

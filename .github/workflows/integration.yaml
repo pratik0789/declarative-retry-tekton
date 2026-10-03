@@ -1,0 +1,38 @@
+name: Tekton integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Unit and offline evaluation
+        run: make test evaluate
+      - name: Install kind
+        run: go install sigs.k8s.io/kind@v0.27.0
+      - name: Create cluster
+        run: make cluster
+      - name: Install Tekton
+        run: make install-tekton wait-tekton
+      - name: Execute baseline and recovery
+        run: make integration
+      - name: Upload execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tekton-integration-evidence
+          path: artifacts/integration
+          if-no-files-found: warn

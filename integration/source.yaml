@@ -1,0 +1,41 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: retry-integration
+  namespace: retry-eval
+spec:
+  tasks:
+    - name: clone
+      taskSpec:
+        steps:
+          - {name: run, image: alpine:3.20, script: "echo cloned\n"}
+    - name: build
+      runAfter: [clone]
+      taskSpec:
+        steps:
+          - {name: run, image: alpine:3.20, script: "echo built\n"}
+    - name: scan
+      runAfter: [build]
+      taskSpec:
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              case "$(context.pipelineRun.name)" in
+                retry-integration-source) echo "injected source failure"; exit 1 ;;
+                *) echo "scan succeeded" ;;
+              esac
+    - name: deploy
+      runAfter: [scan]
+      taskSpec:
+        steps:
+          - {name: run, image: alpine:3.20, script: "echo deployed\n"}
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: retry-integration-source
+  namespace: retry-eval
+spec:
+  pipelineRef:
+    name: retry-integration

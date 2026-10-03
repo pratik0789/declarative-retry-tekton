@@ -1,0 +1,97 @@
+cases:
+  - name: safe-partial-recovery
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    policy: ../testdata/simple/policy.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    expectedDecision: recover
+    expectedActions:
+      clone: inherit
+      build: rerun
+      scan: rerun
+      deploy: continue
+  - name: producer-consumer-conflict
+    pipeline: ../testdata/result-conflict/pipeline.yaml
+    run: ../testdata/result-conflict/run.yaml
+    policy: ../testdata/result-conflict/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: inherit results
+  - name: mutable-workspace-conflict
+    pipeline: ../testdata/workspace-conflict/pipeline.yaml
+    run: ../testdata/workspace-conflict/run.yaml
+    policy: ../testdata/workspace-conflict/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: mutable workspace
+  - name: changed-pipeline
+    pipeline: ../testdata/changed-pipeline/pipeline.yaml
+    run: ../testdata/changed-pipeline/run.yaml
+    policy: ../testdata/changed-pipeline/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: changed
+  - name: expired-recovery-window
+    pipeline: ../testdata/expired/pipeline.yaml
+    run: ../testdata/expired/run.yaml
+    policy: ../testdata/expired/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: expired
+  - name: blocked-task
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/blocked.yaml
+    expectedDecision: refuse
+    expectedReasonContains: blocks resume
+  - name: retry-closure-cycle
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/cycle.yaml
+    expectedDecision: refuse
+    expectedReasonContains: cycle
+  - name: unknown-task-reference
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/unknown-task.yaml
+    expectedDecision: refuse
+    expectedReasonContains: unknown task
+  - name: no-failed-task
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/no-failure/taskruns.yaml
+    policy: ../testdata/simple/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: no failed tasks
+  - name: policy-pipeline-mismatch
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/wrong-pipeline.yaml
+    expectedDecision: refuse
+    expectedReasonContains: policy references
+  - name: run-pipeline-mismatch
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/mismatched-run/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: ../testdata/simple/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: PipelineRun references
+  - name: multiple-failed-tasks
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/multiple-failures/taskruns.yaml
+    policy: ../testdata/simple/policy.yaml
+    expectedDecision: recover
+    expectedActions:
+      clone: inherit
+      build: rerun
+      scan: rerun
+      deploy: continue
+  - name: superseded-run
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/latest-only.yaml
+    newerRuns: ../testdata/newer-run/runs.yaml
+    expectedDecision: refuse
+    expectedReasonContains: supersedes

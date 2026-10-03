@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata: {name: result-conflict-1}
+spec:
+  pipelineRef: {name: result-conflict}
+status:
+  childReferences:
+    - {name: build-run, pipelineTaskName: build, status: Succeeded}
+    - {name: consume-run, pipelineTaskName: consume, status: Succeeded}
+    - {name: fail-run, pipelineTaskName: fail, status: Failed}

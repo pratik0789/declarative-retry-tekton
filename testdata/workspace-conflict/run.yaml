@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata: {name: workspace-conflict-1}
+spec:
+  pipelineRef: {name: workspace-conflict}
+status:
+  childReferences:
+    - {name: prepare-run, pipelineTaskName: prepare, status: Succeeded}
+    - {name: fail-run, pipelineTaskName: fail, status: Failed}

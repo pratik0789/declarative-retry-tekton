@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: {name: result-conflict}
+spec:
+  tasks:
+    - name: build
+    - name: consume
+      params:
+        - name: image
+          value: $(tasks.build.results.image)
+    - name: fail

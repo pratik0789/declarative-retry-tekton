@@ -1,0 +1,13 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: {name: workspace-conflict}
+spec:
+  workspaces:
+    - name: source
+  tasks:
+    - name: prepare
+      workspaces:
+        - {name: src, workspace: source}
+    - name: fail
+      workspaces:
+        - {name: src, workspace: source}

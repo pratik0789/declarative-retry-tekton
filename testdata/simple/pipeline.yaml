@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: delivery
+spec:
+  tasks:
+    - name: clone
+      taskSpec:
+        steps:
+          - {name: clone, image: alpine:3.20, script: "echo cloned\n"}
+    - name: build
+      runAfter: [clone]
+      taskSpec:
+        steps:
+          - {name: build, image: alpine:3.20, script: "echo built\n"}
+    - name: scan
+      runAfter: [build]
+      taskSpec:
+        steps:
+          - {name: scan, image: alpine:3.20, script: "echo scanned\n"}
+    - name: deploy
+      runAfter: [scan]
+      taskSpec:
+        steps:
+          - {name: deploy, image: alpine:3.20, script: "echo deployed\n"}

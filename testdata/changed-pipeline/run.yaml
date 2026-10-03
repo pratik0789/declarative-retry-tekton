@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata: {name: changed-pipeline-1}
+spec:
+  pipelineRef: {name: changed-pipeline}
+status:
+  pipelineSpec:
+    tasks:
+      - name: old-task
+  childReferences:
+    - {name: old-run, pipelineTaskName: old-task, status: Failed}
