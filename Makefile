@@ -1,7 +1,7 @@
 KIND ?= $(HOME)/go/bin/kind
 CLUSTER ?= retry-paper
 KIND_IMAGE ?= kindest/node:v1.31.4
-TEKTON_VERSION ?= v0.62.3
+TEKTON_VERSION ?= v1.6.0
 KUBECTL ?= kubectl
 
 .PHONY: test evaluate generate cluster install-tekton wait-tekton integration teardown

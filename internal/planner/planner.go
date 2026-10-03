@@ -128,12 +128,7 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		}
 	}
 	if r.Status.PipelineSpec != nil {
-		current, _ := json.Marshal(struct {
-			Tasks      []PipelineTask `json:"tasks"`
-			Workspaces []Workspace    `json:"workspaces"`
-		}{p.Spec.Tasks, p.Spec.Workspaces})
-		recorded, _ := json.Marshal(r.Status.PipelineSpec)
-		if string(current) != string(recorded) {
+		if !sameTaskGraph(p.Spec.Tasks, r.Status.PipelineSpec.Tasks) {
 			return refuse("Pipeline specification changed since the source run")
 		}
 	}
@@ -231,6 +226,29 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		plan.Metrics.AvoidancePercent = float64(plan.Metrics.TasksAvoided) * 100 / float64(plan.Metrics.TotalTasks)
 	}
 	return plan, nil
+}
+
+func sameTaskGraph(current, recorded []PipelineTask) bool {
+	graph := func(tasks []PipelineTask) map[string]string {
+		result := map[string]string{}
+		for _, task := range tasks {
+			dependencies := append([]string(nil), task.RunAfter...)
+			sort.Strings(dependencies)
+			result[task.Name] = strings.Join(dependencies, "\x00")
+		}
+		return result
+	}
+	left, right := graph(current), graph(recorded)
+	if len(left) != len(right) {
+		return false
+	}
+	for name, dependencies := range left {
+		value, exists := right[name]
+		if !exists || value != dependencies {
+			return false
+		}
+	}
+	return true
 }
 
 func unsafeResultReuse(tasks map[string]PipelineTask, rerun map[string]bool, states map[string]ChildReference) string {

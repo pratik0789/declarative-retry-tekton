@@ -1,0 +1,351 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    creationTimestamp: "2026-10-03T23:55:04Z"
+    generation: 1
+    labels:
+      tekton.dev/pipeline: retry-integration
+    name: retry-integration-full
+    namespace: retry-eval
+    resourceVersion: "7762"
+    uid: 847090c3-d0c1-46de-8005-b7f5e17576d8
+  spec:
+    pipelineRef:
+      name: retry-integration
+    taskRunTemplate:
+      serviceAccountName: default
+    timeouts:
+      pipeline: 1h0m0s
+  status:
+    childReferences:
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-full-clone
+      pipelineTaskName: clone
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-full-build
+      pipelineTaskName: build
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-full-scan
+      pipelineTaskName: scan
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-full-deploy
+      pipelineTaskName: deploy
+    completionTime: "2026-10-03T23:55:21Z"
+    conditions:
+    - lastTransitionTime: "2026-10-03T23:55:21Z"
+      message: 'Tasks Completed: 4 (Failed: 0, Cancelled 0), Skipped: 0'
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    pipelineSpec:
+      tasks:
+      - name: clone
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo cloned
+      - name: build
+        runAfter:
+        - clone
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo built
+      - name: scan
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "retry-integration-full" in
+                retry-integration-source) echo "injected source failure"; exit 1 ;;
+                *) echo "scan succeeded" ;;
+              esac
+      - name: deploy
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo deployed
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-03T23:55:04Z"
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    annotations:
+      retry.tekton.dev/policy: retry-integration-policy
+      retry.tekton.dev/source-pipeline-run: retry-integration-source
+      retry.tekton.dev/source-pipeline-run-uid: d70e68d0-bccb-4dc0-a3ca-fbe530b55cab
+    creationTimestamp: "2026-10-03T23:55:22Z"
+    generateName: retry-integration-retry-
+    generation: 1
+    labels:
+      tekton.dev/pipeline: retry-integration-retry-7mkgd
+    name: retry-integration-retry-7mkgd
+    namespace: retry-eval
+    resourceVersion: "7932"
+    uid: 7d96cf39-6a68-454b-bb9e-9155310715d5
+  spec:
+    pipelineSpec:
+      tasks:
+      - name: build
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo built
+      - name: scan
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "$(context.pipelineRun.name)" in
+                retry-integration-source) echo "injected source failure"; exit 1 ;;
+                *) echo "scan succeeded" ;;
+              esac
+      - name: deploy
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo deployed
+    taskRunTemplate:
+      serviceAccountName: default
+    timeouts:
+      pipeline: 1h0m0s
+  status:
+    childReferences:
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-retry-7mkgd-build
+      pipelineTaskName: build
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-retry-7mkgd-scan
+      pipelineTaskName: scan
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-retry-7mkgd-deploy
+      pipelineTaskName: deploy
+    completionTime: "2026-10-03T23:55:36Z"
+    conditions:
+    - lastTransitionTime: "2026-10-03T23:55:36Z"
+      message: 'Tasks Completed: 3 (Failed: 0, Cancelled 0), Skipped: 0'
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    pipelineSpec:
+      tasks:
+      - name: build
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo built
+      - name: scan
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "retry-integration-retry-7mkgd" in
+                retry-integration-source) echo "injected source failure"; exit 1 ;;
+                *) echo "scan succeeded" ;;
+              esac
+      - name: deploy
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo deployed
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-03T23:55:22Z"
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-integration-source","namespace":"retry-eval"},"spec":{"pipelineRef":{"name":"retry-integration"}}}
+    creationTimestamp: "2026-10-03T23:54:51Z"
+    generation: 1
+    labels:
+      tekton.dev/pipeline: retry-integration
+    name: retry-integration-source
+    namespace: retry-eval
+    resourceVersion: "7551"
+    uid: d70e68d0-bccb-4dc0-a3ca-fbe530b55cab
+  spec:
+    pipelineRef:
+      name: retry-integration
+    taskRunTemplate:
+      serviceAccountName: default
+    timeouts:
+      pipeline: 1h0m0s
+  status:
+    childReferences:
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-source-clone
+      pipelineTaskName: clone
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-source-build
+      pipelineTaskName: build
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-integration-source-scan
+      pipelineTaskName: scan
+    completionTime: "2026-10-03T23:55:03Z"
+    conditions:
+    - lastTransitionTime: "2026-10-03T23:55:03Z"
+      message: 'Tasks Completed: 3 (Failed: 1, Cancelled 0), Skipped: 1'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    pipelineSpec:
+      tasks:
+      - name: clone
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo cloned
+      - name: build
+        runAfter:
+        - clone
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo built
+      - name: scan
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "retry-integration-source" in
+                retry-integration-source) echo "injected source failure"; exit 1 ;;
+                *) echo "scan succeeded" ;;
+              esac
+      - name: deploy
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo deployed
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    skippedTasks:
+    - name: deploy
+      reason: PipelineRun was stopping
+    startTime: "2026-10-03T23:54:51Z"
+kind: List
+metadata:
+  resourceVersion: ""
