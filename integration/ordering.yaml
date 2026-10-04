@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: retry-ordering
+  namespace: retry-ordering
+spec:
+  tasks:
+    - name: clone
+      taskSpec: {steps: [{name: run, image: alpine:3.20, script: "sleep 1"}]}
+    - name: build
+      runAfter: [clone]
+      taskSpec: {steps: [{name: run, image: alpine:3.20, script: "sleep 3"}]}
+    - name: scan
+      runAfter: [build]
+      taskSpec: {steps: [{name: run, image: alpine:3.20, script: "sleep 3"}]}
+    - name: migrate
+      runAfter: [scan]
+      taskSpec: {steps: [{name: run, image: alpine:3.20, script: "sleep 1"}]}
+    - name: deploy
+      runAfter: [migrate]
+      taskSpec:
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              case "$(context.pipelineRun.name)" in
+                *-source) echo "injected deploy failure"; exit 1 ;;
+              esac
+              echo deployed
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: retry-ordering-source
+  namespace: retry-ordering
+spec:
+  pipelineRef: {name: retry-ordering}

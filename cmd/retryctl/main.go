@@ -30,8 +30,9 @@ func main() {
 		policy := fs.String("policy", "", "PipelineRetryPolicy YAML")
 		binding := fs.String("binding", "persistentVolumeClaim", "binding for writable Workspaces: persistentVolumeClaim or volumeClaimTemplate")
 		secrets := fs.String("secret-workspaces", "", "comma-separated Workspaces bound to Secrets")
+		completed := fs.String("completed", "upstream", "which tasks completed before the failure: upstream or independent")
 		_ = fs.Parse(os.Args[2:])
-		report, err := planner.Replay(*pipeline, *policy, *binding, splitTasks(*secrets))
+		report, err := planner.Replay(*pipeline, *policy, *binding, *completed, splitTasks(*secrets))
 		writeJSON(report, err)
 		return
 	}

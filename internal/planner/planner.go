@@ -261,6 +261,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			})
 		}
 	}
+	plan.Warnings = append(plan.Warnings, finallyWorkspaceWarnings(p, rerun, states)...)
 	sort.Slice(plan.Warnings, func(i, j int) bool {
 		left := plan.Warnings[i].Code + strings.Join(plan.Warnings[i].Tasks, "\x00") + plan.Warnings[i].StateName
 		right := plan.Warnings[j].Code + strings.Join(plan.Warnings[j].Tasks, "\x00") + plan.Warnings[j].StateName
@@ -412,6 +413,40 @@ func ephemeralWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool
 			StateKind: "workspace",
 			StateName: workspace,
 		})
+	}
+	return warnings
+}
+
+// Finally tasks always run again in a recovery run; flag those that touch state inherited tasks left behind.
+func finallyWorkspaceWarnings(p Pipeline, rerun map[string]bool, states map[string]ChildReference) []Warning {
+	workspaceOf := func(binding WorkspaceBinding) string {
+		if binding.Workspace != "" {
+			return binding.Workspace
+		}
+		return binding.Name
+	}
+	inheritedUsers := map[string]bool{}
+	for _, task := range p.Spec.Tasks {
+		child, ran := states[task.Name]
+		if ran && strings.EqualFold(child.Status, "Succeeded") && !rerun[task.Name] {
+			for _, binding := range task.Workspaces {
+				inheritedUsers[workspaceOf(binding)] = true
+			}
+		}
+	}
+	var warnings []Warning
+	for _, task := range p.Spec.Finally {
+		for _, binding := range task.Workspaces {
+			if workspace := workspaceOf(binding); inheritedUsers[workspace] {
+				warnings = append(warnings, Warning{
+					Code:      "finally-task-touches-inherited-state",
+					Message:   fmt.Sprintf("finally task %q runs again and binds workspace %q, which holds state from inherited tasks", task.Name, workspace),
+					Tasks:     []string{task.Name},
+					StateKind: "workspace",
+					StateName: workspace,
+				})
+			}
+		}
 	}
 	return warnings
 }

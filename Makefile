@@ -4,7 +4,7 @@ KIND_IMAGE ?= kindest/node:v1.31.4
 TEKTON_VERSION ?= v1.6.0
 KUBECTL ?= kubectl
 
-.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful benchmark teardown
+.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful ordering benchmark teardown
 
 test:
 	go test ./...
@@ -17,6 +17,8 @@ replay:
 	for policy in policy failed-task-only; do for binding in persistentVolumeClaim volumeClaimTemplate; do \
 		go run ./cmd/retryctl replay --pipeline evaluation/konflux/template-build.yaml --policy evaluation/konflux/$$policy.yaml \
 			--binding $$binding --secret-workspaces git-auth,netrc > evaluation/konflux/replay-$$policy-$$binding.json; \
+		go run ./cmd/retryctl replay --pipeline evaluation/konflux/template-build.yaml --policy evaluation/konflux/$$policy.yaml \
+			--binding $$binding --completed independent --secret-workspaces git-auth,netrc > evaluation/konflux/replay-independent-$$policy-$$binding.json; \
 	done; done
 
 generate:
@@ -36,6 +38,9 @@ integration:
 
 stateful:
 	CLUSTER=$(CLUSTER) ./hack/stateful.sh
+
+ordering:
+	CLUSTER=$(CLUSTER) ./hack/ordering.sh
 
 benchmark:
 	CLUSTER=$(CLUSTER) ./hack/benchmark.sh

@@ -174,3 +174,24 @@ cases:
     policy: policies/unknown-policy-key.yaml
     expectedDecision: refuse
     expectedReasonContains: unknown task "biuld"
+  - name: forward-invalidation
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/forward.yaml
+    selectedTasks: [clone]
+    expectedDecision: recover
+    expectedActions:
+      clone: rerun
+      build: rerun
+      scan: rerun
+      deploy: continue
+  - name: finally-task-touches-inherited-state
+    pipeline: ../testdata/finally/pipeline.yaml
+    run: ../testdata/finally/run.yaml
+    policy: ../testdata/finally/policy.yaml
+    expectedDecision: recover
+    expectedWarningContains: finally-task-touches-inherited-state
+    expectedActions:
+      prepare: inherit
+      fail: rerun

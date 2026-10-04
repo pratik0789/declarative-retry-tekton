@@ -9,6 +9,7 @@ type Pipeline struct {
 	Metadata Metadata `json:"metadata"`
 	Spec     struct {
 		Tasks      []PipelineTask `json:"tasks"`
+		Finally    []PipelineTask `json:"finally,omitempty"`
 		Workspaces []Workspace    `json:"workspaces"`
 	} `json:"spec"`
 	definition any

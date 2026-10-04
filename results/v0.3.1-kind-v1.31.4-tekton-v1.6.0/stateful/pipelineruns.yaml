@@ -1,0 +1,814 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-pvc-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","persistentVolumeClaim":{"claimName":"retry-stateful-pvc"}}]}}
+    creationTimestamp: "2026-10-04T23:00:42Z"
+    generation: 1
+    labels:
+      tekton.dev/pipeline: retry-stateful
+    name: retry-stateful-pvc-source
+    namespace: retry-stateful
+    resourceVersion: "263835"
+    uid: c0fe9fdb-017b-415d-9a47-d59071c97940
+  spec:
+    pipelineRef:
+      name: retry-stateful
+    taskRunTemplate:
+      serviceAccountName: default
+    timeouts:
+      pipeline: 1h0m0s
+    workspaces:
+    - name: shared
+      persistentVolumeClaim:
+        claimName: retry-stateful-pvc
+  status:
+    childReferences:
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-pvc-source-clone
+      pipelineTaskName: clone
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-pvc-source-build
+      pipelineTaskName: build
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-pvc-source-scan
+      pipelineTaskName: scan
+    completionTime: "2026-10-04T23:01:02Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T23:01:02Z"
+      message: 'Tasks Completed: 3 (Failed: 1, Cancelled 0), Skipped: 1'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    pipelineSpec:
+      tasks:
+      - name: clone
+        taskSpec:
+          metadata: {}
+          results:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(workspaces.src.path)/source.txt"
+              head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+              sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: build
+        params:
+        - name: commit
+          value: $(tasks.clone.results.commit)
+        - name: digest
+          value: $(tasks.clone.results.digest)
+        runAfter:
+        - clone
+        taskSpec:
+          metadata: {}
+          params:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          results:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              source_file="$(workspaces.src.path)/source.txt"
+              if [ ! -f "$source_file" ]; then
+                echo "STATE-MISSING: source.txt written by clone is not present"
+                exit 1
+              fi
+              actual=`sha256sum "$source_file" | cut -d' ' -f1`
+              if [ "$actual" != "$(params.digest)" ]; then
+                echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+                exit 1
+              fi
+              echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+              printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: scan
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "retry-stateful-pvc-source" in
+                *-source) echo "injected scan failure"; exit 1 ;;
+              esac
+              echo "scanned $(params.image)"
+      - name: deploy
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo "deployed $(params.image)"
+      workspaces:
+      - name: shared
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    skippedTasks:
+    - name: deploy
+      reason: PipelineRun was stopping
+    startTime: "2026-10-04T23:00:42Z"
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    annotations:
+      retry.tekton.dev/inherited-taskruns: clone=retry-stateful-vct-source-clone
+      retry.tekton.dev/policy: retry-stateful-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/shared-state-warning-codes: ephemeral-workspace-across-closure,shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-stateful
+      retry.tekton.dev/source-pipeline-run: retry-stateful-vct-source
+      retry.tekton.dev/source-pipeline-run-uid: 878d9c72-a2b2-4b8a-a296-8bfa48e03751
+    creationTimestamp: "2026-10-04T23:01:17Z"
+    generateName: retry-stateful-retry-
+    generation: 1
+    labels:
+      tekton.dev/pipeline: retry-stateful-retry-4bf5j
+    name: retry-stateful-retry-4bf5j
+    namespace: retry-stateful
+    resourceVersion: "264136"
+    uid: 2a452382-566f-4b46-8312-b2a1c37851f1
+  spec:
+    pipelineSpec:
+      tasks:
+      - name: build
+        params:
+        - name: commit
+          value: 64805dba61d0
+        - name: digest
+          value: dbf9db9f602b155e9e596f0cceb31c7e39c0a68828274263fb25e232e5d32b4c
+        taskSpec:
+          metadata: {}
+          params:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          results:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              source_file="$(workspaces.src.path)/source.txt"
+              if [ ! -f "$source_file" ]; then
+                echo "STATE-MISSING: source.txt written by clone is not present"
+                exit 1
+              fi
+              actual=`sha256sum "$source_file" | cut -d' ' -f1`
+              if [ "$actual" != "$(params.digest)" ]; then
+                echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+                exit 1
+              fi
+              echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+              printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: scan
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "$(context.pipelineRun.name)" in
+                *-source) echo "injected scan failure"; exit 1 ;;
+              esac
+              echo "scanned $(params.image)"
+      - name: deploy
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo "deployed $(params.image)"
+      workspaces:
+      - name: shared
+    taskRunTemplate:
+      serviceAccountName: default
+    timeouts:
+      pipeline: 1h0m0s
+    workspaces:
+    - name: shared
+      volumeClaimTemplate:
+        metadata:
+          creationTimestamp: null
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 64Mi
+        status: {}
+  status:
+    childReferences:
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-retry-4bf5j-build
+      pipelineTaskName: build
+    completionTime: "2026-10-04T23:01:25Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T23:01:25Z"
+      message: 'Tasks Completed: 1 (Failed: 1, Cancelled 0), Skipped: 2'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    pipelineSpec:
+      tasks:
+      - name: build
+        params:
+        - name: commit
+          value: 64805dba61d0
+        - name: digest
+          value: dbf9db9f602b155e9e596f0cceb31c7e39c0a68828274263fb25e232e5d32b4c
+        taskSpec:
+          metadata: {}
+          params:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          results:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              source_file="$(workspaces.src.path)/source.txt"
+              if [ ! -f "$source_file" ]; then
+                echo "STATE-MISSING: source.txt written by clone is not present"
+                exit 1
+              fi
+              actual=`sha256sum "$source_file" | cut -d' ' -f1`
+              if [ "$actual" != "$(params.digest)" ]; then
+                echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+                exit 1
+              fi
+              echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+              printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: scan
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "retry-stateful-retry-4bf5j" in
+                *-source) echo "injected scan failure"; exit 1 ;;
+              esac
+              echo "scanned $(params.image)"
+      - name: deploy
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo "deployed $(params.image)"
+      workspaces:
+      - name: shared
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    skippedTasks:
+    - name: scan
+      reason: PipelineRun was stopping
+    - name: deploy
+      reason: PipelineRun was stopping
+    startTime: "2026-10-04T23:01:17Z"
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    annotations:
+      retry.tekton.dev/inherited-taskruns: clone=retry-stateful-pvc-source-clone
+      retry.tekton.dev/policy: retry-stateful-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-stateful
+      retry.tekton.dev/source-pipeline-run: retry-stateful-pvc-source
+      retry.tekton.dev/source-pipeline-run-uid: c0fe9fdb-017b-415d-9a47-d59071c97940
+    creationTimestamp: "2026-10-04T23:01:03Z"
+    generateName: retry-stateful-retry-
+    generation: 1
+    labels:
+      tekton.dev/pipeline: retry-stateful-retry-vwwfd
+    name: retry-stateful-retry-vwwfd
+    namespace: retry-stateful
+    resourceVersion: "264027"
+    uid: 05cdfcee-c583-4866-b9dc-b05acf9196bb
+  spec:
+    pipelineSpec:
+      tasks:
+      - name: build
+        params:
+        - name: commit
+          value: a4c913b689b7
+        - name: digest
+          value: 4af41e0ec92b094e2b0b6b68f55a8b1e09420be2aab74722571128ec46b31330
+        taskSpec:
+          metadata: {}
+          params:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          results:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              source_file="$(workspaces.src.path)/source.txt"
+              if [ ! -f "$source_file" ]; then
+                echo "STATE-MISSING: source.txt written by clone is not present"
+                exit 1
+              fi
+              actual=`sha256sum "$source_file" | cut -d' ' -f1`
+              if [ "$actual" != "$(params.digest)" ]; then
+                echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+                exit 1
+              fi
+              echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+              printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: scan
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "$(context.pipelineRun.name)" in
+                *-source) echo "injected scan failure"; exit 1 ;;
+              esac
+              echo "scanned $(params.image)"
+      - name: deploy
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo "deployed $(params.image)"
+      workspaces:
+      - name: shared
+    taskRunTemplate:
+      serviceAccountName: default
+    timeouts:
+      pipeline: 1h0m0s
+    workspaces:
+    - name: shared
+      persistentVolumeClaim:
+        claimName: retry-stateful-pvc
+  status:
+    childReferences:
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-retry-vwwfd-build
+      pipelineTaskName: build
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-retry-vwwfd-scan
+      pipelineTaskName: scan
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-retry-vwwfd-deploy
+      pipelineTaskName: deploy
+    completionTime: "2026-10-04T23:01:16Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T23:01:16Z"
+      message: 'Tasks Completed: 3 (Failed: 0, Cancelled 0), Skipped: 0'
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    pipelineSpec:
+      tasks:
+      - name: build
+        params:
+        - name: commit
+          value: a4c913b689b7
+        - name: digest
+          value: 4af41e0ec92b094e2b0b6b68f55a8b1e09420be2aab74722571128ec46b31330
+        taskSpec:
+          metadata: {}
+          params:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          results:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              source_file="$(workspaces.src.path)/source.txt"
+              if [ ! -f "$source_file" ]; then
+                echo "STATE-MISSING: source.txt written by clone is not present"
+                exit 1
+              fi
+              actual=`sha256sum "$source_file" | cut -d' ' -f1`
+              if [ "$actual" != "$(params.digest)" ]; then
+                echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+                exit 1
+              fi
+              echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+              printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: scan
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "retry-stateful-retry-vwwfd" in
+                *-source) echo "injected scan failure"; exit 1 ;;
+              esac
+              echo "scanned $(params.image)"
+      - name: deploy
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo "deployed $(params.image)"
+      workspaces:
+      - name: shared
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-04T23:01:03Z"
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-vct-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"64Mi"}}}}}]}}
+    creationTimestamp: "2026-10-04T23:00:42Z"
+    generation: 1
+    labels:
+      tekton.dev/pipeline: retry-stateful
+    name: retry-stateful-vct-source
+    namespace: retry-stateful
+    resourceVersion: "263805"
+    uid: 878d9c72-a2b2-4b8a-a296-8bfa48e03751
+  spec:
+    pipelineRef:
+      name: retry-stateful
+    taskRunTemplate:
+      serviceAccountName: default
+    timeouts:
+      pipeline: 1h0m0s
+    workspaces:
+    - name: shared
+      volumeClaimTemplate:
+        metadata:
+          creationTimestamp: null
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 64Mi
+        status: {}
+  status:
+    childReferences:
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-vct-source-clone
+      pipelineTaskName: clone
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-vct-source-build
+      pipelineTaskName: build
+    - apiVersion: tekton.dev/v1
+      kind: TaskRun
+      name: retry-stateful-vct-source-scan
+      pipelineTaskName: scan
+    completionTime: "2026-10-04T23:00:59Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T23:00:59Z"
+      message: 'Tasks Completed: 3 (Failed: 1, Cancelled 0), Skipped: 1'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    pipelineSpec:
+      tasks:
+      - name: clone
+        taskSpec:
+          metadata: {}
+          results:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(workspaces.src.path)/source.txt"
+              head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+              sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: build
+        params:
+        - name: commit
+          value: $(tasks.clone.results.commit)
+        - name: digest
+          value: $(tasks.clone.results.digest)
+        runAfter:
+        - clone
+        taskSpec:
+          metadata: {}
+          params:
+          - name: commit
+            type: string
+          - name: digest
+            type: string
+          results:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              set -eu
+              source_file="$(workspaces.src.path)/source.txt"
+              if [ ! -f "$source_file" ]; then
+                echo "STATE-MISSING: source.txt written by clone is not present"
+                exit 1
+              fi
+              actual=`sha256sum "$source_file" | cut -d' ' -f1`
+              if [ "$actual" != "$(params.digest)" ]; then
+                echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+                exit 1
+              fi
+              echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+              printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+          workspaces:
+          - name: src
+        workspaces:
+        - name: src
+          workspace: shared
+      - name: scan
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - build
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              case "retry-stateful-vct-source" in
+                *-source) echo "injected scan failure"; exit 1 ;;
+              esac
+              echo "scanned $(params.image)"
+      - name: deploy
+        params:
+        - name: image
+          value: $(tasks.build.results.image)
+        runAfter:
+        - scan
+        taskSpec:
+          metadata: {}
+          params:
+          - name: image
+            type: string
+          spec: null
+          steps:
+          - computeResources: {}
+            image: alpine:3.20
+            name: run
+            script: |
+              echo "deployed $(params.image)"
+      workspaces:
+      - name: shared
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    skippedTasks:
+    - name: deploy
+      reason: PipelineRun was stopping
+    startTime: "2026-10-04T23:00:42Z"
+kind: List
+metadata:
+  resourceVersion: ""

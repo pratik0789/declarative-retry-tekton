@@ -202,3 +202,71 @@ func TestCreateWarnsButProceedsForEphemeralWorkspace(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateKeepsOrderingThroughInheritedTasks(t *testing.T) {
+	pipeline := `
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: {name: probe}
+spec:
+  tasks:
+  - {name: clone, taskRef: {name: t}}
+  - {name: build, runAfter: [clone], taskRef: {name: t}}
+  - {name: scan, runAfter: [build], taskRef: {name: t}}
+  - {name: migrate, runAfter: [scan], taskRef: {name: t}}
+  - {name: deploy, runAfter: [migrate], taskRef: {name: t}}
+`
+	run := `
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata: {name: probe-1}
+spec: {pipelineRef: {name: probe}}
+`
+	taskRuns := `
+items:
+- metadata: {name: c, labels: {tekton.dev/pipelineRun: probe-1, tekton.dev/pipelineTask: clone}}
+  status: {conditions: [{type: Succeeded, status: "True"}]}
+- metadata: {name: b, labels: {tekton.dev/pipelineRun: probe-1, tekton.dev/pipelineTask: build}}
+  status: {conditions: [{type: Succeeded, status: "True"}]}
+- metadata: {name: s, labels: {tekton.dev/pipelineRun: probe-1, tekton.dev/pipelineTask: scan}}
+  status: {conditions: [{type: Succeeded, status: "True"}]}
+- metadata: {name: m, labels: {tekton.dev/pipelineRun: probe-1, tekton.dev/pipelineTask: migrate}}
+  status: {conditions: [{type: Succeeded, status: "True"}]}
+- metadata: {name: d, labels: {tekton.dev/pipelineRun: probe-1, tekton.dev/pipelineTask: deploy}}
+  status: {conditions: [{type: Succeeded, status: "False"}]}
+`
+	dir := t.TempDir()
+	var definition struct {
+		Spec any `json:"spec"`
+	}
+	if err := yaml.Unmarshal([]byte(pipeline), &definition); err != nil {
+		t.Fatal(err)
+	}
+	recordedSpec, _ := json.Marshal(definition.Spec)
+	policy := "apiVersion: retry.tekton.dev/v1alpha1\nkind: PipelineRetryPolicy\nmetadata: {name: p}\nspec: {pipelineRef: probe, tasks: {scan: {retryWith: [build]}}}\n"
+	files := map[string]string{"pipeline.yaml": pipeline, "run.yaml": run + "status:\n  pipelineSpec: " + string(recordedSpec) + "\n", "policy.yaml": policy, "taskruns.yaml": taskRuns}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	path := func(name string) string { return filepath.Join(dir, name) }
+	manifest, err := CreateRecoveryRun(path("pipeline.yaml"), path("run.yaml"), path("policy.yaml"), path("taskruns.yaml"), "", []string{"scan"}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out map[string]any
+	if err := yaml.Unmarshal(manifest, &out); err != nil {
+		t.Fatal(err)
+	}
+	for _, raw := range asList(asMap(asMap(out["spec"])["pipelineSpec"])["tasks"]) {
+		task := asMap(raw)
+		if task["name"] == "deploy" {
+			if got := asList(task["runAfter"]); len(got) != 1 || got[0] != "scan" {
+				t.Fatalf("deploy must still wait for the rerun scan through inherited migrate, got runAfter=%v", got)
+			}
+			return
+		}
+	}
+	t.Fatal("deploy missing from recovery run")
+}

@@ -1,8 +1,8 @@
 {
   "pipeline": "template-build",
-  "policy": "failed-task-only",
+  "policy": "template-build-retry",
   "workspaceBinding": "volumeClaimTemplate",
-  "completedModel": "upstream",
+  "completedModel": "independent",
   "tasks": 16,
   "rows": [
     {
@@ -30,51 +30,46 @@
       "decision": "recover",
       "completedBeforeFailure": 2,
       "rerun": [
+        "clone-repository",
         "prefetch-dependencies"
       ],
-      "inherited": 2,
-      "continuing": 13,
-      "warnings": [
-        "ephemeral-workspace-across-closure",
-        "shared-workspace-across-closure"
-      ]
+      "inherited": 1,
+      "continuing": 13
     },
     {
       "failedTask": "build-container",
       "decision": "recover",
       "completedBeforeFailure": 3,
       "rerun": [
-        "build-container"
+        "build-container",
+        "clone-repository",
+        "prefetch-dependencies"
       ],
-      "inherited": 3,
-      "continuing": 12,
-      "warnings": [
-        "ephemeral-workspace-across-closure",
-        "shared-workspace-across-closure"
-      ]
+      "inherited": 1,
+      "continuing": 12
     },
     {
       "failedTask": "build-image-index",
       "decision": "recover",
       "completedBeforeFailure": 4,
       "rerun": [
-        "build-image-index"
+        "build-container",
+        "build-image-index",
+        "clone-repository",
+        "prefetch-dependencies"
       ],
-      "inherited": 4,
-      "continuing": 11,
-      "warnings": [
-        "ephemeral-workspace-across-closure"
-      ]
+      "inherited": 1,
+      "continuing": 11
     },
     {
       "failedTask": "build-source-image",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "build-source-image"
       ],
-      "inherited": 5,
-      "continuing": 10,
+      "inherited": 15,
+      "continuing": 0,
       "warnings": [
         "ephemeral-workspace-across-closure",
         "shared-workspace-across-closure"
@@ -83,51 +78,42 @@
     {
       "failedTask": "deprecated-base-image-check",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "deprecated-base-image-check"
       ],
-      "inherited": 5,
-      "continuing": 10,
-      "warnings": [
-        "ephemeral-workspace-across-closure"
-      ]
+      "inherited": 15,
+      "continuing": 0
     },
     {
       "failedTask": "clair-scan",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "clair-scan"
       ],
-      "inherited": 5,
-      "continuing": 10,
-      "warnings": [
-        "ephemeral-workspace-across-closure"
-      ]
+      "inherited": 15,
+      "continuing": 0
     },
     {
       "failedTask": "ecosystem-cert-preflight-checks",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "ecosystem-cert-preflight-checks"
       ],
-      "inherited": 5,
-      "continuing": 10,
-      "warnings": [
-        "ephemeral-workspace-across-closure"
-      ]
+      "inherited": 15,
+      "continuing": 0
     },
     {
       "failedTask": "sast-snyk-check",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "sast-snyk-check"
       ],
-      "inherited": 5,
-      "continuing": 10,
+      "inherited": 15,
+      "continuing": 0,
       "warnings": [
         "ephemeral-workspace-across-closure",
         "shared-workspace-across-closure"
@@ -136,25 +122,22 @@
     {
       "failedTask": "clamav-scan",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "clamav-scan"
       ],
-      "inherited": 5,
-      "continuing": 10,
-      "warnings": [
-        "ephemeral-workspace-across-closure"
-      ]
+      "inherited": 15,
+      "continuing": 0
     },
     {
       "failedTask": "sast-shell-check",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "sast-shell-check"
       ],
-      "inherited": 5,
-      "continuing": 10,
+      "inherited": 15,
+      "continuing": 0,
       "warnings": [
         "ephemeral-workspace-across-closure",
         "shared-workspace-across-closure"
@@ -163,12 +146,12 @@
     {
       "failedTask": "sast-unicode-check",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "sast-unicode-check"
       ],
-      "inherited": 5,
-      "continuing": 10,
+      "inherited": 15,
+      "continuing": 0,
       "warnings": [
         "ephemeral-workspace-across-closure",
         "shared-workspace-across-closure"
@@ -177,25 +160,22 @@
     {
       "failedTask": "apply-tags",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "apply-tags"
       ],
-      "inherited": 5,
-      "continuing": 10,
-      "warnings": [
-        "ephemeral-workspace-across-closure"
-      ]
+      "inherited": 15,
+      "continuing": 0
     },
     {
       "failedTask": "push-dockerfile",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "push-dockerfile"
       ],
-      "inherited": 5,
-      "continuing": 10,
+      "inherited": 15,
+      "continuing": 0,
       "warnings": [
         "ephemeral-workspace-across-closure",
         "shared-workspace-across-closure"
@@ -204,15 +184,12 @@
     {
       "failedTask": "rpms-signature-scan",
       "decision": "recover",
-      "completedBeforeFailure": 5,
+      "completedBeforeFailure": 15,
       "rerun": [
         "rpms-signature-scan"
       ],
-      "inherited": 5,
-      "continuing": 10,
-      "warnings": [
-        "ephemeral-workspace-across-closure"
-      ]
+      "inherited": 15,
+      "continuing": 0
     }
   ]
 }

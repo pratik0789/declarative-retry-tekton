@@ -1,10 +1,10 @@
 # Evaluation status
 
-The offline evaluation contains 20 deterministic cases: nine accepted recovery
-plans and eleven policy or structural refusals. Four accepted plans carry
-warnings (a shared result, a writable Workspace, a Workspace bound by
-`volumeClaimTemplate`, and a succeeded `blocksResume` task pulled into the
-closure). All expected decisions, dispositions, refusal reasons,
+The offline evaluation contains 23 deterministic cases: eleven accepted
+recovery plans and twelve policy or structural refusals. Five accepted plans
+carry warnings (a shared result, a writable Workspace, a Workspace bound by
+`volumeClaimTemplate`, a succeeded `blocksResume` task pulled into the closure,
+and a `finally` task that binds a Workspace inherited tasks used). All expected decisions, dispositions, refusal reasons,
 and warnings pass. These cases establish planner behavior; they are not
 production-performance data.
 
@@ -26,8 +26,19 @@ harness recovers two source runs and then checks the definition guard:
   refused because the definition changed.
 
 On 2026-10-04 the experiment was run six times on kind v0.27.0 / Kubernetes
-v1.31.4 / Tekton v1.6.0; all six gave the same four outcomes. Results are in
-`results/v0.3.0-kind-v1.31.4-tekton-v1.6.0/stateful/`.
+v1.31.4 / Tekton v1.6.0 with v0.3.0, and once more with v0.3.1; all seven gave
+the same four outcomes. Results are in
+`results/v0.3.0-kind-v1.31.4-tekton-v1.6.0/stateful/` and
+`results/v0.3.1-kind-v1.31.4-tekton-v1.6.0/stateful/`.
+
+## Ordering around inherited tasks
+
+`make ordering` runs a linear Pipeline (clone, build, scan, migrate, deploy)
+whose deploy fails, then recovers it with `--tasks scan`. build and scan rerun,
+migrate is inherited, and deploy reruns. The generator replaces deploy's edge
+to the inherited migrate with an edge to the nearest rerun ancestor, scan, and
+the harness checks Tekton's timestamps that deploy started no earlier than scan
+completed. Results are in `results/v0.3.1-kind-v1.31.4-tekton-v1.6.0/ordering/`.
 
 ## Konflux replay
 
@@ -35,8 +46,11 @@ v1.31.4 / Tekton v1.6.0; all six gave the same four outcomes. Results are in
 Pipeline (vendored, unmodified, at upstream commit bfe4d25) and records the plan
 under the author policy in `evaluation/konflux/policy.yaml` and under an empty
 policy, with the source Workspace bound by a persistent claim or a
-`volumeClaimTemplate`. Only tasks upstream of the failure are treated as
-completed. This exercises the planner only, not a live Konflux installation.
+`volumeClaimTemplate`. Two completion models are reported: only tasks upstream
+of the failure completed (`replay-*.json`), or every task that does not depend
+on the failed task completed, including parallel siblings
+(`replay-independent-*.json`). This exercises the planner only, not a live
+Konflux installation.
 
 The pinned live harness uses kind v0.27.0, Kubernetes v1.31.4, and Tekton
 Pipelines v1.6.0. Run `make cluster install-tekton wait-tekton integration`.

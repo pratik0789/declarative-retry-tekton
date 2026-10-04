@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata: {name: finally-cleanup-1}
+spec:
+  pipelineRef: {name: finally-cleanup}
+  workspaces:
+    - name: source
+      persistentVolumeClaim: {claimName: source}
+status:
+  pipelineSpec: {"finally":[{"name":"cleanup","workspaces":[{"name":"src","workspace":"source"}]}],"tasks":[{"name":"prepare","workspaces":[{"name":"src","workspace":"source"}]},{"name":"fail","runAfter":["prepare"]}],"workspaces":[{"name":"source"}]}
+  childReferences:
+    - {name: prepare-run, pipelineTaskName: prepare, status: Succeeded}
+    - {name: fail-run, pipelineTaskName: fail, status: Failed}
+    - {name: cleanup-run, pipelineTaskName: cleanup, status: Succeeded}

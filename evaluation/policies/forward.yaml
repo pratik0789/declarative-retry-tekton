@@ -1,0 +1,8 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: forward}
+spec:
+  pipelineRef: delivery
+  tasks:
+    # Recloning invalidates everything built and scanned from the old tree.
+    clone: {retryWith: [build, scan]}

@@ -52,14 +52,17 @@ jobs must acknowledge them explicitly with `--confirm-warnings`. The generated
 PipelineRun records the accepted warning codes in annotations.
 
 The recovery run embeds a reduced `pipelineSpec` containing only rerun and
-continue tasks. `runAfter` edges to inherited tasks are removed, string results
+continue tasks. A `runAfter` edge or result reference to an inherited task is
+replaced by edges to its nearest ancestors that still run, so ordering survives
+around inherited tasks. String results
 of inherited tasks are substituted from the source TaskRuns, and all other
 Pipeline and PipelineRun fields (params, retries, timeouts, `finally`, ...) are
 preserved. When an inherited task and a remaining task share a Workspace bound
 by `volumeClaimTemplate` or `emptyDir`, the planner warns that the recovery run
 starts with an empty volume, and when a succeeded task that declares
 `blocksResume` is pulled into the closure or selected, it warns that the task
-will run again. Like other inferred findings, these never change or refuse the
+will run again; it also warns when a `finally` task, which always runs again,
+binds a Workspace that inherited tasks used. Like other inferred findings, these never change or refuse the
 author's closure; `blocksResume` refuses only when that task is the one that
 failed. Generation fails only when a reference
 to an inherited task cannot be expressed in a valid PipelineRun (a missing or

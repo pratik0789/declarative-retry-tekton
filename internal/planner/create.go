@@ -71,6 +71,35 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 	}
 
 	pipelineSpec := asMap(pipeline["spec"])
+	upstream := map[string][]string{}
+	for _, raw := range asList(pipelineSpec["tasks"]) {
+		task := asMap(raw)
+		name, _ := task["name"].(string)
+		for _, dependency := range asList(task["runAfter"]) {
+			upstream[name] = append(upstream[name], fmt.Sprint(dependency))
+		}
+		encoded, _ := json.Marshal(task)
+		for _, match := range taskReference.FindAllStringSubmatch(string(encoded), -1) {
+			upstream[name] = append(upstream[name], match[1])
+		}
+	}
+	// An edge to an inherited task still orders against whatever reruns above it.
+	var nearestRemaining func(string, map[string]bool) []string
+	nearestRemaining = func(task string, seen map[string]bool) []string {
+		var found []string
+		for _, parent := range upstream[task] {
+			if seen[parent] {
+				continue
+			}
+			seen[parent] = true
+			if remaining[parent] {
+				found = append(found, parent)
+			} else {
+				found = append(found, nearestRemaining(parent, seen)...)
+			}
+		}
+		return found
+	}
 	var tasks []any
 	for _, raw := range asList(pipelineSpec["tasks"]) {
 		task := asMap(raw)
@@ -79,9 +108,22 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 			continue
 		}
 		var runAfter []any
+		ordered := map[string]bool{}
 		for _, dependency := range asList(task["runAfter"]) {
 			if remaining[fmt.Sprint(dependency)] {
 				runAfter = append(runAfter, dependency)
+				ordered[fmt.Sprint(dependency)] = true
+			}
+		}
+		for _, dependency := range upstream[name] {
+			if remaining[dependency] {
+				continue
+			}
+			for _, ancestor := range nearestRemaining(dependency, map[string]bool{dependency: true}) {
+				if !ordered[ancestor] && ancestor != name {
+					runAfter = append(runAfter, ancestor)
+					ordered[ancestor] = true
+				}
 			}
 		}
 		if len(runAfter) > 0 {

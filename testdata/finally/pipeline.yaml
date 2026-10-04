@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: {name: finally-cleanup}
+spec:
+  workspaces:
+    - name: source
+  tasks:
+    - name: prepare
+      workspaces:
+        - {name: src, workspace: source}
+    - name: fail
+      runAfter: [prepare]
+  finally:
+    - name: cleanup
+      workspaces:
+        - {name: src, workspace: source}

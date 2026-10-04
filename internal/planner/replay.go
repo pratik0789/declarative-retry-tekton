@@ -25,13 +25,15 @@ type ReplayReport struct {
 	Pipeline         string      `json:"pipeline"`
 	Policy           string      `json:"policy"`
 	WorkspaceBinding string      `json:"workspaceBinding"`
+	Completed        string      `json:"completedModel"`
 	Tasks            int         `json:"tasks"`
 	Rows             []ReplayRow `json:"rows"`
 }
 
-// Replay injects a failure at each task in turn. Tasks upstream of the failure (through runAfter
-// or result references) are treated as completed; everything else as not reached.
-func Replay(pipelinePath, policyPath, binding string, secretWorkspaces []string) (ReplayReport, error) {
+// Replay injects a failure at each task in turn. With the "upstream" model only tasks upstream of
+// the failure (through runAfter or result references) completed; with "independent", every task
+// that does not depend on the failed task completed, including parallel siblings.
+func Replay(pipelinePath, policyPath, binding, completedModel string, secretWorkspaces []string) (ReplayReport, error) {
 	var pipeline Pipeline
 	var policy Policy
 	for path, out := range map[string]any{pipelinePath: &pipeline, policyPath: &policy} {
@@ -42,6 +44,9 @@ func Replay(pipelinePath, policyPath, binding string, secretWorkspaces []string)
 		if err := yaml.Unmarshal(data, out); err != nil {
 			return ReplayReport{}, fmt.Errorf("parse %s: %w", path, err)
 		}
+	}
+	if completedModel != "upstream" && completedModel != "independent" {
+		return ReplayReport{}, fmt.Errorf("completed model must be upstream or independent")
 	}
 	if binding != "persistentVolumeClaim" && binding != "volumeClaimTemplate" {
 		return ReplayReport{}, fmt.Errorf("binding must be persistentVolumeClaim or volumeClaimTemplate")
@@ -91,7 +96,28 @@ func Replay(pipelinePath, policyPath, binding string, secretWorkspaces []string)
 		return seen
 	}
 
-	report := ReplayReport{Pipeline: pipeline.Metadata.Name, Policy: policy.Metadata.Name, WorkspaceBinding: binding, Tasks: len(pipeline.Spec.Tasks)}
+	descendants := func(name string) map[string]bool {
+		seen := map[string]bool{}
+		changed := true
+		for changed {
+			changed = false
+			for task, parents := range upstream {
+				if seen[task] {
+					continue
+				}
+				for _, parent := range parents {
+					if parent == name || seen[parent] {
+						seen[task] = true
+						changed = true
+						break
+					}
+				}
+			}
+		}
+		return seen
+	}
+
+	report := ReplayReport{Pipeline: pipeline.Metadata.Name, Policy: policy.Metadata.Name, WorkspaceBinding: binding, Completed: completedModel, Tasks: len(pipeline.Spec.Tasks)}
 	for _, failedTask := range pipeline.Spec.Tasks {
 		var run PipelineRun
 		run.Metadata.Name = "replay-" + failedTask.Name
@@ -99,6 +125,15 @@ func Replay(pipelinePath, policyPath, binding string, secretWorkspaces []string)
 		run.Spec.Workspaces = workspaces
 		run.recordedDefinition = pipeline.definition
 		completed := ancestors(failedTask.Name)
+		if completedModel == "independent" {
+			downstream := descendants(failedTask.Name)
+			completed = map[string]bool{}
+			for _, task := range pipeline.Spec.Tasks {
+				if task.Name != failedTask.Name && !downstream[task.Name] {
+					completed[task.Name] = true
+				}
+			}
+		}
 		for _, task := range pipeline.Spec.Tasks {
 			if completed[task.Name] {
 				run.Status.ChildReferences = append(run.Status.ChildReferences, ChildReference{Name: run.Metadata.Name + "-" + task.Name, PipelineTask: task.Name, Status: "Succeeded"})
