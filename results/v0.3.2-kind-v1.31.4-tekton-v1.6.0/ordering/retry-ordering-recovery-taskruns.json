@@ -1,0 +1,330 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522",
+                    "retry.tekton.dev/inherited-taskruns": "clone=retry-ordering-source-clone,migrate=retry-ordering-source-migrate",
+                    "retry.tekton.dev/policy": "retry-ordering-policy",
+                    "retry.tekton.dev/policy-generation": "1",
+                    "retry.tekton.dev/source-pipeline": "retry-ordering",
+                    "retry.tekton.dev/source-pipeline-run": "retry-ordering-source",
+                    "retry.tekton.dev/source-pipeline-run-uid": "2cc6d3aa-4218-46cb-bf07-8b867e816abf"
+                },
+                "creationTimestamp": "2026-10-04T23:18:49Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "retry-ordering-retry-59jzs",
+                    "tekton.dev/pipelineRun": "retry-ordering-retry-59jzs",
+                    "tekton.dev/pipelineRunUID": "7a8dbc48-23c6-4e02-a189-d0868cd4c9bc",
+                    "tekton.dev/pipelineTask": "build"
+                },
+                "name": "retry-ordering-retry-59jzs-build",
+                "namespace": "retry-ordering",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "retry-ordering-retry-59jzs",
+                        "uid": "7a8dbc48-23c6-4e02-a189-d0868cd4c9bc"
+                    }
+                ],
+                "resourceVersion": "267674",
+                "uid": "2a601e6b-db23-4273-9d0b-11a0d683e47a"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 3"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-04T23:18:57Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-04T23:18:57Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "retry-ordering-retry-59jzs-build-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-04T23:18:49Z",
+                "steps": [
+                    {
+                        "container": "step-run",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "run",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://21a0b11b1e168cdda5f624260c6fb109ee12fbb6dbce54025cc8bd21d45bf497",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-04T23:18:56Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-04T23:18:53Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 3"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522",
+                    "retry.tekton.dev/inherited-taskruns": "clone=retry-ordering-source-clone,migrate=retry-ordering-source-migrate",
+                    "retry.tekton.dev/policy": "retry-ordering-policy",
+                    "retry.tekton.dev/policy-generation": "1",
+                    "retry.tekton.dev/source-pipeline": "retry-ordering",
+                    "retry.tekton.dev/source-pipeline-run": "retry-ordering-source",
+                    "retry.tekton.dev/source-pipeline-run-uid": "2cc6d3aa-4218-46cb-bf07-8b867e816abf"
+                },
+                "creationTimestamp": "2026-10-04T23:19:04Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "retry-ordering-retry-59jzs",
+                    "tekton.dev/pipelineRun": "retry-ordering-retry-59jzs",
+                    "tekton.dev/pipelineRunUID": "7a8dbc48-23c6-4e02-a189-d0868cd4c9bc",
+                    "tekton.dev/pipelineTask": "deploy"
+                },
+                "name": "retry-ordering-retry-59jzs-deploy",
+                "namespace": "retry-ordering",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "retry-ordering-retry-59jzs",
+                        "uid": "7a8dbc48-23c6-4e02-a189-d0868cd4c9bc"
+                    }
+                ],
+                "resourceVersion": "267779",
+                "uid": "eb5a8fb4-860b-47d8-83a2-0c5686cc87f6"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "case \"retry-ordering-retry-59jzs\" in\n  *-source) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-04T23:19:08Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-04T23:19:08Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "retry-ordering-retry-59jzs-deploy-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-04T23:19:04Z",
+                "steps": [
+                    {
+                        "container": "step-run",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "run",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://c3dccac6555b4ac2689be22b9c836294b293c586c0efd6ad6b303264b37f1fc2",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-04T23:19:07Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-04T23:19:07Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "case \"retry-ordering-retry-59jzs\" in\n  *-source) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522",
+                    "retry.tekton.dev/inherited-taskruns": "clone=retry-ordering-source-clone,migrate=retry-ordering-source-migrate",
+                    "retry.tekton.dev/policy": "retry-ordering-policy",
+                    "retry.tekton.dev/policy-generation": "1",
+                    "retry.tekton.dev/source-pipeline": "retry-ordering",
+                    "retry.tekton.dev/source-pipeline-run": "retry-ordering-source",
+                    "retry.tekton.dev/source-pipeline-run-uid": "2cc6d3aa-4218-46cb-bf07-8b867e816abf"
+                },
+                "creationTimestamp": "2026-10-04T23:18:57Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "retry-ordering-retry-59jzs",
+                    "tekton.dev/pipelineRun": "retry-ordering-retry-59jzs",
+                    "tekton.dev/pipelineRunUID": "7a8dbc48-23c6-4e02-a189-d0868cd4c9bc",
+                    "tekton.dev/pipelineTask": "scan"
+                },
+                "name": "retry-ordering-retry-59jzs-scan",
+                "namespace": "retry-ordering",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "retry-ordering-retry-59jzs",
+                        "uid": "7a8dbc48-23c6-4e02-a189-d0868cd4c9bc"
+                    }
+                ],
+                "resourceVersion": "267722",
+                "uid": "a7b24d0c-45f6-4757-a040-6c57d2ccadff"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 3"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-04T23:19:04Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-04T23:19:04Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "retry-ordering-retry-59jzs-scan-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-04T23:18:57Z",
+                "steps": [
+                    {
+                        "container": "step-run",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "run",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://e40cf55e5ec79fd6b35ebe66f6d4c99757113e79033918eece80bab02c326103",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-04T23:19:03Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-04T23:19:00Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 3"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

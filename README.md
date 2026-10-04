@@ -69,9 +69,10 @@ to an inherited task cannot be expressed in a valid PipelineRun (a missing or
 non-string result, or a status reference). Annotations record the source
 run, policy name and generation, and the source TaskRun of each inherited task.
 
-When the policy sets `retryOnlyLatest`, pass `--newer-runs` with the
-PipelineRuns to compare against (an empty list is allowed); without it,
-recovery is refused. `targetParameters` restricts supersession to runs with
+When the policy sets `retryOnlyLatest`, pass `--newer-runs-from-cluster` (with
+`--kube-context` if needed) to have retryctl list every PipelineRun in the
+source run's namespace with kubectl, or `--newer-runs` with a list of your own
+(an empty list is allowed); without either, recovery is refused. `targetParameters` restricts supersession to runs with
 equal values for those parameters. `resumeWithin` is measured from the source
 run's completion time, falling back to its creation time.
 

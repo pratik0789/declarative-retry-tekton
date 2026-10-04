@@ -270,3 +270,60 @@ items:
 	}
 	t.Fatal("deploy missing from recovery run")
 }
+
+func TestCreateKeepsOrderingThroughFanIn(t *testing.T) {
+	pipeline := `
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: {name: probe}
+spec:
+  tasks:
+  - {name: clone, taskRef: {name: t}}
+  - {name: build-a, runAfter: [clone], taskRef: {name: t}}
+  - {name: build-b, runAfter: [clone], taskRef: {name: t}}
+  - {name: package, runAfter: [build-a, build-b], taskRef: {name: t}}
+  - {name: publish, runAfter: [package], taskRef: {name: t}}
+  - {name: deploy, runAfter: [publish], taskRef: {name: t}}
+`
+	var items []string
+	for _, task := range []string{"clone", "build-a", "build-b", "package", "publish"} {
+		items = append(items, "- metadata: {name: "+task+", labels: {tekton.dev/pipelineRun: probe-1, tekton.dev/pipelineTask: "+task+"}}\n  status: {conditions: [{type: Succeeded, status: \"True\"}]}")
+	}
+	items = append(items, "- metadata: {name: deploy, labels: {tekton.dev/pipelineRun: probe-1, tekton.dev/pipelineTask: deploy}}\n  status: {conditions: [{type: Succeeded, status: \"False\"}]}")
+	var definition struct {
+		Spec any `json:"spec"`
+	}
+	if err := yaml.Unmarshal([]byte(pipeline), &definition); err != nil {
+		t.Fatal(err)
+	}
+	recordedSpec, _ := json.Marshal(definition.Spec)
+	dir := t.TempDir()
+	files := map[string]string{
+		"pipeline.yaml": pipeline,
+		"run.yaml":      "apiVersion: tekton.dev/v1\nkind: PipelineRun\nmetadata: {name: probe-1}\nspec: {pipelineRef: {name: probe}}\nstatus:\n  pipelineSpec: " + string(recordedSpec) + "\n",
+		"policy.yaml":   "apiVersion: retry.tekton.dev/v1alpha1\nkind: PipelineRetryPolicy\nmetadata: {name: p}\nspec: {pipelineRef: probe, tasks: {}}\n",
+		"taskruns.yaml": "items:\n" + strings.Join(items, "\n") + "\n",
+	}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	path := func(name string) string { return filepath.Join(dir, name) }
+	manifest, err := CreateRecoveryRun(path("pipeline.yaml"), path("run.yaml"), path("policy.yaml"), path("taskruns.yaml"), "", []string{"build-a"}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out map[string]any
+	if err := yaml.Unmarshal(manifest, &out); err != nil {
+		t.Fatal(err)
+	}
+	got := map[string][]any{}
+	for _, raw := range asList(asMap(asMap(out["spec"])["pipelineSpec"])["tasks"]) {
+		task := asMap(raw)
+		got[task["name"].(string)] = asList(task["runAfter"])
+	}
+	if len(got) != 2 || len(got["build-a"]) != 0 || len(got["deploy"]) != 1 || got["deploy"][0] != "build-a" {
+		t.Fatalf("want build-a with no edges and deploy after build-a through publish, package; got %v", got)
+	}
+}

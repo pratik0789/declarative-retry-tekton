@@ -1,0 +1,54 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: clone=retry-ordering-source-clone,migrate=retry-ordering-source-migrate
+    retry.tekton.dev/policy: retry-ordering-policy
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/source-pipeline: retry-ordering
+    retry.tekton.dev/source-pipeline-run: retry-ordering-source
+    retry.tekton.dev/source-pipeline-run-uid: 2cc6d3aa-4218-46cb-bf07-8b867e816abf
+  generateName: retry-ordering-retry-
+  namespace: retry-ordering
+spec:
+  pipelineSpec:
+    tasks:
+    - name: build
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: sleep 3
+    - name: scan
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: sleep 3
+    - name: deploy
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(context.pipelineRun.name)" in
+              *-source) echo "injected deploy failure"; exit 1 ;;
+            esac
+            echo deployed
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

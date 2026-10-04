@@ -6,9 +6,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/pratik0789/declarative-retry-tekton/internal/planner"
+	"sigs.k8s.io/yaml"
 )
 
 func main() {
@@ -43,9 +45,15 @@ func main() {
 		policy := fs.String("policy", "", "PipelineRetryPolicy YAML")
 		taskRuns := fs.String("taskruns", "", "Kubernetes List of source TaskRuns")
 		newerRuns := fs.String("newer-runs", "", "YAML list of PipelineRuns to check for supersession; required when the policy sets retryOnlyLatest")
+		fromCluster := fs.Bool("newer-runs-from-cluster", false, "list PipelineRuns in the source run's namespace with kubectl instead of --newer-runs")
+		kubeContext := fs.String("kube-context", "", "kubectl context for --newer-runs-from-cluster")
 		selected := fs.String("tasks", "", "comma-separated tasks to rerun in addition to the failed tasks")
 		confirmWarnings := fs.Bool("confirm-warnings", false, "continue when shared results or Workspaces cross the retry closure")
 		_ = fs.Parse(os.Args[2:])
+		resolveNewerRuns(newerRuns, *fromCluster, *kubeContext, *run)
+		if *fromCluster {
+			defer os.Remove(*newerRuns)
+		}
 		plan, err := planner.PlanFilesWithInputs(*pipeline, *run, *policy, *taskRuns, *newerRuns, splitTasks(*selected))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "retryctl:", err)
@@ -80,11 +88,17 @@ func main() {
 	policy := fs.String("policy", "", "PipelineRetryPolicy YAML")
 	taskRuns := fs.String("taskruns", "", "optional Kubernetes List of source TaskRuns")
 	newerRuns := fs.String("newer-runs", "", "YAML list of PipelineRuns to check for supersession; required when the policy sets retryOnlyLatest")
+	fromCluster := fs.Bool("newer-runs-from-cluster", false, "list PipelineRuns in the source run's namespace with kubectl instead of --newer-runs")
+	kubeContext := fs.String("kube-context", "", "kubectl context for --newer-runs-from-cluster")
 	selected := fs.String("tasks", "", "comma-separated tasks to rerun in addition to the failed tasks")
 	_ = fs.Parse(os.Args[2:])
 	if *pipeline == "" || *run == "" || *policy == "" {
 		fs.Usage()
 		os.Exit(2)
+	}
+	resolveNewerRuns(newerRuns, *fromCluster, *kubeContext, *run)
+	if *fromCluster {
+		defer os.Remove(*newerRuns)
 	}
 	plan, err := planner.PlanFilesWithInputs(*pipeline, *run, *policy, *taskRuns, *newerRuns, splitTasks(*selected))
 	if err != nil {
@@ -92,6 +106,62 @@ func main() {
 		os.Exit(1)
 	}
 	writeJSON(plan, err)
+}
+
+// resolveNewerRuns replaces an operator-supplied list with every PipelineRun in the source run's namespace.
+func resolveNewerRuns(newerRuns *string, fromCluster bool, kubeContext, runPath string) {
+	if !fromCluster {
+		return
+	}
+	fail := func(err error) {
+		fmt.Fprintln(os.Stderr, "retryctl:", err)
+		os.Exit(1)
+	}
+	if *newerRuns != "" {
+		fail(fmt.Errorf("--newer-runs and --newer-runs-from-cluster are mutually exclusive"))
+	}
+	data, err := os.ReadFile(runPath)
+	if err != nil {
+		fail(err)
+	}
+	var source struct {
+		Metadata struct {
+			Namespace string `json:"namespace"`
+		} `json:"metadata"`
+	}
+	if err := yaml.Unmarshal(data, &source); err != nil {
+		fail(err)
+	}
+	if source.Metadata.Namespace == "" {
+		fail(fmt.Errorf("--newer-runs-from-cluster needs the source run's metadata.namespace"))
+	}
+	args := []string{"get", "pipelineruns.tekton.dev", "-n", source.Metadata.Namespace, "-o", "json"}
+	if kubeContext != "" {
+		args = append([]string{"--context", kubeContext}, args...)
+	}
+	output, err := exec.Command("kubectl", args...).Output()
+	if err != nil {
+		fail(fmt.Errorf("list PipelineRuns: %w", err))
+	}
+	var list struct {
+		Items []json.RawMessage `json:"items"`
+	}
+	if err := json.Unmarshal(output, &list); err != nil {
+		fail(err)
+	}
+	if list.Items == nil {
+		list.Items = []json.RawMessage{}
+	}
+	encoded, _ := json.Marshal(list.Items)
+	file, err := os.CreateTemp("", "retryctl-newer-runs-*.json")
+	if err != nil {
+		fail(err)
+	}
+	if _, err := file.Write(encoded); err != nil {
+		fail(err)
+	}
+	file.Close()
+	*newerRuns = file.Name()
 }
 
 func splitTasks(value string) []string {

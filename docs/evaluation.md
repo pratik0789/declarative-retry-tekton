@@ -33,12 +33,19 @@ the same four outcomes. Results are in
 
 ## Ordering around inherited tasks
 
-`make ordering` runs a linear Pipeline (clone, build, scan, migrate, deploy)
-whose deploy fails, then recovers it with `--tasks scan`. build and scan rerun,
-migrate is inherited, and deploy reruns. The generator replaces deploy's edge
-to the inherited migrate with an edge to the nearest rerun ancestor, scan, and
-the harness checks Tekton's timestamps that deploy started no earlier than scan
-completed. Results are in `results/v0.3.1-kind-v1.31.4-tekton-v1.6.0/ordering/`.
+`make ordering` runs two Pipelines on kind and recovers each with a selected
+task, so that deploy's only edge points at an inherited task:
+
+- Linear (clone, build, scan, migrate, deploy): `--tasks scan` reruns build and
+  scan, migrate is inherited, and the failed deploy reruns.
+- Fan-out/fan-in (clone, build-a and build-b, package, publish, deploy):
+  `--tasks build-a` reruns build-a; build-b, package, and publish are inherited.
+
+In both, the harness checks Tekton's timestamps that deploy started no earlier
+than the rerun task above it completed. The fan-in source run also exercises
+`--newer-runs-from-cluster`: planning is allowed before the recovery run
+exists and refused after, because retryctl lists the namespace's PipelineRuns
+itself. Results are in `results/v0.3.2-kind-v1.31.4-tekton-v1.6.0/ordering/`.
 
 ## Konflux replay
 
@@ -98,6 +105,10 @@ Raw per-trial measurements and grouped means are written under
 ```bash
 SIZES="5 10 20 40" REPETITIONS=20 TASK_SLEEP=1 make benchmark
 ```
+
+The 60-trial run used in the paper was repeated on GitHub Actions with
+artifact-v0.3.0; raw trials and confidence intervals are in
+`results/v0.3.0-ci-60-trials-kind-v1.31.4-tekton-v1.6.0/`.
 
 The benchmark reports TaskRuns avoided and observed wall time. Synthetic timing
 must be described as controlled experimental evidence, not production savings.
