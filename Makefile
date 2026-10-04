@@ -4,7 +4,7 @@ KIND_IMAGE ?= kindest/node:v1.31.4
 TEKTON_VERSION ?= v1.6.0
 KUBECTL ?= kubectl
 
-.PHONY: test evaluate generate cluster install-tekton wait-tekton integration teardown
+.PHONY: test evaluate generate cluster install-tekton wait-tekton integration benchmark teardown
 
 test:
 	go test ./...
@@ -27,6 +27,9 @@ wait-tekton:
 
 integration:
 	CLUSTER=$(CLUSTER) ./hack/integration.sh
+
+benchmark:
+	CLUSTER=$(CLUSTER) ./hack/benchmark.sh
 
 teardown:
 	$(KIND) delete cluster --name $(CLUSTER)

@@ -31,3 +31,19 @@ are retained in `results/kind-v1.31.4-tekton-v1.6.0/`.
 
 This is one controlled feasibility run, not a statistically meaningful
 performance result. Timing claims require repeated trials.
+
+## Synthetic performance benchmark
+
+`make benchmark` executes measured full-restart and declarative-recovery trials
+on the live Tekton cluster. By default it evaluates 5- and 10-task linear
+pipelines, early/middle/late failures, and three repetitions per configuration.
+Raw per-trial measurements and grouped means are written under
+`artifacts/benchmark/`. Configure larger experiments with `SIZES`, `POSITIONS`,
+`REPETITIONS`, and `TASK_SLEEP`; for example:
+
+```bash
+SIZES="5 10 20 40" REPETITIONS=20 TASK_SLEEP=1 make benchmark
+```
+
+The benchmark reports TaskRuns avoided and observed wall time. Synthetic timing
+must be described as controlled experimental evidence, not production savings.

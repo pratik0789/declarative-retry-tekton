@@ -1,0 +1,74 @@
+name: Synthetic Tekton benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/benchmark.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {size: 5, position: early}
+          - {size: 5, position: middle}
+          - {size: 5, position: late}
+          - {size: 10, position: early}
+          - {size: 10, position: middle}
+          - {size: 10, position: late}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Install kind
+        run: go install sigs.k8s.io/kind@v0.27.0
+      - name: Create cluster and install Tekton
+        run: make cluster install-tekton wait-tekton
+      - name: Run measured trials
+        env:
+          SIZES: ${{ matrix.size }}
+          POSITIONS: ${{ matrix.position }}
+          REPETITIONS: 10
+          TASK_SLEEP: 0.2
+          OUTPUT_DIR: artifacts/benchmark-${{ matrix.size }}-${{ matrix.position }}
+        run: make benchmark
+      - name: Upload raw measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-${{ matrix.size }}-${{ matrix.position }}
+          path: artifacts/benchmark-${{ matrix.size }}-${{ matrix.position }}
+          if-no-files-found: warn
+
+  aggregate:
+    if: always()
+    needs: benchmark
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-*
+          path: downloaded
+      - name: Combine successful trials
+        run: |
+          mkdir -p combined
+          first=1
+          while IFS= read -r file; do
+            if [ "$first" -eq 1 ]; then cat "$file"; first=0; else tail -n +2 "$file"; fi
+          done < <(find downloaded -name trials.csv | sort) > combined/trials.csv
+          awk -f benchmark/summarize.awk combined/trials.csv | sort -t, -k1,1n -k2,2 > combined/summary.csv
+          cat combined/summary.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-benchmark-combined
+          path: combined
