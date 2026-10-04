@@ -4,6 +4,7 @@ metadata: {name: result-conflict-1}
 spec:
   pipelineRef: {name: result-conflict}
 status:
+  pipelineSpec: {"tasks":[{"name":"build"},{"name":"consume","params":[{"name":"image","value":"$(tasks.build.results.image)"}]},{"name":"fail"}]}
   childReferences:
     - {name: build-run, pipelineTaskName: build, status: Succeeded}
     - {name: consume-run, pipelineTaskName: consume, status: Succeeded}

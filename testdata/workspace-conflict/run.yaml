@@ -4,6 +4,7 @@ metadata: {name: workspace-conflict-1}
 spec:
   pipelineRef: {name: workspace-conflict}
 status:
+  pipelineSpec: {"tasks":[{"name":"prepare","workspaces":[{"name":"src","workspace":"source"}]},{"name":"fail","workspaces":[{"name":"src","workspace":"source"}]}],"workspaces":[{"name":"source"}]}
   childReferences:
     - {name: prepare-run, pipelineTaskName: prepare, status: Succeeded}
     - {name: fail-run, pipelineTaskName: fail, status: Failed}

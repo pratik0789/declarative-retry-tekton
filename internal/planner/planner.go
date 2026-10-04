@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -16,10 +18,10 @@ func PlanFiles(pipelinePath, runPath, policyPath string) (Plan, error) {
 }
 
 func PlanFilesWithNewer(pipelinePath, runPath, policyPath, newerRunsPath string) (Plan, error) {
-	return PlanFilesWithInputs(pipelinePath, runPath, policyPath, "", newerRunsPath)
+	return PlanFilesWithInputs(pipelinePath, runPath, policyPath, "", newerRunsPath, nil)
 }
 
-func PlanFilesWithInputs(pipelinePath, runPath, policyPath, taskRunsPath, newerRunsPath string) (Plan, error) {
+func PlanFilesWithInputs(pipelinePath, runPath, policyPath, taskRunsPath, newerRunsPath string, selected []string) (Plan, error) {
 	var pipeline Pipeline
 	var run PipelineRun
 	var policy Policy
@@ -56,7 +58,7 @@ func PlanFilesWithInputs(pipelinePath, runPath, policyPath, taskRunsPath, newerR
 		}
 		applyTaskRuns(&run, list.Items)
 	}
-	return BuildWithNewerRuns(pipeline, run, policy, newerRuns, time.Now())
+	return BuildWithSelection(pipeline, run, policy, newerRuns, selected, time.Now())
 }
 
 func applyTaskRuns(run *PipelineRun, taskRuns []TaskRun) {
@@ -87,7 +89,7 @@ func applyTaskRuns(run *PipelineRun, taskRuns []TaskRun) {
 				status = "Failed"
 			}
 		}
-		run.Status.ChildReferences = append(run.Status.ChildReferences, ChildReference{Name: taskRun.Metadata.Name, PipelineTask: task, Status: status})
+		run.Status.ChildReferences = append(run.Status.ChildReferences, ChildReference{Name: taskRun.Metadata.Name, PipelineTask: task, Status: status, Results: taskRun.Status.Results})
 	}
 }
 
@@ -96,6 +98,10 @@ func Build(p Pipeline, r PipelineRun, policy Policy, now time.Time) (Plan, error
 }
 
 func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []PipelineRun, now time.Time) (Plan, error) {
+	return BuildWithSelection(p, r, policy, newerRuns, nil, now)
+}
+
+func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []PipelineRun, selected []string, now time.Time) (Plan, error) {
 	plan := Plan{SourceRun: r.Metadata.Name, SourceRunUID: r.Metadata.UID, Pipeline: p.Metadata.Name, Policy: policy.Metadata.Name, PolicyGeneration: policy.Metadata.Generation, Decision: "recover"}
 	refuse := func(reason string) (Plan, error) {
 		plan.Decision = "refuse"
@@ -111,26 +117,43 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	if policy.Spec.PipelineRef != p.Metadata.Name {
 		return refuse("policy references a different Pipeline")
 	}
-	if policy.Spec.ResumeWithin != "" && !r.Metadata.CreationTimestamp.IsZero() {
+	// Without a completion time, the creation time gives an earlier, more conservative window start.
+	windowStart := r.Metadata.CreationTimestamp
+	if r.Status.CompletionTime != nil {
+		windowStart = *r.Status.CompletionTime
+	}
+	if policy.Spec.ResumeWithin != "" && !windowStart.IsZero() {
 		d, err := time.ParseDuration(policy.Spec.ResumeWithin)
 		if err != nil {
 			return Plan{}, fmt.Errorf("invalid resumeWithin: %w", err)
 		}
-		if now.After(r.Metadata.CreationTimestamp.Add(d)) {
+		if now.After(windowStart.Add(d)) {
 			return refuse("recovery window has expired")
 		}
 	}
 	if policy.Spec.RetryOnlyLatest {
+		if newerRuns == nil {
+			return refuse("retryOnlyLatest requires the PipelineRuns to compare against (--newer-runs)")
+		}
 		for _, candidate := range newerRuns {
-			if candidate.Spec.PipelineRef.Name == p.Metadata.Name && candidate.Metadata.CreationTimestamp.After(r.Metadata.CreationTimestamp) {
+			samePipeline := candidate.Spec.PipelineRef.Name == p.Metadata.Name || candidate.Metadata.Annotations[annotationSourcePipeline] == p.Metadata.Name
+			if samePipeline && sameTarget(policy.Spec.TargetParameters, r, candidate) && candidate.Metadata.CreationTimestamp.After(r.Metadata.CreationTimestamp) {
 				return refuse(fmt.Sprintf("newer PipelineRun %q supersedes the source run", candidate.Metadata.Name))
 			}
 		}
 	}
-	if r.Status.PipelineSpec != nil {
-		if !sameTaskGraph(p.Spec.Tasks, r.Status.PipelineSpec.Tasks) {
-			return refuse("Pipeline specification changed since the source run")
-		}
+	current, recorded := p.definition, r.recordedDefinition
+	if current == nil {
+		current = toAny(p.Spec)
+	}
+	if recorded == nil && r.Status.PipelineSpec != nil {
+		recorded = toAny(r.Status.PipelineSpec)
+	}
+	if recorded == nil {
+		return refuse("source PipelineRun does not record the Pipeline definition it ran")
+	}
+	if !definitionMatches(withoutNulls(current), withoutNulls(recorded)) {
+		return refuse("Pipeline definition changed since the source run")
 	}
 
 	tasks := map[string]PipelineTask{}
@@ -139,6 +162,18 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			return Plan{}, fmt.Errorf("duplicate pipeline task %q", task.Name)
 		}
 		tasks[task.Name] = task
+	}
+	ruleNames := make([]string, 0, len(policy.Spec.Tasks))
+	for name := range policy.Spec.Tasks {
+		ruleNames = append(ruleNames, name)
+	}
+	sort.Strings(ruleNames)
+	for _, name := range ruleNames {
+		for _, referenced := range append([]string{name}, policy.Spec.Tasks[name].RetryWith...) {
+			if _, ok := tasks[referenced]; !ok {
+				return refuse(fmt.Sprintf("policy references unknown task %q", referenced))
+			}
+		}
 	}
 	states := map[string]ChildReference{}
 	failed := map[string]bool{}
@@ -151,6 +186,21 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	if len(failed) == 0 {
 		return refuse("source PipelineRun has no failed tasks")
 	}
+	failedNames := make([]string, 0, len(failed))
+	for name := range failed {
+		failedNames = append(failedNames, name)
+	}
+	sort.Strings(failedNames)
+	for _, name := range failedNames {
+		if policy.Spec.Tasks[name].BlocksResume {
+			return refuse(fmt.Sprintf("task %q failed and blocks resume", name))
+		}
+	}
+	for _, name := range selected {
+		if _, ok := tasks[name]; !ok {
+			return refuse(fmt.Sprintf("selected unknown task %q", name))
+		}
+	}
 	rerun := map[string]bool{}
 	var visit func(string) error
 	visit = func(name string) error {
@@ -160,24 +210,19 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		if rerun[name] {
 			return nil
 		}
-		rule := policy.Spec.Tasks[name]
-		if rule.BlocksResume {
-			return fmt.Errorf("task %q blocks resume", name)
-		}
 		rerun[name] = true
-		for _, dependency := range rule.RetryWith {
+		for _, dependency := range policy.Spec.Tasks[name].RetryWith {
 			if err := visit(dependency); err != nil {
 				return err
 			}
 		}
 		return nil
 	}
-	for name := range failed {
+	for _, name := range append(failedNames, selected...) {
 		if err := visit(name); err != nil {
 			return refuse(err.Error())
 		}
 	}
-
 	names := make([]string, 0, len(tasks))
 	for name := range tasks {
 		names = append(names, name)
@@ -188,18 +233,34 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		taskPlan := TaskPlan{Name: name}
 		switch {
 		case rerun[name]:
-			taskPlan.Action, taskPlan.Reason = "rerun", "failed task or retryWith closure"
+			taskPlan.Action, taskPlan.Reason = "rerun", "failed or selected task, or retryWith closure"
 		case !ran:
 			taskPlan.Action, taskPlan.Reason = "continue", "task was not reached in source run"
 		case strings.EqualFold(child.Status, "Succeeded"):
 			taskPlan.Action, taskPlan.Reason, taskPlan.SourceTaskRun = "inherit", "successful result reused from source run", child.Name
+			for _, result := range child.Results {
+				if taskPlan.Results == nil {
+					taskPlan.Results = map[string]any{}
+				}
+				taskPlan.Results[result.Name] = result.Value
+			}
 		default:
 			taskPlan.Action, taskPlan.Reason = "rerun", "source task did not succeed"
 		}
 		plan.Tasks = append(plan.Tasks, taskPlan)
 	}
 	plan.Warnings = append(plan.Warnings, sharedResultWarnings(tasks, rerun, states)...)
-	plan.Warnings = append(plan.Warnings, sharedWorkspaceWarnings(p, rerun, states)...)
+	plan.Warnings = append(plan.Warnings, sharedWorkspaceWarnings(p, r, rerun, states)...)
+	plan.Warnings = append(plan.Warnings, ephemeralWorkspaceWarnings(p, r, rerun, states)...)
+	for name := range rerun {
+		if !failed[name] && policy.Spec.Tasks[name].BlocksResume {
+			plan.Warnings = append(plan.Warnings, Warning{
+				Code:    "blocks-resume-task-rerun",
+				Message: fmt.Sprintf("task %q declares blocksResume and will run again because it was selected or is in the retry closure", name),
+				Tasks:   []string{name},
+			})
+		}
+	}
 	sort.Slice(plan.Warnings, func(i, j int) bool {
 		left := plan.Warnings[i].Code + strings.Join(plan.Warnings[i].Tasks, "\x00") + plan.Warnings[i].StateName
 		right := plan.Warnings[j].Code + strings.Join(plan.Warnings[j].Tasks, "\x00") + plan.Warnings[j].StateName
@@ -223,27 +284,136 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	return plan, nil
 }
 
-func sameTaskGraph(current, recorded []PipelineTask) bool {
-	graph := func(tasks []PipelineTask) map[string]string {
-		result := map[string]string{}
-		for _, task := range tasks {
-			dependencies := append([]string(nil), task.RunAfter...)
-			sort.Strings(dependencies)
-			result[task.Name] = strings.Join(dependencies, "\x00")
+var variableReference = regexp.MustCompile(`\$\([^()]*\)`)
+
+// Tekton substitutes $(...) variables in the recorded spec, so they match any value; everything else must be equal.
+func definitionMatches(current, recorded any) bool {
+	switch typed := current.(type) {
+	case map[string]any:
+		other, ok := recorded.(map[string]any)
+		if !ok || len(typed) != len(other) {
+			return false
 		}
-		return result
+		for key, value := range typed {
+			if otherValue, exists := other[key]; !exists || !definitionMatches(value, otherValue) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		other, ok := recorded.([]any)
+		if !ok || len(typed) != len(other) {
+			return false
+		}
+		for index := range typed {
+			if !definitionMatches(typed[index], other[index]) {
+				return false
+			}
+		}
+		return true
+	case string:
+		other, ok := recorded.(string)
+		if !ok {
+			return false
+		}
+		literals := variableReference.Split(typed, -1)
+		for index, literal := range literals {
+			literals[index] = regexp.QuoteMeta(literal)
+		}
+		return regexp.MustCompile(`^` + strings.Join(literals, `(?s:.*)`) + `$`).MatchString(other)
+	default:
+		return reflect.DeepEqual(current, recorded)
 	}
-	left, right := graph(current), graph(recorded)
-	if len(left) != len(right) {
-		return false
+}
+
+func withoutNulls(value any) any {
+	switch typed := value.(type) {
+	case map[string]any:
+		out := map[string]any{}
+		for key, item := range typed {
+			if item != nil {
+				out[key] = withoutNulls(item)
+			}
+		}
+		return out
+	case []any:
+		out := make([]any, len(typed))
+		for index, item := range typed {
+			out[index] = withoutNulls(item)
+		}
+		return out
 	}
-	for name, dependencies := range left {
-		value, exists := right[name]
-		if !exists || value != dependencies {
+	return value
+}
+
+func toAny(value any) any {
+	encoded, _ := json.Marshal(value)
+	var out any
+	_ = json.Unmarshal(encoded, &out)
+	return out
+}
+
+func sameTarget(parameters []string, source, candidate PipelineRun) bool {
+	value := func(run PipelineRun, name string) any {
+		for _, param := range run.Spec.Params {
+			if param.Name == name {
+				return param.Value
+			}
+		}
+		return nil
+	}
+	for _, name := range parameters {
+		if !reflect.DeepEqual(value(source, name), value(candidate, name)) {
 			return false
 		}
 	}
 	return true
+}
+
+func ephemeralWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool, states map[string]ChildReference) []Warning {
+	ephemeral := map[string]string{}
+	for _, binding := range r.Spec.Workspaces {
+		name, _ := binding["name"].(string)
+		for _, kind := range []string{"volumeClaimTemplate", "emptyDir"} {
+			if _, ok := binding[kind]; ok {
+				ephemeral[name] = kind
+			}
+		}
+	}
+	inheritedUsers := map[string][]string{}
+	remainingUsers := map[string][]string{}
+	for _, task := range p.Spec.Tasks {
+		child, ran := states[task.Name]
+		inherited := ran && strings.EqualFold(child.Status, "Succeeded") && !rerun[task.Name]
+		for _, binding := range task.Workspaces {
+			workspace := binding.Workspace
+			if workspace == "" {
+				workspace = binding.Name
+			}
+			if inherited {
+				inheritedUsers[workspace] = append(inheritedUsers[workspace], task.Name)
+			} else {
+				remainingUsers[workspace] = append(remainingUsers[workspace], task.Name)
+			}
+		}
+	}
+	var warnings []Warning
+	for workspace, kind := range ephemeral {
+		inherited, remaining := inheritedUsers[workspace], remainingUsers[workspace]
+		if len(inherited) == 0 || len(remaining) == 0 {
+			continue
+		}
+		taskList := append(append([]string(nil), inherited...), remaining...)
+		sort.Strings(taskList)
+		warnings = append(warnings, Warning{
+			Code:      "ephemeral-workspace-across-closure",
+			Message:   fmt.Sprintf("workspace %q is bound by %s, so the recovery run starts with a new, empty volume; contents written by inherited tasks are not carried over", workspace, kind),
+			Tasks:     taskList,
+			StateKind: "workspace",
+			StateName: workspace,
+		})
+	}
+	return warnings
 }
 
 func sharedResultWarnings(tasks map[string]PipelineTask, rerun map[string]bool, states map[string]ChildReference) []Warning {
@@ -268,11 +438,20 @@ func sharedResultWarnings(tasks map[string]PipelineTask, rerun map[string]bool, 
 	return warnings
 }
 
-func sharedWorkspaceWarnings(p Pipeline, rerun map[string]bool, states map[string]ChildReference) []Warning {
+func sharedWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool, states map[string]ChildReference) []Warning {
 	var warnings []Warning
 	readOnly := map[string]bool{}
 	for _, workspace := range p.Spec.Workspaces {
 		readOnly[workspace.Name] = workspace.ReadOnly
+	}
+	// Kubernetes always mounts these volume sources read-only.
+	for _, binding := range r.Spec.Workspaces {
+		name, _ := binding["name"].(string)
+		for _, kind := range []string{"secret", "configMap", "projected"} {
+			if _, ok := binding[kind]; ok {
+				readOnly[name] = true
+			}
+		}
 	}
 	users := map[string]map[string]bool{}
 	for _, task := range p.Spec.Tasks {

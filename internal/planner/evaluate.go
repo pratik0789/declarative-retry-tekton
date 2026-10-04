@@ -20,6 +20,7 @@ type EvaluationCase struct {
 	Policy                  string            `json:"policy"`
 	TaskRuns                string            `json:"taskRuns"`
 	NewerRuns               string            `json:"newerRuns"`
+	SelectedTasks           []string          `json:"selectedTasks"`
 	ExpectedDecision        string            `json:"expectedDecision"`
 	ExpectedActions         map[string]string `json:"expectedActions"`
 	ExpectedReasonContains  string            `json:"expectedReasonContains"`
@@ -65,7 +66,7 @@ func Evaluate(manifestPath string) (EvaluationReport, error) {
 			}
 			return filepath.Join(base, path)
 		}
-		plan, planErr := PlanFilesWithInputs(resolve(item.Pipeline), resolve(item.Run), resolve(item.Policy), resolve(item.TaskRuns), resolve(item.NewerRuns))
+		plan, planErr := PlanFilesWithInputs(resolve(item.Pipeline), resolve(item.Run), resolve(item.Policy), resolve(item.TaskRuns), resolve(item.NewerRuns), item.SelectedTasks)
 		result := EvaluationCaseResult{Name: item.Name}
 		if planErr != nil {
 			result.Error = planErr.Error()

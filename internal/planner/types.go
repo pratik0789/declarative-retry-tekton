@@ -1,6 +1,9 @@
 package planner
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Pipeline struct {
 	Metadata Metadata `json:"metadata"`
@@ -8,6 +11,40 @@ type Pipeline struct {
 		Tasks      []PipelineTask `json:"tasks"`
 		Workspaces []Workspace    `json:"workspaces"`
 	} `json:"spec"`
+	definition any
+}
+
+// The planner only models a subset of Tekton fields; the full spec is kept for definition checks.
+func (p *Pipeline) UnmarshalJSON(data []byte) error {
+	type plain Pipeline
+	if err := json.Unmarshal(data, (*plain)(p)); err != nil {
+		return err
+	}
+	var raw struct {
+		Spec any `json:"spec"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	p.definition = raw.Spec
+	return nil
+}
+
+func (r *PipelineRun) UnmarshalJSON(data []byte) error {
+	type plain PipelineRun
+	if err := json.Unmarshal(data, (*plain)(r)); err != nil {
+		return err
+	}
+	var raw struct {
+		Status struct {
+			PipelineSpec any `json:"pipelineSpec"`
+		} `json:"status"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	r.recordedDefinition = raw.Status.PipelineSpec
+	return nil
 }
 
 type Workspace struct {
@@ -21,6 +58,7 @@ type Metadata struct {
 	Generation        int64             `json:"generation"`
 	CreationTimestamp time.Time         `json:"creationTimestamp"`
 	Labels            map[string]string `json:"labels"`
+	Annotations       map[string]string `json:"annotations"`
 }
 
 type PipelineTask struct {
@@ -49,21 +87,25 @@ type PipelineRun struct {
 		PipelineRef struct {
 			Name string `json:"name"`
 		} `json:"pipelineRef"`
+		Params     []Param          `json:"params,omitempty"`
 		Workspaces []map[string]any `json:"workspaces,omitempty"`
 	} `json:"spec"`
 	Status struct {
-		PipelineSpec *struct {
+		CompletionTime *time.Time `json:"completionTime,omitempty"`
+		PipelineSpec   *struct {
 			Tasks      []PipelineTask `json:"tasks"`
 			Workspaces []Workspace    `json:"workspaces"`
 		} `json:"pipelineSpec"`
 		ChildReferences []ChildReference `json:"childReferences"`
 	} `json:"status"`
+	recordedDefinition any
 }
 
 type ChildReference struct {
-	Name         string `json:"name"`
-	PipelineTask string `json:"pipelineTaskName"`
-	Status       string `json:"status"`
+	Name         string       `json:"name"`
+	PipelineTask string       `json:"pipelineTaskName"`
+	Status       string       `json:"status"`
+	Results      []TaskResult `json:"-"`
 }
 
 type TaskRunList struct {
@@ -92,10 +134,11 @@ type TaskResult struct {
 type Policy struct {
 	Metadata Metadata `json:"metadata"`
 	Spec     struct {
-		PipelineRef     string              `json:"pipelineRef"`
-		ResumeWithin    string              `json:"resumeWithin"`
-		RetryOnlyLatest bool                `json:"retryOnlyLatest"`
-		Tasks           map[string]TaskRule `json:"tasks"`
+		PipelineRef      string              `json:"pipelineRef"`
+		ResumeWithin     string              `json:"resumeWithin"`
+		RetryOnlyLatest  bool                `json:"retryOnlyLatest"`
+		TargetParameters []string            `json:"targetParameters,omitempty"`
+		Tasks            map[string]TaskRule `json:"tasks"`
 	} `json:"spec"`
 }
 
@@ -135,8 +178,9 @@ type Metrics struct {
 }
 
 type TaskPlan struct {
-	Name          string `json:"name"`
-	Action        string `json:"action"`
-	Reason        string `json:"reason"`
-	SourceTaskRun string `json:"sourceTaskRun,omitempty"`
+	Name          string         `json:"name"`
+	Action        string         `json:"action"`
+	Reason        string         `json:"reason"`
+	SourceTaskRun string         `json:"sourceTaskRun,omitempty"`
+	Results       map[string]any `json:"results,omitempty"`
 }

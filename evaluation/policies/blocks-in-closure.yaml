@@ -1,0 +1,8 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: blocks-in-closure}
+spec:
+  pipelineRef: delivery
+  tasks:
+    scan: {retryWith: [build]}
+    build: {blocksResume: true}

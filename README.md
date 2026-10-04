@@ -51,6 +51,27 @@ If shared-state warnings are present, `create` asks for confirmation. Automated
 jobs must acknowledge them explicitly with `--confirm-warnings`. The generated
 PipelineRun records the accepted warning codes in annotations.
 
+The recovery run embeds a reduced `pipelineSpec` containing only rerun and
+continue tasks. `runAfter` edges to inherited tasks are removed, string results
+of inherited tasks are substituted from the source TaskRuns, and all other
+Pipeline and PipelineRun fields (params, retries, timeouts, `finally`, ...) are
+preserved. When an inherited task and a remaining task share a Workspace bound
+by `volumeClaimTemplate` or `emptyDir`, the planner warns that the recovery run
+starts with an empty volume, and when a succeeded task that declares
+`blocksResume` is pulled into the closure or selected, it warns that the task
+will run again. Like other inferred findings, these never change or refuse the
+author's closure; `blocksResume` refuses only when that task is the one that
+failed. Generation fails only when a reference
+to an inherited task cannot be expressed in a valid PipelineRun (a missing or
+non-string result, or a status reference). Annotations record the source
+run, policy name and generation, and the source TaskRun of each inherited task.
+
+When the policy sets `retryOnlyLatest`, pass `--newer-runs` with the
+PipelineRuns to compare against (an empty list is allowed); without it,
+recovery is refused. `targetParameters` restricts supersession to runs with
+equal values for those parameters. `resumeWithin` is measured from the source
+run's completion time, falling back to its creation time.
+
 ## Development
 
 ```bash

@@ -1,0 +1,10 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  name: retry-stateful-policy
+  generation: 1
+spec:
+  pipelineRef: retry-stateful
+  tasks:
+    scan:
+      retryWith: [build]

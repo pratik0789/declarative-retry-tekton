@@ -1,0 +1,7 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: selection}
+spec:
+  pipelineRef: delivery
+  tasks:
+    build: {retryWith: [clone]}

@@ -7,6 +7,7 @@ spec:
   pipelineRef:
     name: delivery
 status:
+  pipelineSpec: {"tasks":[{"name":"clone","taskSpec":{"steps":[{"image":"alpine:3.20","name":"clone","script":"echo cloned\n"}]}},{"name":"build","runAfter":["clone"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"build","script":"echo built\n"}]}},{"name":"scan","runAfter":["build"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"scan","script":"echo scanned\n"}]}},{"name":"deploy","runAfter":["scan"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"deploy","script":"echo deployed\n"}]}}]}
   childReferences:
     - name: delivery-1-clone
       pipelineTaskName: clone

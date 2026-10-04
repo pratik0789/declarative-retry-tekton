@@ -1,12 +1,42 @@
 # Evaluation status
 
-The offline evaluation contains 13 deterministic cases: five accepted recovery
-plans and eight policy or structural refusals. Two accepted plans carry
-shared-state warnings for a result or writable Workspace crossing the declared
-closure. All expected decisions and warnings currently pass. These synthetic
-results establish planner behavior; they are not production-performance data.
+The offline evaluation contains 20 deterministic cases: nine accepted recovery
+plans and eleven policy or structural refusals. Four accepted plans carry
+warnings (a shared result, a writable Workspace, a Workspace bound by
+`volumeClaimTemplate`, and a succeeded `blocksResume` task pulled into the
+closure). All expected decisions, dispositions, refusal reasons,
+and warnings pass. These cases establish planner behavior; they are not
+production-performance data.
 
 Run them with `make test evaluate`.
+
+## Stateful recovery on kind
+
+`make stateful` runs `integration/stateful.yaml`. `clone` writes a random file to
+the shared Workspace and emits its commit identifier and SHA-256 digest; `build`
+verifies both before emitting an image name; `scan` fails in the source run. The
+harness recovers two source runs and then checks the definition guard:
+
+- Persistent claim: recovery inherits `clone`, substitutes its commit result as
+  a literal parameter, and `build` verifies the file and digest (`STATE-VERIFIED`).
+- `volumeClaimTemplate`: `create` stops for confirmation and reports the
+  `ephemeral-workspace-across-closure` warning; after confirmation, `build`
+  fails because the file is missing (`STATE-MISSING`).
+- After one line of the Pipeline changes, planning the first source run again is
+  refused because the definition changed.
+
+On 2026-10-04 the experiment was run six times on kind v0.27.0 / Kubernetes
+v1.31.4 / Tekton v1.6.0; all six gave the same four outcomes. Results are in
+`results/v0.3.0-kind-v1.31.4-tekton-v1.6.0/stateful/`.
+
+## Konflux replay
+
+`make replay` injects a failure at each task of the Konflux template-build
+Pipeline (vendored, unmodified, at upstream commit bfe4d25) and records the plan
+under the author policy in `evaluation/konflux/policy.yaml` and under an empty
+policy, with the source Workspace bound by a persistent claim or a
+`volumeClaimTemplate`. Only tasks upstream of the failure are treated as
+completed. This exercises the planner only, not a live Konflux installation.
 
 The pinned live harness uses kind v0.27.0, Kubernetes v1.31.4, and Tekton
 Pipelines v1.6.0. Run `make cluster install-tekton wait-tekton integration`.
@@ -29,6 +59,15 @@ executed three TaskRuns in 13.970 seconds, inherited the successful `clone`
 task, and avoided one of four tasks (25%). Both PipelineRuns reached
 `Succeeded=True`. The raw resources, events, generated manifest, and summary
 are retained in `results/kind-v1.31.4-tekton-v1.6.0/`.
+
+On 2026-10-04 the same harness was rerun with the v0.3.0 planner (stricter
+definition check, result substitution, field preservation). The full restart
+executed four TaskRuns in 16.899 seconds and the recovery run three TaskRuns in
+13.985 seconds; both succeeded. Results are in
+`results/v0.3.0-kind-v1.31.4-tekton-v1.6.0/integration/`. One benchmark pair per
+configuration was also rerun with v0.3.0 to confirm that every recovery run
+succeeds and skips the same TaskRuns (`benchmark-spot-check/` in the same
+directory); those single trials are not used as timing results.
 
 This is one controlled feasibility run, not a statistically meaningful
 performance result. Timing claims require repeated trials.

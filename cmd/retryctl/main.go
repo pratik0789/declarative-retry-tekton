@@ -13,7 +13,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: retryctl <plan|create|evaluate> [options]")
+		fmt.Fprintln(os.Stderr, "usage: retryctl <plan|create|evaluate|replay> [options]")
 		os.Exit(2)
 	}
 	if os.Args[1] == "evaluate" {
@@ -24,15 +24,28 @@ func main() {
 		writeJSON(report, err)
 		return
 	}
+	if os.Args[1] == "replay" {
+		fs := flag.NewFlagSet("replay", flag.ExitOnError)
+		pipeline := fs.String("pipeline", "", "Tekton Pipeline YAML")
+		policy := fs.String("policy", "", "PipelineRetryPolicy YAML")
+		binding := fs.String("binding", "persistentVolumeClaim", "binding for writable Workspaces: persistentVolumeClaim or volumeClaimTemplate")
+		secrets := fs.String("secret-workspaces", "", "comma-separated Workspaces bound to Secrets")
+		_ = fs.Parse(os.Args[2:])
+		report, err := planner.Replay(*pipeline, *policy, *binding, splitTasks(*secrets))
+		writeJSON(report, err)
+		return
+	}
 	if os.Args[1] == "create" {
 		fs := flag.NewFlagSet("create", flag.ExitOnError)
 		pipeline := fs.String("pipeline", "", "Tekton Pipeline YAML")
 		run := fs.String("run", "", "failed PipelineRun YAML")
 		policy := fs.String("policy", "", "PipelineRetryPolicy YAML")
 		taskRuns := fs.String("taskruns", "", "Kubernetes List of source TaskRuns")
+		newerRuns := fs.String("newer-runs", "", "YAML list of PipelineRuns to check for supersession; required when the policy sets retryOnlyLatest")
+		selected := fs.String("tasks", "", "comma-separated tasks to rerun in addition to the failed tasks")
 		confirmWarnings := fs.Bool("confirm-warnings", false, "continue when shared results or Workspaces cross the retry closure")
 		_ = fs.Parse(os.Args[2:])
-		plan, err := planner.PlanFilesWithInputs(*pipeline, *run, *policy, *taskRuns, "")
+		plan, err := planner.PlanFilesWithInputs(*pipeline, *run, *policy, *taskRuns, *newerRuns, splitTasks(*selected))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "retryctl:", err)
 			os.Exit(1)
@@ -48,7 +61,7 @@ func main() {
 				}
 			}
 		}
-		manifest, err := planner.CreateRecoveryRun(*pipeline, *run, *policy, *taskRuns, accepted)
+		manifest, err := planner.CreateRecoveryRun(*pipeline, *run, *policy, *taskRuns, *newerRuns, splitTasks(*selected), accepted)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "retryctl:", err)
 			os.Exit(1)
@@ -57,7 +70,7 @@ func main() {
 		return
 	}
 	if os.Args[1] != "plan" {
-		fmt.Fprintln(os.Stderr, "usage: retryctl <plan|create|evaluate> [options]")
+		fmt.Fprintln(os.Stderr, "usage: retryctl <plan|create|evaluate|replay> [options]")
 		os.Exit(2)
 	}
 	fs := flag.NewFlagSet("plan", flag.ExitOnError)
@@ -65,18 +78,29 @@ func main() {
 	run := fs.String("run", "", "failed PipelineRun YAML")
 	policy := fs.String("policy", "", "PipelineRetryPolicy YAML")
 	taskRuns := fs.String("taskruns", "", "optional Kubernetes List of source TaskRuns")
-	newerRuns := fs.String("newer-runs", "", "optional YAML list of newer PipelineRuns")
+	newerRuns := fs.String("newer-runs", "", "YAML list of PipelineRuns to check for supersession; required when the policy sets retryOnlyLatest")
+	selected := fs.String("tasks", "", "comma-separated tasks to rerun in addition to the failed tasks")
 	_ = fs.Parse(os.Args[2:])
 	if *pipeline == "" || *run == "" || *policy == "" {
 		fs.Usage()
 		os.Exit(2)
 	}
-	plan, err := planner.PlanFilesWithInputs(*pipeline, *run, *policy, *taskRuns, *newerRuns)
+	plan, err := planner.PlanFilesWithInputs(*pipeline, *run, *policy, *taskRuns, *newerRuns, splitTasks(*selected))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "retryctl:", err)
 		os.Exit(1)
 	}
 	writeJSON(plan, err)
+}
+
+func splitTasks(value string) []string {
+	var tasks []string
+	for _, task := range strings.Split(value, ",") {
+		if task = strings.TrimSpace(task); task != "" {
+			tasks = append(tasks, task)
+		}
+	}
+	return tasks
 }
 
 func printWarnings(warnings []planner.Warning) {

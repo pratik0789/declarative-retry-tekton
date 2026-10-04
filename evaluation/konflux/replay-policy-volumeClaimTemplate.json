@@ -1,0 +1,212 @@
+{
+  "pipeline": "template-build",
+  "policy": "template-build-retry",
+  "workspaceBinding": "volumeClaimTemplate",
+  "tasks": 16,
+  "rows": [
+    {
+      "failedTask": "init",
+      "decision": "recover",
+      "completedBeforeFailure": 0,
+      "rerun": [
+        "init"
+      ],
+      "inherited": 0,
+      "continuing": 15
+    },
+    {
+      "failedTask": "clone-repository",
+      "decision": "recover",
+      "completedBeforeFailure": 1,
+      "rerun": [
+        "clone-repository"
+      ],
+      "inherited": 1,
+      "continuing": 14
+    },
+    {
+      "failedTask": "prefetch-dependencies",
+      "decision": "recover",
+      "completedBeforeFailure": 2,
+      "rerun": [
+        "clone-repository",
+        "prefetch-dependencies"
+      ],
+      "inherited": 1,
+      "continuing": 13
+    },
+    {
+      "failedTask": "build-container",
+      "decision": "recover",
+      "completedBeforeFailure": 3,
+      "rerun": [
+        "build-container",
+        "clone-repository",
+        "prefetch-dependencies"
+      ],
+      "inherited": 1,
+      "continuing": 12
+    },
+    {
+      "failedTask": "build-image-index",
+      "decision": "recover",
+      "completedBeforeFailure": 4,
+      "rerun": [
+        "build-container",
+        "build-image-index",
+        "clone-repository",
+        "prefetch-dependencies"
+      ],
+      "inherited": 1,
+      "continuing": 11
+    },
+    {
+      "failedTask": "build-source-image",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "build-source-image"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure",
+        "shared-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "deprecated-base-image-check",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "deprecated-base-image-check"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "clair-scan",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "clair-scan"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "ecosystem-cert-preflight-checks",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "ecosystem-cert-preflight-checks"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "sast-snyk-check",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "sast-snyk-check"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure",
+        "shared-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "clamav-scan",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "clamav-scan"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "sast-shell-check",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "sast-shell-check"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure",
+        "shared-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "sast-unicode-check",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "sast-unicode-check"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure",
+        "shared-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "apply-tags",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "apply-tags"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "push-dockerfile",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "push-dockerfile"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure",
+        "shared-workspace-across-closure"
+      ]
+    },
+    {
+      "failedTask": "rpms-signature-scan",
+      "decision": "recover",
+      "completedBeforeFailure": 5,
+      "rerun": [
+        "rpms-signature-scan"
+      ],
+      "inherited": 5,
+      "continuing": 10,
+      "warnings": [
+        "ephemeral-workspace-across-closure"
+      ]
+    }
+  ]
+}

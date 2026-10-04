@@ -1,0 +1,1160 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-pvc-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","persistentVolumeClaim":{"claimName":"retry-stateful-pvc"}}]}}
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-c4346d31a9
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-04T22:09:06Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful
+      tekton.dev/pipelineRun: retry-stateful-pvc-source
+      tekton.dev/pipelineRunUID: 95832b61-0185-4158-8834-99a0fc35ede5
+      tekton.dev/pipelineTask: build
+    name: retry-stateful-pvc-source-build
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-pvc-source
+      uid: 95832b61-0185-4158-8834-99a0fc35ede5
+    resourceVersion: "247676"
+    uid: ffbba63d-ac8b-4393-9347-da406b4d37c7
+  spec:
+    params:
+    - name: commit
+      value: 8d13a60f723e
+    - name: digest
+      value: c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="$(workspaces.src.path)/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "$(params.digest)" ]; then
+            echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+          printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: retry-stateful-pvc
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:11Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:11Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-stateful-pvc-source-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: image
+      type: string
+      value: img-8d13a60f723e
+    startTime: "2026-10-04T22:09:06Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://9a2d73d0e9590d18675493e7fc23e175f7076862e2eeeead45345cecc04ff1af
+        exitCode: 0
+        finishedAt: "2026-10-04T22:09:10Z"
+        message: '[{"key":"image","value":"img-8d13a60f723e","type":1}]'
+        reason: Completed
+        startedAt: "2026-10-04T22:09:10Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="/workspace/src/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde" ]; then
+            echo "STATE-MISMATCH: expected c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde, found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit 8d13a60f723e digest $actual"
+          printf 'img-%s' "8d13a60f723e" > "/tekton/results/image"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-pvc-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","persistentVolumeClaim":{"claimName":"retry-stateful-pvc"}}]}}
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-c4346d31a9
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-04T22:08:57Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful
+      tekton.dev/pipelineRun: retry-stateful-pvc-source
+      tekton.dev/pipelineRunUID: 95832b61-0185-4158-8834-99a0fc35ede5
+      tekton.dev/pipelineTask: clone
+    name: retry-stateful-pvc-source-clone
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-pvc-source
+      uid: 95832b61-0185-4158-8834-99a0fc35ede5
+    resourceVersion: "247586"
+    uid: 1cfd0b3a-2979-420c-948d-9a8adf8200f2
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      results:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(workspaces.src.path)/source.txt"
+          head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+          sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: retry-stateful-pvc
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:06Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:06Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-stateful-pvc-source-clone-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: commit
+      type: string
+      value: 8d13a60f723e
+    - name: digest
+      type: string
+      value: c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde
+    startTime: "2026-10-04T22:08:57Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://cddce74efd20d1b31106f3c2065ffd4eb7359f6cbf4e14960e8a30fb10dbd506
+        exitCode: 0
+        finishedAt: "2026-10-04T22:09:05Z"
+        message: '[{"key":"commit","value":"8d13a60f723e","type":1},{"key":"digest","value":"c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde","type":1}]'
+        reason: Completed
+        startedAt: "2026-10-04T22:09:05Z"
+      terminationReason: Completed
+    taskSpec:
+      results:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > "/workspace/src/source.txt"
+          head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "/tekton/results/commit"
+          sha256sum "/workspace/src/source.txt" | cut -d' ' -f1 | tr -d '\n' > "/tekton/results/digest"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-pvc-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","persistentVolumeClaim":{"claimName":"retry-stateful-pvc"}}]}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-04T22:09:11Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful
+      tekton.dev/pipelineRun: retry-stateful-pvc-source
+      tekton.dev/pipelineRunUID: 95832b61-0185-4158-8834-99a0fc35ede5
+      tekton.dev/pipelineTask: scan
+    name: retry-stateful-pvc-source-scan
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-pvc-source
+      uid: 95832b61-0185-4158-8834-99a0fc35ede5
+    resourceVersion: "247794"
+    uid: 79451df4-9ac6-4791-81c2-1a3f398a865d
+  spec:
+    params:
+    - name: image
+      value: img-8d13a60f723e
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-stateful-pvc-source" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned $(params.image)"
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:17Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:17Z"
+      message: '"step-run" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: retry-stateful-pvc-source-scan-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-04T22:09:11Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://977b2168097a0050cf89c81f644fdacaf28216292d6ca158d8249722c66ad8c3
+        exitCode: 1
+        finishedAt: "2026-10-04T22:09:16Z"
+        reason: Error
+        startedAt: "2026-10-04T22:09:16Z"
+      terminationReason: Error
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-stateful-pvc-source" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned img-8d13a60f723e"
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-52ac1e533b
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: clone=retry-stateful-pvc-source-clone
+      retry.tekton.dev/policy: retry-stateful-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-stateful
+      retry.tekton.dev/source-pipeline-run: retry-stateful-pvc-source
+      retry.tekton.dev/source-pipeline-run-uid: 95832b61-0185-4158-8834-99a0fc35ede5
+    creationTimestamp: "2026-10-04T22:09:17Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful-retry-shqtb
+      tekton.dev/pipelineRun: retry-stateful-retry-shqtb
+      tekton.dev/pipelineRunUID: 0a54336f-30ad-4f44-b29e-9f0fec5356e4
+      tekton.dev/pipelineTask: build
+    name: retry-stateful-retry-shqtb-build
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-retry-shqtb
+      uid: 0a54336f-30ad-4f44-b29e-9f0fec5356e4
+    resourceVersion: "247875"
+    uid: e4c23147-88da-406a-a79b-19b91e231c3e
+  spec:
+    params:
+    - name: commit
+      value: 8d13a60f723e
+    - name: digest
+      value: c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="$(workspaces.src.path)/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "$(params.digest)" ]; then
+            echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+          printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: retry-stateful-pvc
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:22Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:22Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-stateful-retry-shqtb-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: image
+      type: string
+      value: img-8d13a60f723e
+    startTime: "2026-10-04T22:09:17Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://c88043883ac1b593362bc4c196ec6ed032183cbabfeb503e7817e061ded6fec5
+        exitCode: 0
+        finishedAt: "2026-10-04T22:09:21Z"
+        message: '[{"key":"image","value":"img-8d13a60f723e","type":1}]'
+        reason: Completed
+        startedAt: "2026-10-04T22:09:21Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="/workspace/src/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde" ]; then
+            echo "STATE-MISMATCH: expected c5a6a7ccfe520094695e2b97679ca5c384014cadb3950d08f1da8edf753badde, found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit 8d13a60f723e digest $actual"
+          printf 'img-%s' "8d13a60f723e" > "/tekton/results/image"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: clone=retry-stateful-pvc-source-clone
+      retry.tekton.dev/policy: retry-stateful-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-stateful
+      retry.tekton.dev/source-pipeline-run: retry-stateful-pvc-source
+      retry.tekton.dev/source-pipeline-run-uid: 95832b61-0185-4158-8834-99a0fc35ede5
+    creationTimestamp: "2026-10-04T22:09:26Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful-retry-shqtb
+      tekton.dev/pipelineRun: retry-stateful-retry-shqtb
+      tekton.dev/pipelineRunUID: 0a54336f-30ad-4f44-b29e-9f0fec5356e4
+      tekton.dev/pipelineTask: deploy
+    name: retry-stateful-retry-shqtb-deploy
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-retry-shqtb
+      uid: 0a54336f-30ad-4f44-b29e-9f0fec5356e4
+    resourceVersion: "247971"
+    uid: 5084fc73-8746-4806-ba69-2dd5b56293c4
+  spec:
+    params:
+    - name: image
+      value: img-8d13a60f723e
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          echo "deployed $(params.image)"
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:30Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:30Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-stateful-retry-shqtb-deploy-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-04T22:09:26Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://f75e1ce89568ce773131474f1001af3297830ddd9120153957db1ed9f205297a
+        exitCode: 0
+        finishedAt: "2026-10-04T22:09:29Z"
+        reason: Completed
+        startedAt: "2026-10-04T22:09:29Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          echo "deployed img-8d13a60f723e"
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: clone=retry-stateful-pvc-source-clone
+      retry.tekton.dev/policy: retry-stateful-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-stateful
+      retry.tekton.dev/source-pipeline-run: retry-stateful-pvc-source
+      retry.tekton.dev/source-pipeline-run-uid: 95832b61-0185-4158-8834-99a0fc35ede5
+    creationTimestamp: "2026-10-04T22:09:22Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful-retry-shqtb
+      tekton.dev/pipelineRun: retry-stateful-retry-shqtb
+      tekton.dev/pipelineRunUID: 0a54336f-30ad-4f44-b29e-9f0fec5356e4
+      tekton.dev/pipelineTask: scan
+    name: retry-stateful-retry-shqtb-scan
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-retry-shqtb
+      uid: 0a54336f-30ad-4f44-b29e-9f0fec5356e4
+    resourceVersion: "247927"
+    uid: 7076b2a2-5814-4854-b216-1fbe0e2f14e6
+  spec:
+    params:
+    - name: image
+      value: img-8d13a60f723e
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-stateful-retry-shqtb" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned $(params.image)"
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:26Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:26Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-stateful-retry-shqtb-scan-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-04T22:09:22Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://bfe09260cc895e481711457cd0eef26d8371407d6130a54a11851f20a1ba8653
+        exitCode: 0
+        finishedAt: "2026-10-04T22:09:25Z"
+        reason: Completed
+        startedAt: "2026-10-04T22:09:25Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-stateful-retry-shqtb" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned img-8d13a60f723e"
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-e7ecdab749
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: clone=retry-stateful-vct-source-clone
+      retry.tekton.dev/policy: retry-stateful-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/shared-state-warning-codes: ephemeral-workspace-across-closure,shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-stateful
+      retry.tekton.dev/source-pipeline-run: retry-stateful-vct-source
+      retry.tekton.dev/source-pipeline-run-uid: 7d3ba8f5-b79d-4dfc-bf28-d14d6e1c0700
+    creationTimestamp: "2026-10-04T22:09:31Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful-retry-wfbsj
+      tekton.dev/pipelineRun: retry-stateful-retry-wfbsj
+      tekton.dev/pipelineRunUID: b2737457-6c64-44b4-a829-ecc852c53837
+      tekton.dev/pipelineTask: build
+    name: retry-stateful-retry-wfbsj-build
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-retry-wfbsj
+      uid: b2737457-6c64-44b4-a829-ecc852c53837
+    resourceVersion: "248090"
+    uid: bfe7c831-403d-4f14-bf13-b4597af9a5c1
+  spec:
+    params:
+    - name: commit
+      value: 36550dd19ad0
+    - name: digest
+      value: e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="$(workspaces.src.path)/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "$(params.digest)" ]; then
+            echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+          printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: pvc-3b67bbbf3d
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:38Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:38Z"
+      message: '"step-run" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: retry-stateful-retry-wfbsj-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-04T22:09:31Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://8f74bfedcd789583a73849ff361e41c0e7886476f82601389558a938a174a6aa
+        exitCode: 1
+        finishedAt: "2026-10-04T22:09:37Z"
+        reason: Error
+        startedAt: "2026-10-04T22:09:37Z"
+      terminationReason: Error
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="/workspace/src/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb" ]; then
+            echo "STATE-MISMATCH: expected e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb, found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit 36550dd19ad0 digest $actual"
+          printf 'img-%s' "36550dd19ad0" > "/tekton/results/image"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-vct-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"64Mi"}}}}}]}}
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-3e4a48176c
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-04T22:09:06Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful
+      tekton.dev/pipelineRun: retry-stateful-vct-source
+      tekton.dev/pipelineRunUID: 7d3ba8f5-b79d-4dfc-bf28-d14d6e1c0700
+      tekton.dev/pipelineTask: build
+    name: retry-stateful-vct-source-build
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-vct-source
+      uid: 7d3ba8f5-b79d-4dfc-bf28-d14d6e1c0700
+    resourceVersion: "247678"
+    uid: 5b55fcf2-8027-4cf4-bb79-908617721a81
+  spec:
+    params:
+    - name: commit
+      value: 36550dd19ad0
+    - name: digest
+      value: e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="$(workspaces.src.path)/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "$(params.digest)" ]; then
+            echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+          printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: pvc-5624695200
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:11Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:11Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-stateful-vct-source-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: image
+      type: string
+      value: img-36550dd19ad0
+    startTime: "2026-10-04T22:09:06Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://393586f62d2e68d816d4c891e3b910158547511f1ec2b250398645ee090c47cf
+        exitCode: 0
+        finishedAt: "2026-10-04T22:09:10Z"
+        message: '[{"key":"image","value":"img-36550dd19ad0","type":1}]'
+        reason: Completed
+        startedAt: "2026-10-04T22:09:10Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          source_file="/workspace/src/source.txt"
+          if [ ! -f "$source_file" ]; then
+            echo "STATE-MISSING: source.txt written by clone is not present"
+            exit 1
+          fi
+          actual=`sha256sum "$source_file" | cut -d' ' -f1`
+          if [ "$actual" != "e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb" ]; then
+            echo "STATE-MISMATCH: expected e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb, found $actual"
+            exit 1
+          fi
+          echo "STATE-VERIFIED: commit 36550dd19ad0 digest $actual"
+          printf 'img-%s' "36550dd19ad0" > "/tekton/results/image"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-vct-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"64Mi"}}}}}]}}
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-3e4a48176c
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-04T22:08:57Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful
+      tekton.dev/pipelineRun: retry-stateful-vct-source
+      tekton.dev/pipelineRunUID: 7d3ba8f5-b79d-4dfc-bf28-d14d6e1c0700
+      tekton.dev/pipelineTask: clone
+    name: retry-stateful-vct-source-clone
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-vct-source
+      uid: 7d3ba8f5-b79d-4dfc-bf28-d14d6e1c0700
+    resourceVersion: "247590"
+    uid: 303bb8fb-24d9-46db-8f64-e2ace62a1952
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      results:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(workspaces.src.path)/source.txt"
+          head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+          sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: pvc-5624695200
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:06Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:06Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-stateful-vct-source-clone-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: commit
+      type: string
+      value: 36550dd19ad0
+    - name: digest
+      type: string
+      value: e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb
+    startTime: "2026-10-04T22:08:57Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://76340008fd85d7d0f925679eba2cb1f1e12dae70e84d983b0a44b253040d116c
+        exitCode: 0
+        finishedAt: "2026-10-04T22:09:05Z"
+        message: '[{"key":"commit","value":"36550dd19ad0","type":1},{"key":"digest","value":"e3fcd9cfb55d942582c4848df3d0a396f04a731747fc839ecefb20ea70e9bcdb","type":1}]'
+        reason: Completed
+        startedAt: "2026-10-04T22:09:05Z"
+      terminationReason: Completed
+    taskSpec:
+      results:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > "/workspace/src/source.txt"
+          head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "/tekton/results/commit"
+          sha256sum "/workspace/src/source.txt" | cut -d' ' -f1 | tr -d '\n' > "/tekton/results/digest"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-stateful-vct-source","namespace":"retry-stateful"},"spec":{"pipelineRef":{"name":"retry-stateful"},"workspaces":[{"name":"shared","volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"64Mi"}}}}}]}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-04T22:09:11Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-stateful
+      tekton.dev/pipelineRun: retry-stateful-vct-source
+      tekton.dev/pipelineRunUID: 7d3ba8f5-b79d-4dfc-bf28-d14d6e1c0700
+      tekton.dev/pipelineTask: scan
+    name: retry-stateful-vct-source-scan
+    namespace: retry-stateful
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-stateful-vct-source
+      uid: 7d3ba8f5-b79d-4dfc-bf28-d14d6e1c0700
+    resourceVersion: "247783"
+    uid: 4f4c36da-0be8-44a9-bba5-4b39ef255e5e
+  spec:
+    params:
+    - name: image
+      value: img-36550dd19ad0
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-stateful-vct-source" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned $(params.image)"
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-04T22:09:16Z"
+    conditions:
+    - lastTransitionTime: "2026-10-04T22:09:16Z"
+      message: '"step-run" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: retry-stateful-vct-source-scan-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-04T22:09:11Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://e4ecd854485581bc6e2afe574f6f1fc4d640bdc12969a8cf2ab0b3f08ab6a557
+        exitCode: 1
+        finishedAt: "2026-10-04T22:09:15Z"
+        reason: Error
+        startedAt: "2026-10-04T22:09:15Z"
+      terminationReason: Error
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-stateful-vct-source" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned img-36550dd19ad0"
+kind: List
+metadata:
+  resourceVersion: ""

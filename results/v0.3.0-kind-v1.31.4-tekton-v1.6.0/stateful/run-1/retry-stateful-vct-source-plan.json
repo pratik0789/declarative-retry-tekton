@@ -1,0 +1,65 @@
+{
+  "sourceRun": "retry-stateful-vct-source",
+  "sourceRunUID": "82a0e789-a370-42b5-82a9-608bdd55ec89",
+  "pipeline": "retry-stateful",
+  "policy": "retry-stateful-policy",
+  "policyGeneration": 1,
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "build",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "clone",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "retry-stateful-vct-source-clone",
+      "results": {
+        "commit": "f984d4700efe",
+        "digest": "4123bffd1ee31d93c1284af7b9690aa96a94de9eaa1e923e397adf72762ee43c"
+      }
+    },
+    {
+      "name": "deploy",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "name": "scan",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "ephemeral-workspace-across-closure",
+      "message": "workspace \"shared\" is bound by volumeClaimTemplate, so the recovery run starts with a new, empty volume; contents written by inherited tasks are not carried over",
+      "tasks": [
+        "build",
+        "clone"
+      ],
+      "stateKind": "workspace",
+      "stateName": "shared"
+    },
+    {
+      "code": "shared-workspace-across-closure",
+      "message": "writable workspace \"shared\" is shared by rerun and reused tasks",
+      "tasks": [
+        "build",
+        "clone"
+      ],
+      "stateKind": "workspace",
+      "stateName": "shared"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 4,
+    "rerunTasks": 2,
+    "inheritedTasks": 1,
+    "continuingTasks": 1,
+    "tasksAvoided": 1,
+    "avoidancePercent": 25
+  }
+}

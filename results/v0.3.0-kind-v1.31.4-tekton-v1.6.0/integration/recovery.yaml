@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: clone=retry-integration-source-clone
+    retry.tekton.dev/policy: retry-integration-policy
+    retry.tekton.dev/source-pipeline: retry-integration
+    retry.tekton.dev/source-pipeline-run: retry-integration-source
+    retry.tekton.dev/source-pipeline-run-uid: b34d93d3-b17f-4be6-9cb2-797c53321485
+  generateName: retry-integration-retry-
+  namespace: retry-eval
+spec:
+  pipelineSpec:
+    tasks:
+    - name: build
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo built
+    - name: scan
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(context.pipelineRun.name)" in
+              retry-integration-source) echo "injected source failure"; exit 1 ;;
+              *) echo "scan succeeded" ;;
+            esac
+    - name: deploy
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo deployed
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

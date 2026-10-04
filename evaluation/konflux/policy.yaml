@@ -1,0 +1,21 @@
+# Retry policy written for the Konflux template-build Pipeline. Each entry records
+# knowledge the Pipeline graph does not contain.
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  name: template-build-retry
+  generation: 1
+spec:
+  pipelineRef: template-build
+  tasks:
+    # Prefetching writes dependency configuration into the cloned source tree, so a
+    # second prefetch must start from a fresh clone.
+    prefetch-dependencies:
+      retryWith: [clone-repository]
+    # The build consumes the prefetched dependencies from the shared Workspace and can
+    # modify them; a rebuild therefore needs a fresh prefetch (and, transitively, clone).
+    build-container:
+      retryWith: [prefetch-dependencies]
+    # A new image index must point at the image it is rebuilt from.
+    build-image-index:
+      retryWith: [build-container]

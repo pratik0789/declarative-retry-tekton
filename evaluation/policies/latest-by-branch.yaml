@@ -1,0 +1,8 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: latest-by-branch}
+spec:
+  pipelineRef: delivery
+  retryOnlyLatest: true
+  targetParameters: [branch]
+  tasks: {}

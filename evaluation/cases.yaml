@@ -106,3 +106,71 @@ cases:
     newerRuns: ../testdata/newer-run/runs.yaml
     expectedDecision: refuse
     expectedReasonContains: supersedes
+  - name: blocks-resume-on-succeeded-closure-member
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/blocks-in-closure.yaml
+    expectedDecision: recover
+    expectedWarningContains: blocks-resume-task-rerun
+    expectedActions:
+      clone: inherit
+      build: rerun
+      scan: rerun
+      deploy: continue
+  - name: explicit-task-selection
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/selection.yaml
+    selectedTasks: [build]
+    expectedDecision: recover
+    expectedActions:
+      clone: rerun
+      build: rerun
+      scan: rerun
+      deploy: continue
+  - name: changed-task-definition
+    pipeline: ../testdata/changed-definition/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: ../testdata/simple/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: changed
+  - name: unrecorded-definition
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/unrecorded/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: ../testdata/simple/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: does not record
+  - name: ephemeral-workspace-warning
+    pipeline: ../testdata/workspace-conflict/pipeline.yaml
+    run: ../testdata/ephemeral-workspace/run.yaml
+    policy: ../testdata/workspace-conflict/policy.yaml
+    expectedDecision: recover
+    expectedWarningContains: ephemeral-workspace-across-closure
+    expectedActions:
+      prepare: inherit
+      fail: rerun
+  - name: newer-run-for-other-target
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/target-branch/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/latest-by-branch.yaml
+    newerRuns: ../testdata/target-branch/runs.yaml
+    expectedDecision: recover
+  - name: retry-only-latest-without-comparison-runs
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/latest-only.yaml
+    expectedDecision: refuse
+    expectedReasonContains: --newer-runs
+  - name: misspelled-policy-task
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/unknown-policy-key.yaml
+    expectedDecision: refuse
+    expectedReasonContains: unknown task "biuld"
