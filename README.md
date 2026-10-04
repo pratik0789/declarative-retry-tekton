@@ -8,6 +8,7 @@ Published result: [end-to-end feasibility report](docs/feasibility-report.md)
 (`feasibility-v0.1.0`).
 
 Measured evaluation: [synthetic Tekton benchmark](docs/synthetic-benchmark.md).
+The published dataset contains 60 paired live Tekton trials.
 
 ## Quick start
 
