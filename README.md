@@ -4,6 +4,9 @@ Research prototype for planning safe, declarative recovery of failed Tekton
 `PipelineRun`s. The prototype is external to Tekton and does not represent an
 existing Tekton API.
 
+Published result: [end-to-end feasibility report](docs/feasibility-report.md)
+(`feasibility-v0.1.0`).
+
 ## Quick start
 
 ```bash
