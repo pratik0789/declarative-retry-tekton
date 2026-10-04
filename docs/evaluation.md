@@ -1,8 +1,9 @@
 # Evaluation status
 
-The offline evaluation contains 13 deterministic cases: two accepted recovery
-plans and eleven conservative refusals. All expected decisions currently pass.
-The recoverable examples avoid one of four source tasks (25%). These synthetic
+The offline evaluation contains 13 deterministic cases: five accepted recovery
+plans and eight policy or structural refusals. Two accepted plans carry
+shared-state warnings for a result or writable Workspace crossing the declared
+closure. All expected decisions and warnings currently pass. These synthetic
 results establish planner behavior; they are not production-performance data.
 
 Run them with `make test evaluate`.

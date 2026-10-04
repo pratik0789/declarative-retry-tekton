@@ -14,15 +14,16 @@ type EvaluationManifest struct {
 }
 
 type EvaluationCase struct {
-	Name                   string            `json:"name"`
-	Pipeline               string            `json:"pipeline"`
-	Run                    string            `json:"run"`
-	Policy                 string            `json:"policy"`
-	TaskRuns               string            `json:"taskRuns"`
-	NewerRuns              string            `json:"newerRuns"`
-	ExpectedDecision       string            `json:"expectedDecision"`
-	ExpectedActions        map[string]string `json:"expectedActions"`
-	ExpectedReasonContains string            `json:"expectedReasonContains"`
+	Name                    string            `json:"name"`
+	Pipeline                string            `json:"pipeline"`
+	Run                     string            `json:"run"`
+	Policy                  string            `json:"policy"`
+	TaskRuns                string            `json:"taskRuns"`
+	NewerRuns               string            `json:"newerRuns"`
+	ExpectedDecision        string            `json:"expectedDecision"`
+	ExpectedActions         map[string]string `json:"expectedActions"`
+	ExpectedReasonContains  string            `json:"expectedReasonContains"`
+	ExpectedWarningContains string            `json:"expectedWarningContains"`
 }
 
 type EvaluationReport struct {
@@ -36,13 +37,14 @@ type EvaluationReport struct {
 }
 
 type EvaluationCaseResult struct {
-	Name          string  `json:"name"`
-	Passed        bool    `json:"passed"`
-	Decision      string  `json:"decision,omitempty"`
-	Reason        string  `json:"reason,omitempty"`
-	TasksAvoided  int     `json:"tasksAvoided,omitempty"`
-	AvoidanceRate float64 `json:"avoidancePercent,omitempty"`
-	Error         string  `json:"error,omitempty"`
+	Name          string    `json:"name"`
+	Passed        bool      `json:"passed"`
+	Decision      string    `json:"decision,omitempty"`
+	Reason        string    `json:"reason,omitempty"`
+	Warnings      []Warning `json:"warnings,omitempty"`
+	TasksAvoided  int       `json:"tasksAvoided,omitempty"`
+	AvoidanceRate float64   `json:"avoidancePercent,omitempty"`
+	Error         string    `json:"error,omitempty"`
 }
 
 func Evaluate(manifestPath string) (EvaluationReport, error) {
@@ -68,11 +70,20 @@ func Evaluate(manifestPath string) (EvaluationReport, error) {
 		if planErr != nil {
 			result.Error = planErr.Error()
 		} else {
-			result.Decision, result.Reason = plan.Decision, plan.RefusalReason
+			result.Decision, result.Reason, result.Warnings = plan.Decision, plan.RefusalReason, plan.Warnings
 			result.TasksAvoided, result.AvoidanceRate = plan.Metrics.TasksAvoided, plan.Metrics.AvoidancePercent
 			result.Passed = plan.Decision == item.ExpectedDecision
 			if item.ExpectedReasonContains != "" {
 				result.Passed = result.Passed && strings.Contains(plan.RefusalReason, item.ExpectedReasonContains)
+			}
+			if item.ExpectedWarningContains != "" {
+				matched := false
+				for _, warning := range plan.Warnings {
+					if strings.Contains(warning.Message, item.ExpectedWarningContains) || strings.Contains(warning.Code, item.ExpectedWarningContains) {
+						matched = true
+					}
+				}
+				result.Passed = result.Passed && matched
 			}
 			actions := map[string]string{}
 			for _, task := range plan.Tasks {

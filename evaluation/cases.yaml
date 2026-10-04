@@ -14,14 +14,21 @@ cases:
     pipeline: ../testdata/result-conflict/pipeline.yaml
     run: ../testdata/result-conflict/run.yaml
     policy: ../testdata/result-conflict/policy.yaml
-    expectedDecision: refuse
-    expectedReasonContains: inherit results
+    expectedDecision: recover
+    expectedWarningContains: shared-result-across-closure
+    expectedActions:
+      build: rerun
+      consume: inherit
+      fail: rerun
   - name: mutable-workspace-conflict
     pipeline: ../testdata/workspace-conflict/pipeline.yaml
     run: ../testdata/workspace-conflict/run.yaml
     policy: ../testdata/workspace-conflict/policy.yaml
-    expectedDecision: refuse
-    expectedReasonContains: mutable workspace
+    expectedDecision: recover
+    expectedWarningContains: shared-workspace-across-closure
+    expectedActions:
+      prepare: inherit
+      fail: rerun
   - name: changed-pipeline
     pipeline: ../testdata/changed-pipeline/pipeline.yaml
     run: ../testdata/changed-pipeline/run.yaml
@@ -46,8 +53,12 @@ cases:
     run: ../testdata/simple/run.yaml
     taskRuns: ../testdata/simple/taskruns.yaml
     policy: policies/cycle.yaml
-    expectedDecision: refuse
-    expectedReasonContains: cycle
+    expectedDecision: recover
+    expectedActions:
+      clone: inherit
+      build: rerun
+      scan: rerun
+      deploy: continue
   - name: unknown-task-reference
     pipeline: ../testdata/simple/pipeline.yaml
     run: ../testdata/simple/run.yaml

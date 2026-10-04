@@ -22,9 +22,11 @@ go run ./cmd/retryctl plan \
 
 The planner classifies each pipeline task as `rerun`, `inherit`, `continue`, or
 `refuse`, and emits a deterministic JSON recovery plan with reasons and source
-provenance. It conservatively refuses recovery when the pipeline changed, a
-rerun producer conflicts with an inherited consumer, mutable workspaces cross
-the recovery boundary, or the recovery window has expired.
+provenance. The policy author owns the retry closure. When results or writable
+Workspaces cross its boundary, the planner reports structured warnings instead
+of changing or refusing the declared closure. Structural errors and explicit
+policy constraints, such as an expired recovery window or `blocksResume`, still
+prevent recovery.
 
 Run the reproducible fixture evaluation:
 
@@ -44,6 +46,10 @@ go run ./cmd/retryctl create \
   --policy testdata/simple/policy.yaml \
   --taskruns testdata/simple/taskruns.yaml > recovery-run.yaml
 ```
+
+If shared-state warnings are present, `create` asks for confirmation. Automated
+jobs must acknowledge them explicitly with `--confirm-warnings`. The generated
+PipelineRun records the accepted warning codes in annotations.
 
 ## Development
 

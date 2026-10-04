@@ -33,19 +33,19 @@ func TestBuildClassifiesTasks(t *testing.T) {
 	}
 }
 
-func TestBuildRefusesInheritedConsumerOfRerunResult(t *testing.T) {
+func TestBuildWarnsForInheritedConsumerOfRerunResult(t *testing.T) {
 	p, r, policy := safetyFixture()
 	p.Spec.Tasks[1].Params = []Param{{Name: "image", Value: "$(tasks.build.results.image)"}}
 	plan, err := Build(p, r, policy, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if plan.Decision != "refuse" || !contains(plan.RefusalReason, "inherit results") {
+	if plan.Decision != "recover" || !warningContains(plan.Warnings, "shared-result-across-closure") {
 		t.Fatalf("unexpected plan: %+v", plan)
 	}
 }
 
-func TestBuildRefusesMutableWorkspaceAcrossBoundary(t *testing.T) {
+func TestBuildWarnsForMutableWorkspaceAcrossBoundary(t *testing.T) {
 	p, r, policy := safetyFixture()
 	p.Spec.Workspaces = []Workspace{{Name: "source"}}
 	p.Spec.Tasks[0].Workspaces = []WorkspaceBinding{{Name: "src", Workspace: "source"}}
@@ -54,7 +54,7 @@ func TestBuildRefusesMutableWorkspaceAcrossBoundary(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if plan.Decision != "refuse" || !contains(plan.RefusalReason, "mutable workspace") {
+	if plan.Decision != "recover" || !warningContains(plan.Warnings, "shared-workspace-across-closure") {
 		t.Fatalf("unexpected plan: %+v", plan)
 	}
 }
@@ -110,6 +110,15 @@ func contains(value, fragment string) bool {
 	return strings.Contains(value, fragment)
 }
 
+func warningContains(warnings []Warning, fragment string) bool {
+	for _, warning := range warnings {
+		if strings.Contains(warning.Code, fragment) || strings.Contains(warning.Message, fragment) {
+			return true
+		}
+	}
+	return false
+}
+
 func TestBuildRefusesBlockedTask(t *testing.T) {
 	var p Pipeline
 	p.Metadata.Name = "p"
@@ -128,5 +137,34 @@ func TestBuildRefusesBlockedTask(t *testing.T) {
 	}
 	if plan.Decision != "refuse" {
 		t.Fatalf("got %q", plan.Decision)
+	}
+}
+
+func TestBuildAllowsRetryClosureCycle(t *testing.T) {
+	var p Pipeline
+	p.Metadata.Name = "p"
+	p.Spec.Tasks = []PipelineTask{{Name: "build"}, {Name: "scan"}}
+	var r PipelineRun
+	r.Metadata.Name = "r"
+	r.Spec.PipelineRef.Name = "p"
+	r.Status.ChildReferences = []ChildReference{{PipelineTask: "build", Status: "Succeeded"}, {PipelineTask: "scan", Status: "Failed"}}
+	var policy Policy
+	policy.Metadata.Name = "policy"
+	policy.Spec.PipelineRef = "p"
+	policy.Spec.Tasks = map[string]TaskRule{
+		"build": {RetryWith: []string{"scan"}},
+		"scan":  {RetryWith: []string{"build"}},
+	}
+	plan, err := Build(p, r, policy, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Decision != "recover" {
+		t.Fatalf("unexpected plan: %+v", plan)
+	}
+	for _, task := range plan.Tasks {
+		if task.Action != "rerun" {
+			t.Fatalf("task %q: got %q, want rerun", task.Name, task.Action)
+		}
 	}
 }

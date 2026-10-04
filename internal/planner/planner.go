@@ -153,29 +153,23 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	}
 	rerun := map[string]bool{}
 	var visit func(string) error
-	visiting := map[string]bool{}
 	visit = func(name string) error {
 		if _, ok := tasks[name]; !ok {
 			return fmt.Errorf("policy references unknown task %q", name)
 		}
-		if visiting[name] {
-			return fmt.Errorf("cycle in retryWith at task %q", name)
-		}
 		if rerun[name] {
 			return nil
 		}
-		visiting[name] = true
 		rule := policy.Spec.Tasks[name]
 		if rule.BlocksResume {
 			return fmt.Errorf("task %q blocks resume", name)
 		}
+		rerun[name] = true
 		for _, dependency := range rule.RetryWith {
 			if err := visit(dependency); err != nil {
 				return err
 			}
 		}
-		visiting[name] = false
-		rerun[name] = true
 		return nil
 	}
 	for name := range failed {
@@ -204,12 +198,13 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		}
 		plan.Tasks = append(plan.Tasks, taskPlan)
 	}
-	if reason := unsafeResultReuse(tasks, rerun, states); reason != "" {
-		return refuse(reason)
-	}
-	if reason := unsafeSharedWorkspace(p, rerun, states); reason != "" {
-		return refuse(reason)
-	}
+	plan.Warnings = append(plan.Warnings, sharedResultWarnings(tasks, rerun, states)...)
+	plan.Warnings = append(plan.Warnings, sharedWorkspaceWarnings(p, rerun, states)...)
+	sort.Slice(plan.Warnings, func(i, j int) bool {
+		left := plan.Warnings[i].Code + strings.Join(plan.Warnings[i].Tasks, "\x00") + plan.Warnings[i].StateName
+		right := plan.Warnings[j].Code + strings.Join(plan.Warnings[j].Tasks, "\x00") + plan.Warnings[j].StateName
+		return left < right
+	})
 	plan.Metrics.TotalTasks = len(plan.Tasks)
 	for _, task := range plan.Tasks {
 		switch task.Action {
@@ -251,7 +246,8 @@ func sameTaskGraph(current, recorded []PipelineTask) bool {
 	return true
 }
 
-func unsafeResultReuse(tasks map[string]PipelineTask, rerun map[string]bool, states map[string]ChildReference) string {
+func sharedResultWarnings(tasks map[string]PipelineTask, rerun map[string]bool, states map[string]ChildReference) []Warning {
+	var warnings []Warning
 	for consumer, task := range tasks {
 		child, ran := states[consumer]
 		if !ran || !strings.EqualFold(child.Status, "Succeeded") || rerun[consumer] {
@@ -260,14 +256,20 @@ func unsafeResultReuse(tasks map[string]PipelineTask, rerun map[string]bool, sta
 		encoded, _ := json.Marshal(task.Params)
 		for producer := range rerun {
 			if strings.Contains(string(encoded), "$(tasks."+producer+".results.") {
-				return fmt.Sprintf("task %q would inherit results produced by rerun task %q", consumer, producer)
+				warnings = append(warnings, Warning{
+					Code:      "shared-result-across-closure",
+					Message:   fmt.Sprintf("task %q would be reused after consuming a result from rerun task %q", consumer, producer),
+					Tasks:     []string{producer, consumer},
+					StateKind: "result",
+				})
 			}
 		}
 	}
-	return ""
+	return warnings
 }
 
-func unsafeSharedWorkspace(p Pipeline, rerun map[string]bool, states map[string]ChildReference) string {
+func sharedWorkspaceWarnings(p Pipeline, rerun map[string]bool, states map[string]ChildReference) []Warning {
+	var warnings []Warning
 	readOnly := map[string]bool{}
 	for _, workspace := range p.Spec.Workspaces {
 		readOnly[workspace.Name] = workspace.ReadOnly
@@ -299,8 +301,21 @@ func unsafeSharedWorkspace(p Pipeline, rerun map[string]bool, states map[string]
 			}
 		}
 		if hasRerun && inherited != "" {
-			return fmt.Sprintf("mutable workspace %q is shared by rerun and inherited tasks (including %q)", workspace, inherited)
+			var taskList []string
+			for name := range taskNames {
+				if rerun[name] || (states[name].PipelineTask != "" && strings.EqualFold(states[name].Status, "Succeeded")) {
+					taskList = append(taskList, name)
+				}
+			}
+			sort.Strings(taskList)
+			warnings = append(warnings, Warning{
+				Code:      "shared-workspace-across-closure",
+				Message:   fmt.Sprintf("writable workspace %q is shared by rerun and reused tasks", workspace),
+				Tasks:     taskList,
+				StateKind: "workspace",
+				StateName: workspace,
+			})
 		}
 	}
-	return ""
+	return warnings
 }

@@ -12,7 +12,7 @@ type Pipeline struct {
 
 type Workspace struct {
 	Name     string `json:"name"`
-	ReadOnly bool   `json:"readOnly"`
+	ReadOnly bool   `json:"readOnly,omitempty"`
 }
 
 type Metadata struct {
@@ -49,6 +49,7 @@ type PipelineRun struct {
 		PipelineRef struct {
 			Name string `json:"name"`
 		} `json:"pipelineRef"`
+		Workspaces []map[string]any `json:"workspaces,omitempty"`
 	} `json:"spec"`
 	Status struct {
 		PipelineSpec *struct {
@@ -111,8 +112,17 @@ type Plan struct {
 	PolicyGeneration int64      `json:"policyGeneration,omitempty"`
 	Decision         string     `json:"decision"`
 	Tasks            []TaskPlan `json:"tasks"`
+	Warnings         []Warning  `json:"warnings,omitempty"`
 	RefusalReason    string     `json:"refusalReason,omitempty"`
 	Metrics          Metrics    `json:"metrics"`
+}
+
+type Warning struct {
+	Code      string   `json:"code"`
+	Message   string   `json:"message"`
+	Tasks     []string `json:"tasks,omitempty"`
+	StateKind string   `json:"stateKind,omitempty"`
+	StateName string   `json:"stateName,omitempty"`
 }
 
 type Metrics struct {
