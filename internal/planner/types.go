@@ -92,7 +92,8 @@ type PipelineRun struct {
 		Workspaces []map[string]any `json:"workspaces,omitempty"`
 	} `json:"spec"`
 	Status struct {
-		CompletionTime *time.Time `json:"completionTime,omitempty"`
+		CompletionTime *time.Time  `json:"completionTime,omitempty"`
+		Conditions     []Condition `json:"conditions,omitempty"`
 		PipelineSpec   *struct {
 			Tasks      []PipelineTask `json:"tasks"`
 			Workspaces []Workspace    `json:"workspaces"`

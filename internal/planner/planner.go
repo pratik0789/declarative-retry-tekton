@@ -136,6 +136,9 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			return refuse("retryOnlyLatest requires the PipelineRuns to compare against (--newer-runs)")
 		}
 		for _, candidate := range newerRuns {
+			if failedRecoveryOf(candidate, r) {
+				continue
+			}
 			samePipeline := candidate.Spec.PipelineRef.Name == p.Metadata.Name || candidate.Metadata.Annotations[annotationSourcePipeline] == p.Metadata.Name
 			if samePipeline && sameTarget(policy.Spec.TargetParameters, r, candidate) && candidate.Metadata.CreationTimestamp.After(r.Metadata.CreationTimestamp) {
 				return refuse(fmt.Sprintf("newer PipelineRun %q supersedes the source run", candidate.Metadata.Name))
@@ -352,6 +355,24 @@ func toAny(value any) any {
 	var out any
 	_ = json.Unmarshal(encoded, &out)
 	return out
+}
+
+// A recovery run that itself failed must not stop the original run from being recovered again.
+func failedRecoveryOf(candidate, source PipelineRun) bool {
+	annotations := candidate.Metadata.Annotations
+	ofSource := annotations[annotationSourceRun] == source.Metadata.Name
+	if uid := annotations[annotationSourceRunUID]; uid != "" && source.Metadata.UID != "" {
+		ofSource = uid == source.Metadata.UID
+	}
+	if !ofSource {
+		return false
+	}
+	for _, condition := range candidate.Status.Conditions {
+		if condition.Type == "Succeeded" && strings.EqualFold(condition.Status, "False") {
+			return true
+		}
+	}
+	return false
 }
 
 func sameTarget(parameters []string, source, candidate PipelineRun) bool {

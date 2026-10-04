@@ -311,3 +311,30 @@ func TestBuildRefusesPolicyKeyForUnknownTask(t *testing.T) {
 		t.Fatalf("a policy entry for a missing task must refuse: %+v %v", plan, err)
 	}
 }
+
+func TestBuildFailedRecoveryDoesNotSupersedeItsSource(t *testing.T) {
+	p, r, policy := safetyFixture()
+	policy.Spec.RetryOnlyLatest = true
+	r.Metadata.UID = "source-uid"
+	r.Metadata.CreationTimestamp = time.Now().Add(-time.Hour)
+	recovery := func(status string) PipelineRun {
+		var run PipelineRun
+		run.Metadata.Name = "p-retry-x"
+		run.Metadata.CreationTimestamp = time.Now()
+		run.Metadata.Annotations = map[string]string{annotationSourcePipeline: "p", annotationSourceRun: "r", annotationSourceRunUID: "source-uid"}
+		if status != "" {
+			run.Status.Conditions = []Condition{{Type: "Succeeded", Status: status}}
+		}
+		return run
+	}
+	plan, err := BuildWithNewerRuns(p, recorded(r, p), policy, []PipelineRun{recovery("False")}, time.Now())
+	if err != nil || plan.Decision != "recover" {
+		t.Fatalf("a failed recovery run must not block recovering its source: %+v %v", plan, err)
+	}
+	for _, status := range []string{"", "Unknown", "True"} {
+		plan, err = BuildWithNewerRuns(p, recorded(r, p), policy, []PipelineRun{recovery(status)}, time.Now())
+		if err != nil || plan.Decision != "refuse" {
+			t.Fatalf("a running or successful recovery run (status %q) must still supersede: %+v %v", status, plan, err)
+		}
+	}
+}
