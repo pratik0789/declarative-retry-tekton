@@ -1,0 +1,146 @@
+# Two Pipelines whose failed task leaves the shared Workspace in a state that
+# rerunning that task alone cannot repair. Used by hack/closure.sh to compare
+# recovery under an empty policy with recovery under the declared closure.
+#
+# retry-codegen: build edits the source tree in place, then fails. Rerunning
+#   build alone edits the already-edited tree again and succeeds silently with
+#   a different artifact. Declared closure: build retryWith [clone].
+# retry-vendor: build moves the prefetched dependency into vendor/, then fails.
+#   Rerunning build alone finds the staging copy gone and fails loudly.
+#   Declared closure: build retryWith [prefetch].
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: retry-codegen
+spec:
+  params:
+    - name: revision
+  workspaces:
+    - name: shared
+  tasks:
+    - name: clone
+      params: [{name: revision, value: $(params.revision)}]
+      workspaces: [{name: src, workspace: shared}]
+      taskSpec:
+        params: [{name: revision}]
+        workspaces: [{name: src}]
+        results: [{name: commit}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              set -eu
+              cd "$(workspaces.src.path)"
+              rm -rf ./app.go ./staging ./vendor
+              printf 'package app\nconst Revision = "%s"\n' "$(params.revision)" > app.go
+              printf '%s' "$(params.revision)" > "$(results.commit.path)"
+    - name: build
+      runAfter: [clone]
+      params: [{name: commit, value: $(tasks.clone.results.commit)}]
+      workspaces: [{name: src, workspace: shared}]
+      taskSpec:
+        params: [{name: commit}]
+        workspaces: [{name: src}]
+        results: [{name: image}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              set -eu
+              cd "$(workspaces.src.path)"
+              printf 'const BuildTag = "release"\n' >> app.go
+              blocks=`grep -c BuildTag app.go`
+              digest=`sha256sum app.go | cut -c1-16`
+              echo "STATE-CODEGEN: commit $(params.commit) generated-blocks $blocks digest $digest"
+              printf 'img-%s' "$digest" > "$(results.image.path)"
+              case "$(context.pipelineRun.name)" in
+                *-source-*) echo "injected build failure after code generation"; exit 1 ;;
+              esac
+    - name: scan
+      runAfter: [build]
+      params: [{name: image, value: $(tasks.build.results.image)}]
+      taskSpec:
+        params: [{name: image}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              echo "scanned $(params.image)"
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: retry-vendor
+spec:
+  params:
+    - name: revision
+  workspaces:
+    - name: shared
+  tasks:
+    - name: clone
+      params: [{name: revision, value: $(params.revision)}]
+      workspaces: [{name: src, workspace: shared}]
+      taskSpec:
+        params: [{name: revision}]
+        workspaces: [{name: src}]
+        results: [{name: commit}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              set -eu
+              cd "$(workspaces.src.path)"
+              rm -rf ./app.go ./staging ./vendor
+              printf 'package app\nconst Revision = "%s"\n' "$(params.revision)" > app.go
+              printf '%s' "$(params.revision)" > "$(results.commit.path)"
+    - name: prefetch
+      runAfter: [clone]
+      params: [{name: commit, value: $(tasks.clone.results.commit)}]
+      workspaces: [{name: src, workspace: shared}]
+      taskSpec:
+        params: [{name: commit}]
+        workspaces: [{name: src}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              set -eu
+              cd "$(workspaces.src.path)"
+              mkdir -p staging
+              printf 'lib for %s\n' "$(params.commit)" > staging/lib.txt
+    - name: build
+      runAfter: [prefetch]
+      params: [{name: commit, value: $(tasks.clone.results.commit)}]
+      workspaces: [{name: src, workspace: shared}]
+      taskSpec:
+        params: [{name: commit}]
+        workspaces: [{name: src}]
+        results: [{name: image}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              set -eu
+              cd "$(workspaces.src.path)"
+              if [ ! -f staging/lib.txt ]; then
+                echo "STATE-MISSING: staging/lib.txt written by prefetch is not present"
+                exit 1
+              fi
+              mkdir -p vendor
+              mv staging/lib.txt vendor/lib.txt
+              digest=`cat app.go vendor/lib.txt | sha256sum | cut -c1-16`
+              echo "STATE-VENDORED: commit $(params.commit) digest $digest"
+              printf 'img-%s' "$digest" > "$(results.image.path)"
+              case "$(context.pipelineRun.name)" in
+                *-source-*) echo "injected build failure after vendoring"; exit 1 ;;
+              esac
+    - name: scan
+      runAfter: [build]
+      params: [{name: image, value: $(tasks.build.results.image)}]
+      taskSpec:
+        params: [{name: image}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              echo "scanned $(params.image)"

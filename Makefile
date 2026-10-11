@@ -4,7 +4,7 @@ KIND_IMAGE ?= kindest/node:v1.31.4
 TEKTON_VERSION ?= v1.6.0
 KUBECTL ?= kubectl
 
-.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful ordering benchmark teardown
+.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful ordering closure benchmark teardown
 
 test:
 	go test ./...
@@ -35,12 +35,19 @@ wait-tekton:
 
 integration:
 	CLUSTER=$(CLUSTER) ./hack/integration.sh
+	CLUSTER=$(CLUSTER) ARTIFACT_DIR=artifacts/integration/stateful ./hack/stateful.sh
+	CLUSTER=$(CLUSTER) ARTIFACT_DIR=artifacts/integration/ordering ./hack/ordering.sh
+	CLUSTER=$(CLUSTER) ARTIFACT_DIR=artifacts/integration/closure TRIALS=$${TRIALS:-5} ./hack/closure.sh
+	{ echo "commit=$$(git rev-parse HEAD)"; $(KUBECTL) --context kind-$(CLUSTER) version; nproc; free -g; } > artifacts/integration/environment.txt 2>&1 || true
 
 stateful:
 	CLUSTER=$(CLUSTER) ./hack/stateful.sh
 
 ordering:
 	CLUSTER=$(CLUSTER) ./hack/ordering.sh
+
+closure:
+	CLUSTER=$(CLUSTER) ./hack/closure.sh
 
 benchmark:
 	CLUSTER=$(CLUSTER) ./hack/benchmark.sh
