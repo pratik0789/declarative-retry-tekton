@@ -1,0 +1,56 @@
+{
+  "sourceRun": "vendor-source-empty-2",
+  "sourceRunUID": "1f4dc4c2-13fa-400c-8122-4ff6fd357a38",
+  "pipeline": "retry-vendor",
+  "policy": "retry-vendor-empty",
+  "policyGeneration": 1,
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "build",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "clone",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "vendor-source-empty-2-clone",
+      "results": {
+        "commit": "rev-vendor-2"
+      }
+    },
+    {
+      "name": "prefetch",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "vendor-source-empty-2-prefetch"
+    },
+    {
+      "name": "scan",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "shared-workspace-across-closure",
+      "message": "writable workspace \"shared\" is shared by rerun and reused tasks",
+      "tasks": [
+        "build",
+        "clone",
+        "prefetch"
+      ],
+      "stateKind": "workspace",
+      "stateName": "shared"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 4,
+    "rerunTasks": 1,
+    "inheritedTasks": 2,
+    "continuingTasks": 1,
+    "tasksAvoided": 2,
+    "avoidancePercent": 50
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "sourceRun": "codegen-source-closure-3",
+  "sourceRunUID": "a37d327e-a92f-4e27-beb4-3063cd9e73c7",
+  "pipeline": "retry-codegen",
+  "policy": "retry-codegen-closure",
+  "policyGeneration": 1,
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "build",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "clone",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "scan",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 3,
+    "rerunTasks": 2,
+    "inheritedTasks": 0,
+    "continuingTasks": 1,
+    "tasksAvoided": 0,
+    "avoidancePercent": 0
+  }
+}

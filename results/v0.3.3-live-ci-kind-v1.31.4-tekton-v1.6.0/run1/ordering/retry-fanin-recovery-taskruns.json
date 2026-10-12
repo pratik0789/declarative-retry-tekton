@@ -1,0 +1,223 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522",
+                    "retry.tekton.dev/inherited-taskruns": "build-b=retry-fanin-source-build-b,clone=retry-fanin-source-clone,package=retry-fanin-source-package,publish=retry-fanin-source-publish",
+                    "retry.tekton.dev/policy": "retry-fanin-policy",
+                    "retry.tekton.dev/policy-generation": "1",
+                    "retry.tekton.dev/source-pipeline": "retry-fanin",
+                    "retry.tekton.dev/source-pipeline-run": "retry-fanin-source",
+                    "retry.tekton.dev/source-pipeline-run-uid": "d4880589-a078-4566-a301-ad7d99d6f606"
+                },
+                "creationTimestamp": "2026-10-11T21:00:30Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "retry-fanin-retry-pn5dl",
+                    "tekton.dev/pipelineRun": "retry-fanin-retry-pn5dl",
+                    "tekton.dev/pipelineRunUID": "f762e12b-d08b-48f0-8a09-6e527ac0dc9c",
+                    "tekton.dev/pipelineTask": "build-a"
+                },
+                "name": "retry-fanin-retry-pn5dl-build-a",
+                "namespace": "retry-ordering",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "retry-fanin-retry-pn5dl",
+                        "uid": "f762e12b-d08b-48f0-8a09-6e527ac0dc9c"
+                    }
+                ],
+                "resourceVersion": "2838",
+                "uid": "f9959e28-e846-470e-ab96-8c7e2bb65379"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 4"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-11T21:00:40Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-11T21:00:40Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "retry-fanin-retry-pn5dl-build-a-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-11T21:00:30Z",
+                "steps": [
+                    {
+                        "container": "step-run",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "run",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://f93f89f1c5d206ed4c60a1770f2798406709f8e53ecadc1eefe748d941f15ea8",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-11T21:00:39Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-11T21:00:35Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 4"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522",
+                    "retry.tekton.dev/inherited-taskruns": "build-b=retry-fanin-source-build-b,clone=retry-fanin-source-clone,package=retry-fanin-source-package,publish=retry-fanin-source-publish",
+                    "retry.tekton.dev/policy": "retry-fanin-policy",
+                    "retry.tekton.dev/policy-generation": "1",
+                    "retry.tekton.dev/source-pipeline": "retry-fanin",
+                    "retry.tekton.dev/source-pipeline-run": "retry-fanin-source",
+                    "retry.tekton.dev/source-pipeline-run-uid": "d4880589-a078-4566-a301-ad7d99d6f606"
+                },
+                "creationTimestamp": "2026-10-11T21:00:40Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "retry-fanin-retry-pn5dl",
+                    "tekton.dev/pipelineRun": "retry-fanin-retry-pn5dl",
+                    "tekton.dev/pipelineRunUID": "f762e12b-d08b-48f0-8a09-6e527ac0dc9c",
+                    "tekton.dev/pipelineTask": "deploy"
+                },
+                "name": "retry-fanin-retry-pn5dl-deploy",
+                "namespace": "retry-ordering",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "retry-fanin-retry-pn5dl",
+                        "uid": "f762e12b-d08b-48f0-8a09-6e527ac0dc9c"
+                    }
+                ],
+                "resourceVersion": "2892",
+                "uid": "d189ef43-a6d7-42ad-963e-8ce525a6c6f1"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "case \"retry-fanin-retry-pn5dl\" in\n  *-source) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-11T21:00:45Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-11T21:00:45Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "retry-fanin-retry-pn5dl-deploy-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-11T21:00:40Z",
+                "steps": [
+                    {
+                        "container": "step-run",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "run",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://dac292ee11902cfad18fca9ea264f5eddb56cdfeb6657a42b44f2c17ef89664e",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-11T21:00:44Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-11T21:00:44Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "case \"retry-fanin-retry-pn5dl\" in\n  *-source) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

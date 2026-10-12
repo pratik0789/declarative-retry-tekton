@@ -1,0 +1,84 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: clone=codegen-source-empty-5-clone
+    retry.tekton.dev/policy: retry-codegen-empty
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+    retry.tekton.dev/shared-state-warnings-accepted: "true"
+    retry.tekton.dev/source-pipeline: retry-codegen
+    retry.tekton.dev/source-pipeline-run: codegen-source-empty-5
+    retry.tekton.dev/source-pipeline-run-uid: f3c59a32-a7fb-45b3-b35b-f46f51298b23
+  generateName: retry-codegen-retry-
+  namespace: retry-closure
+spec:
+  params:
+  - name: revision
+    value: rev-codegen-5
+  pipelineSpec:
+    params:
+    - name: revision
+      type: string
+    tasks:
+    - name: build
+      params:
+      - name: commit
+        value: rev-codegen-5
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            cd "$(workspaces.src.path)"
+            printf 'const BuildTag = "release"\n' >> app.go
+            blocks=`grep -c BuildTag app.go`
+            digest=`sha256sum app.go | cut -c1-16`
+            echo "STATE-CODEGEN: commit $(params.commit) generated-blocks $blocks digest $digest"
+            printf 'img-%s' "$digest" > "$(results.image.path)"
+            case "$(context.pipelineRun.name)" in
+              *-source-*) echo "injected build failure after code generation"; exit 1 ;;
+            esac
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: scan
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo "scanned $(params.image)"
+    workspaces:
+    - name: shared
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: codegen-empty-5

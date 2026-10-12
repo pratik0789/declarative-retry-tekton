@@ -1,0 +1,223 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522",
+                    "retry.tekton.dev/inherited-taskruns": "build-b=retry-fanin-source-build-b,clone=retry-fanin-source-clone,package=retry-fanin-source-package,publish=retry-fanin-source-publish",
+                    "retry.tekton.dev/policy": "retry-fanin-policy",
+                    "retry.tekton.dev/policy-generation": "1",
+                    "retry.tekton.dev/source-pipeline": "retry-fanin",
+                    "retry.tekton.dev/source-pipeline-run": "retry-fanin-source",
+                    "retry.tekton.dev/source-pipeline-run-uid": "0f35d060-965e-4b8c-bdf2-02924f9de81b"
+                },
+                "creationTimestamp": "2026-10-11T23:43:28Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "retry-fanin-retry-zwh4t",
+                    "tekton.dev/pipelineRun": "retry-fanin-retry-zwh4t",
+                    "tekton.dev/pipelineRunUID": "7fb36aba-bbc8-49f6-b40a-173d37c6956d",
+                    "tekton.dev/pipelineTask": "build-a"
+                },
+                "name": "retry-fanin-retry-zwh4t-build-a",
+                "namespace": "retry-ordering",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "retry-fanin-retry-zwh4t",
+                        "uid": "7fb36aba-bbc8-49f6-b40a-173d37c6956d"
+                    }
+                ],
+                "resourceVersion": "2836",
+                "uid": "d80cba85-a87b-4038-8208-91933d1e3f45"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 4"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-11T23:43:36Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-11T23:43:36Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "retry-fanin-retry-zwh4t-build-a-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-11T23:43:28Z",
+                "steps": [
+                    {
+                        "container": "step-run",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "run",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://b712cd6fb98e1eaff1912940f8976095016e2260e0836eae614300ec1ee0362f",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-11T23:43:36Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-11T23:43:31Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "sleep 4"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522",
+                    "retry.tekton.dev/inherited-taskruns": "build-b=retry-fanin-source-build-b,clone=retry-fanin-source-clone,package=retry-fanin-source-package,publish=retry-fanin-source-publish",
+                    "retry.tekton.dev/policy": "retry-fanin-policy",
+                    "retry.tekton.dev/policy-generation": "1",
+                    "retry.tekton.dev/source-pipeline": "retry-fanin",
+                    "retry.tekton.dev/source-pipeline-run": "retry-fanin-source",
+                    "retry.tekton.dev/source-pipeline-run-uid": "0f35d060-965e-4b8c-bdf2-02924f9de81b"
+                },
+                "creationTimestamp": "2026-10-11T23:43:36Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "retry-fanin-retry-zwh4t",
+                    "tekton.dev/pipelineRun": "retry-fanin-retry-zwh4t",
+                    "tekton.dev/pipelineRunUID": "7fb36aba-bbc8-49f6-b40a-173d37c6956d",
+                    "tekton.dev/pipelineTask": "deploy"
+                },
+                "name": "retry-fanin-retry-zwh4t-deploy",
+                "namespace": "retry-ordering",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "retry-fanin-retry-zwh4t",
+                        "uid": "7fb36aba-bbc8-49f6-b40a-173d37c6956d"
+                    }
+                ],
+                "resourceVersion": "2887",
+                "uid": "edc3e631-4dca-446c-8073-7f15bdb0b6ac"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "case \"retry-fanin-retry-zwh4t\" in\n  *-source) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-11T23:43:41Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-11T23:43:41Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "retry-fanin-retry-zwh4t-deploy-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-11T23:43:37Z",
+                "steps": [
+                    {
+                        "container": "step-run",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "run",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://152e24c65a620e19969a0f0efacb5d93074042d3652c83cf2610979612c70403",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-11T23:43:41Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-11T23:43:41Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "run",
+                            "script": "case \"retry-fanin-retry-zwh4t\" in\n  *-source) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

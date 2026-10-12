@@ -1,0 +1,55 @@
+{
+  "sourceRun": "retry-stateful-pvc-source",
+  "sourceRunUID": "1a996ee4-1ccd-4f6f-a6b3-ad1b58c7e103",
+  "pipeline": "retry-stateful",
+  "policy": "retry-stateful-policy",
+  "policyGeneration": 1,
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "build",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "clone",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "retry-stateful-pvc-source-clone",
+      "results": {
+        "commit": "c15fe5566a62",
+        "digest": "d0f4a0212d752300926a3e0225b7b7c9b64b19d5e21901f00a30416b8ace52c9"
+      }
+    },
+    {
+      "name": "deploy",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "name": "scan",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "shared-workspace-across-closure",
+      "message": "writable workspace \"shared\" is shared by rerun and reused tasks",
+      "tasks": [
+        "build",
+        "clone"
+      ],
+      "stateKind": "workspace",
+      "stateName": "shared"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 4,
+    "rerunTasks": 2,
+    "inheritedTasks": 1,
+    "continuingTasks": 1,
+    "tasksAvoided": 1,
+    "avoidancePercent": 25
+  }
+}

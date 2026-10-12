@@ -1,0 +1,114 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: clone=vendor-source-closure-5-clone
+    retry.tekton.dev/policy: retry-vendor-closure
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+    retry.tekton.dev/shared-state-warnings-accepted: "true"
+    retry.tekton.dev/source-pipeline: retry-vendor
+    retry.tekton.dev/source-pipeline-run: vendor-source-closure-5
+    retry.tekton.dev/source-pipeline-run-uid: 019088c6-7743-4718-83fa-2ca3100e8133
+  generateName: retry-vendor-retry-
+  namespace: retry-closure
+spec:
+  params:
+  - name: revision
+    value: rev-vendor-5
+  pipelineSpec:
+    params:
+    - name: revision
+      type: string
+    tasks:
+    - name: prefetch
+      params:
+      - name: commit
+        value: rev-vendor-5
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            cd "$(workspaces.src.path)"
+            mkdir -p staging
+            printf 'lib for %s\n' "$(params.commit)" > staging/lib.txt
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: build
+      params:
+      - name: commit
+        value: rev-vendor-5
+      runAfter:
+      - prefetch
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            cd "$(workspaces.src.path)"
+            if [ ! -f staging/lib.txt ]; then
+              echo "STATE-MISSING: staging/lib.txt written by prefetch is not present"
+              exit 1
+            fi
+            mkdir -p vendor
+            mv staging/lib.txt vendor/lib.txt
+            digest=`cat app.go vendor/lib.txt | sha256sum | cut -c1-16`
+            echo "STATE-VENDORED: commit $(params.commit) digest $digest"
+            printf 'img-%s' "$digest" > "$(results.image.path)"
+            case "$(context.pipelineRun.name)" in
+              *-source-*) echo "injected build failure after vendoring"; exit 1 ;;
+            esac
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: scan
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo "scanned $(params.image)"
+    workspaces:
+    - name: shared
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: vendor-closure-5
