@@ -265,9 +265,10 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		}
 	}
 	plan.Warnings = append(plan.Warnings, finallyWorkspaceWarnings(p, rerun, states)...)
+	plan.Warnings = append(plan.Warnings, laterClaimWarnings(r, newerRuns)...)
 	sort.Slice(plan.Warnings, func(i, j int) bool {
-		left := plan.Warnings[i].Code + strings.Join(plan.Warnings[i].Tasks, "\x00") + plan.Warnings[i].StateName
-		right := plan.Warnings[j].Code + strings.Join(plan.Warnings[j].Tasks, "\x00") + plan.Warnings[j].StateName
+		left := plan.Warnings[i].Code + strings.Join(plan.Warnings[i].Tasks, "\x00") + plan.Warnings[i].StateName + plan.Warnings[i].Message
+		right := plan.Warnings[j].Code + strings.Join(plan.Warnings[j].Tasks, "\x00") + plan.Warnings[j].StateName + plan.Warnings[j].Message
 		return left < right
 	})
 	plan.Metrics.TotalTasks = len(plan.Tasks)
@@ -390,6 +391,53 @@ func sameTarget(parameters []string, source, candidate PipelineRun) bool {
 		}
 	}
 	return true
+}
+
+// Binding evidence is not proof of a write. Warn even for failed recoveries and
+// other targets, whose effects are outside retryOnlyLatest's refusal rule.
+func laterClaimWarnings(source PipelineRun, candidates []PipelineRun) []Warning {
+	claims := map[string]string{}
+	for _, binding := range source.Spec.Workspaces {
+		pvc, ok := binding["persistentVolumeClaim"].(map[string]any)
+		if !ok {
+			continue
+		}
+		claim, _ := pvc["claimName"].(string)
+		workspace, _ := binding["name"].(string)
+		if claim != "" {
+			claims[claim] = workspace
+		}
+	}
+	var warnings []Warning
+	seen := map[string]bool{}
+	for _, candidate := range candidates {
+		if !candidate.Metadata.CreationTimestamp.After(source.Metadata.CreationTimestamp) {
+			continue
+		}
+		if source.Metadata.Namespace != "" && candidate.Metadata.Namespace != "" && source.Metadata.Namespace != candidate.Metadata.Namespace {
+			continue
+		}
+		for _, binding := range candidate.Spec.Workspaces {
+			pvc, ok := binding["persistentVolumeClaim"].(map[string]any)
+			if !ok {
+				continue
+			}
+			claim, _ := pvc["claimName"].(string)
+			workspace, exists := claims[claim]
+			key := candidate.Metadata.Name + "\x00" + claim
+			if !exists || seen[key] {
+				continue
+			}
+			seen[key] = true
+			warnings = append(warnings, Warning{
+				Code:      "later-run-shares-persistent-claim",
+				Message:   fmt.Sprintf("later PipelineRun %q binds persistent claim %q used by source workspace %q; the claim may have changed, including after a failed recovery", candidate.Metadata.Name, claim, workspace),
+				StateKind: "workspace",
+				StateName: workspace,
+			})
+		}
+	}
+	return warnings
 }
 
 func ephemeralWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool, states map[string]ChildReference) []Warning {

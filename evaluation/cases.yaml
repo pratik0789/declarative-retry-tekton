@@ -195,3 +195,67 @@ cases:
     expectedActions:
       prepare: inherit
       fail: rerun
+
+  - name: unknown-operator-selection
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: ../testdata/simple/policy.yaml
+    selectedTasks:
+    - ghost
+    expectedDecision: refuse
+    expectedReasonContains: selected unknown task
+  - name: emptydir-workspace-warning
+    pipeline: ../testdata/workspace-conflict/pipeline.yaml
+    run: ../testdata/emptydir/run.yaml
+    taskRuns: ''
+    policy: ../testdata/workspace-conflict/policy.yaml
+    expectedDecision: recover
+    expectedWarningContains: ephemeral-workspace-across-closure
+    expectedActions:
+      prepare: inherit
+      fail: rerun
+  - name: creation-time-window-fallback
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/completion-fallback/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/fallback-window.yaml
+    expectedDecision: refuse
+    expectedReasonContains: expired
+  - name: cancelled-sibling-blocks-resume
+    pipeline: ../testdata/cancelled-sibling/pipeline.yaml
+    run: ../testdata/cancelled-sibling/run.yaml
+    taskRuns: ../testdata/cancelled-sibling/taskruns.yaml
+    policy: policies/cancelled-sibling-blocks.yaml
+    expectedDecision: refuse
+    expectedReasonContains: '"build" failed and blocks resume'
+  - name: failed-recovery-does-not-supersede-source
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/failed-recovery/source.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/latest-only.yaml
+    newerRuns: ../testdata/failed-recovery/runs.yaml
+    expectedDecision: recover
+  - name: direct-recovery-of-embedded-recovery-refused
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/failed-recovery/run.yaml
+    taskRuns: ''
+    policy: ../testdata/simple/policy.yaml
+    expectedDecision: refuse
+    expectedReasonContains: references a different Pipeline
+  - name: failed-recovery-claim-reuse-warns
+    pipeline: ../testdata/later-claim/pipeline.yaml
+    run: ../testdata/later-claim/source.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/latest-only.yaml
+    newerRuns: ../testdata/later-claim/failed-recovery-runs.yaml
+    expectedDecision: recover
+    expectedWarningContains: later-run-shares-persistent-claim
+  - name: different-target-same-claim-warns
+    pipeline: ../testdata/later-claim/pipeline.yaml
+    run: ../testdata/later-claim/source.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/latest-by-branch.yaml
+    newerRuns: ../testdata/later-claim/other-target-runs.yaml
+    expectedDecision: recover
+    expectedWarningContains: later-run-shares-persistent-claim

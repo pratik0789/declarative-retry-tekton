@@ -1,0 +1,310 @@
+{
+  "totalCases": 31,
+  "passedCases": 31,
+  "correctnessPercent": 100,
+  "recoverableCases": 15,
+  "totalTasksAvoided": 17,
+  "meanAvoidancePercent": 35.55555555555556,
+  "cases": [
+    {
+      "name": "safe-partial-recovery",
+      "passed": true,
+      "decision": "recover",
+      "tasksAvoided": 1,
+      "avoidancePercent": 25
+    },
+    {
+      "name": "producer-consumer-conflict",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "shared-result-across-closure",
+          "message": "task \"consume\" would be reused after consuming a result from rerun task \"build\"",
+          "tasks": [
+            "build",
+            "consume"
+          ],
+          "stateKind": "result"
+        }
+      ],
+      "tasksAvoided": 1,
+      "avoidancePercent": 33.333333333333336
+    },
+    {
+      "name": "mutable-workspace-conflict",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "shared-workspace-across-closure",
+          "message": "writable workspace \"source\" is shared by rerun and reused tasks",
+          "tasks": [
+            "fail",
+            "prepare"
+          ],
+          "stateKind": "workspace",
+          "stateName": "source"
+        }
+      ],
+      "tasksAvoided": 1,
+      "avoidancePercent": 50
+    },
+    {
+      "name": "changed-pipeline",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "Pipeline definition changed since the source run"
+    },
+    {
+      "name": "expired-recovery-window",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "recovery window has expired"
+    },
+    {
+      "name": "blocked-task",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "task \"scan\" failed and blocks resume"
+    },
+    {
+      "name": "retry-closure-cycle",
+      "passed": true,
+      "decision": "recover",
+      "tasksAvoided": 1,
+      "avoidancePercent": 25
+    },
+    {
+      "name": "unknown-task-reference",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "policy references unknown task \"does-not-exist\""
+    },
+    {
+      "name": "no-failed-task",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "source PipelineRun has no failed tasks"
+    },
+    {
+      "name": "policy-pipeline-mismatch",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "policy references a different Pipeline"
+    },
+    {
+      "name": "run-pipeline-mismatch",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "PipelineRun references a different Pipeline"
+    },
+    {
+      "name": "multiple-failed-tasks",
+      "passed": true,
+      "decision": "recover",
+      "tasksAvoided": 1,
+      "avoidancePercent": 25
+    },
+    {
+      "name": "superseded-run",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "newer PipelineRun \"delivery-2\" supersedes the source run"
+    },
+    {
+      "name": "blocks-resume-on-succeeded-closure-member",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "blocks-resume-task-rerun",
+          "message": "task \"build\" declares blocksResume and will run again because it was selected or is in the retry closure",
+          "tasks": [
+            "build"
+          ]
+        }
+      ],
+      "tasksAvoided": 1,
+      "avoidancePercent": 25
+    },
+    {
+      "name": "explicit-task-selection",
+      "passed": true,
+      "decision": "recover"
+    },
+    {
+      "name": "changed-task-definition",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "Pipeline definition changed since the source run"
+    },
+    {
+      "name": "unrecorded-definition",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "source PipelineRun does not record the Pipeline definition it ran"
+    },
+    {
+      "name": "ephemeral-workspace-warning",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "ephemeral-workspace-across-closure",
+          "message": "workspace \"source\" is bound by volumeClaimTemplate, so the recovery run starts with a new, empty volume; contents written by inherited tasks are not carried over",
+          "tasks": [
+            "fail",
+            "prepare"
+          ],
+          "stateKind": "workspace",
+          "stateName": "source"
+        },
+        {
+          "code": "shared-workspace-across-closure",
+          "message": "writable workspace \"source\" is shared by rerun and reused tasks",
+          "tasks": [
+            "fail",
+            "prepare"
+          ],
+          "stateKind": "workspace",
+          "stateName": "source"
+        }
+      ],
+      "tasksAvoided": 1,
+      "avoidancePercent": 50
+    },
+    {
+      "name": "newer-run-for-other-target",
+      "passed": true,
+      "decision": "recover",
+      "tasksAvoided": 2,
+      "avoidancePercent": 50
+    },
+    {
+      "name": "retry-only-latest-without-comparison-runs",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "retryOnlyLatest requires the PipelineRuns to compare against (--newer-runs)"
+    },
+    {
+      "name": "misspelled-policy-task",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "policy references unknown task \"biuld\""
+    },
+    {
+      "name": "forward-invalidation",
+      "passed": true,
+      "decision": "recover"
+    },
+    {
+      "name": "finally-task-touches-inherited-state",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "finally-task-touches-inherited-state",
+          "message": "finally task \"cleanup\" runs again and binds workspace \"source\", which holds state from inherited tasks",
+          "tasks": [
+            "cleanup"
+          ],
+          "stateKind": "workspace",
+          "stateName": "source"
+        }
+      ],
+      "tasksAvoided": 1,
+      "avoidancePercent": 50
+    },
+    {
+      "name": "unknown-operator-selection",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "selected unknown task \"ghost\""
+    },
+    {
+      "name": "emptydir-workspace-warning",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "ephemeral-workspace-across-closure",
+          "message": "workspace \"source\" is bound by emptyDir, so the recovery run starts with a new, empty volume; contents written by inherited tasks are not carried over",
+          "tasks": [
+            "fail",
+            "prepare"
+          ],
+          "stateKind": "workspace",
+          "stateName": "source"
+        },
+        {
+          "code": "shared-workspace-across-closure",
+          "message": "writable workspace \"source\" is shared by rerun and reused tasks",
+          "tasks": [
+            "fail",
+            "prepare"
+          ],
+          "stateKind": "workspace",
+          "stateName": "source"
+        }
+      ],
+      "tasksAvoided": 1,
+      "avoidancePercent": 50
+    },
+    {
+      "name": "creation-time-window-fallback",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "recovery window has expired"
+    },
+    {
+      "name": "cancelled-sibling-blocks-resume",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "task \"build\" failed and blocks resume"
+    },
+    {
+      "name": "failed-recovery-does-not-supersede-source",
+      "passed": true,
+      "decision": "recover",
+      "tasksAvoided": 2,
+      "avoidancePercent": 50
+    },
+    {
+      "name": "direct-recovery-of-embedded-recovery-refused",
+      "passed": true,
+      "decision": "refuse",
+      "reason": "PipelineRun references a different Pipeline"
+    },
+    {
+      "name": "failed-recovery-claim-reuse-warns",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "later-run-shares-persistent-claim",
+          "message": "later PipelineRun \"delivery-retry-failed\" binds persistent claim \"shared-claim\" used by source workspace \"shared\"; the claim may have changed, including after a failed recovery",
+          "stateKind": "workspace",
+          "stateName": "shared"
+        }
+      ],
+      "tasksAvoided": 2,
+      "avoidancePercent": 50
+    },
+    {
+      "name": "different-target-same-claim-warns",
+      "passed": true,
+      "decision": "recover",
+      "warnings": [
+        {
+          "code": "later-run-shares-persistent-claim",
+          "message": "later PipelineRun \"other-branch\" binds persistent claim \"shared-claim\" used by source workspace \"shared\"; the claim may have changed, including after a failed recovery",
+          "stateKind": "workspace",
+          "stateName": "shared"
+        }
+      ],
+      "tasksAvoided": 2,
+      "avoidancePercent": 50
+    }
+  ]
+}

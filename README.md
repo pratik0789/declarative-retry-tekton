@@ -10,6 +10,10 @@ Published result: [end-to-end feasibility report](docs/feasibility-report.md)
 Measured evaluation: [synthetic Tekton benchmark](docs/synthetic-benchmark.md).
 The published dataset contains 60 paired live Tekton trials.
 
+Mechanism-specific evaluation: [matched stateful closure comparisons](docs/closure-ablation.md).
+These compare an empty policy, a declared closure, and full restart for partial
+Workspace writes and forward invalidation of inherited artifacts.
+
 ## Quick start
 
 ```bash
@@ -77,6 +81,11 @@ equal values for those parameters. Recovery runs count as newer runs of their
 source, except a recovery run that itself failed, so the original run can be
 recovered again. `resumeWithin` is measured from the source
 run's completion time, falling back to its creation time.
+
+When comparison runs are available, a later run that binds the source's
+persistent claim produces `later-run-shares-persistent-claim`, even if it is a
+failed recovery or belongs to another target. This is an advisory binding check:
+it does not observe writes, restore state, or serialize concurrent requests.
 
 ## Development
 

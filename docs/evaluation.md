@@ -1,14 +1,22 @@
 # Evaluation status
 
-The offline evaluation contains 23 deterministic cases: eleven accepted
-recovery plans and twelve policy or structural refusals. Five accepted plans
-carry warnings (a shared result, a writable Workspace, a Workspace bound by
-`volumeClaimTemplate`, a succeeded `blocksResume` task pulled into the closure,
-and a `finally` task that binds a Workspace inherited tasks used). All expected decisions, dispositions, refusal reasons,
-and warnings pass. These cases establish planner behavior; they are not
-production-performance data.
+The original offline evaluation contained 23 deterministic cases: eleven
+accepted recovery plans and twelve refusals, with five warning-bearing accepted
+plans. The companion revision expands it to 31 cases: fifteen accepted plans,
+sixteen refusals, and eight warning-bearing accepted plans. Added paths cover
+unknown operator selection, `emptyDir`, creation-time window fallback, a
+cancelled sibling declaring `blocksResume`, failed recovery supersession,
+direct recovery of an embedded recovery run, and later shared-claim warnings
+for failed recoveries and other targets. All specified decisions, dispositions,
+refusal reasons, and required warning codes pass. These authored examples
+establish finite specification coverage, not population correctness.
 
 Run them with `make test evaluate`.
+
+See [matched closure comparisons](closure-ablation.md) for the new live
+three-arm experiment and its independent recomputation of native objects and
+Workspace bytes. Its output oracle does not use planner labels; policies and
+task assertions nevertheless share authorship.
 
 ## Stateful recovery on kind
 

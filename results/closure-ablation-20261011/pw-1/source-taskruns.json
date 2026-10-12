@@ -1,0 +1,350 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/affinity-assistant": "affinity-assistant-503bf1f047",
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-12T00:22:58Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "pw-1",
+          "tekton.dev/pipelineRun": "pw-1-source",
+          "tekton.dev/pipelineRunUID": "f195b823-ccc7-4ba3-8689-e996be3a54fd",
+          "tekton.dev/pipelineTask": "mutate"
+        },
+        "name": "pw-1-source-mutate",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "pw-1-source",
+            "uid": "f195b823-ccc7-4ba3-8689-e996be3a54fd"
+          }
+        ],
+        "resourceVersion": "1911600",
+        "uid": "36330c09-0b33-4f95-a52c-bbd09f026535"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"pw-1-source\" in *-source) printf \"dirty:d22cfc4932cd5f32\" > $(workspaces.data.path)/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\nif [ \"`cat $(workspaces.data.path)/source.txt`\" != \"clean:d22cfc4932cd5f32\" ]; then echo DIRTY-INPUT; exit 1; fi\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "pw-1-source"
+            }
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:23:02Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:23:02Z",
+            "message": "\"step-run\" exited with code 1: Error",
+            "reason": "Failed",
+            "status": "False",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "pw-1-source-mutate-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:22:58Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://64b3161f9a02fa48c089bd9db84510a62d08a31d6d6ec5b0ec0f18905d5e16c6",
+              "exitCode": 1,
+              "finishedAt": "2026-10-12T00:23:01Z",
+              "reason": "Error",
+              "startedAt": "2026-10-12T00:23:01Z"
+            },
+            "terminationReason": "Error"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"pw-1-source\" in *-source) printf \"dirty:d22cfc4932cd5f32\" > /workspace/data/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\nif [ \"`cat /workspace/data/source.txt`\" != \"clean:d22cfc4932cd5f32\" ]; then echo DIRTY-INPUT; exit 1; fi\nsha256sum /workspace/data/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > /workspace/data/artifact-input.sha\nprintf \"built:\" > /workspace/data/artifact.txt; cat /workspace/data/artifact-input.sha >> /workspace/data/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-12T00:22:48Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "pw-1",
+          "tekton.dev/pipelineRun": "pw-1-source",
+          "tekton.dev/pipelineRunUID": "f195b823-ccc7-4ba3-8689-e996be3a54fd",
+          "tekton.dev/pipelineTask": "observe"
+        },
+        "name": "pw-1-source-observe",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "pw-1-source",
+            "uid": "f195b823-ccc7-4ba3-8689-e996be3a54fd"
+          }
+        ],
+        "resourceVersion": "1911487",
+        "uid": "758786cc-61a1-44b0-8486-98097823ff1d"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\necho OBSERVED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:22:53Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:22:53Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "pw-1-source-observe-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:22:48Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://94c1bb2811e71c895f539154cd504f025001a179cf73726d2b7d6e12291e68db",
+              "exitCode": 0,
+              "finishedAt": "2026-10-12T00:22:52Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-12T00:22:52Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\necho OBSERVED\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/affinity-assistant": "affinity-assistant-503bf1f047",
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-12T00:22:53Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "pw-1",
+          "tekton.dev/pipelineRun": "pw-1-source",
+          "tekton.dev/pipelineRunUID": "f195b823-ccc7-4ba3-8689-e996be3a54fd",
+          "tekton.dev/pipelineTask": "prepare"
+        },
+        "name": "pw-1-source-prepare",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "pw-1-source",
+            "uid": "f195b823-ccc7-4ba3-8689-e996be3a54fd"
+          }
+        ],
+        "resourceVersion": "1911553",
+        "uid": "807c96a4-5984-4059-bd6c-1384b75e1df3"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"clean:d22cfc4932cd5f32\" > $(workspaces.data.path)/source.txt\nrm -f $(workspaces.data.path)/artifact.txt $(workspaces.data.path)/artifact-input.sha $(workspaces.data.path)/receipt.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "pw-1-source"
+            }
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:22:58Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:22:58Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "pw-1-source-prepare-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:22:53Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://3a887c0aeb109b73213604e9b7379a4a1f405b9c044d5ef87d70daeb3898a6b4",
+              "exitCode": 0,
+              "finishedAt": "2026-10-12T00:22:57Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-12T00:22:57Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"clean:d22cfc4932cd5f32\" > /workspace/data/source.txt\nrm -f /workspace/data/artifact.txt /workspace/data/artifact-input.sha /workspace/data/receipt.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

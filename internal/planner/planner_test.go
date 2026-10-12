@@ -338,3 +338,32 @@ func TestBuildFailedRecoveryDoesNotSupersedeItsSource(t *testing.T) {
 		}
 	}
 }
+
+func TestLaterClaimWarningBoundaries(t *testing.T) {
+	var source PipelineRun
+	source.Metadata.Namespace = "a"
+	source.Metadata.CreationTimestamp = time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	source.Spec.Workspaces = []map[string]any{{"name": "shared", "persistentVolumeClaim": map[string]any{"claimName": "claim"}}}
+	var candidate PipelineRun
+	candidate.Metadata.Name = "later"
+	candidate.Metadata.Namespace = "a"
+	candidate.Metadata.CreationTimestamp = source.Metadata.CreationTimestamp.Add(time.Hour)
+	candidate.Spec.Workspaces = source.Spec.Workspaces
+	if warnings := laterClaimWarnings(source, []PipelineRun{candidate, candidate}); len(warnings) != 1 {
+		t.Fatalf("same-namespace later binding must warn once: %+v", warnings)
+	}
+	candidate.Metadata.Namespace = "b"
+	if warnings := laterClaimWarnings(source, []PipelineRun{candidate}); len(warnings) != 0 {
+		t.Fatalf("same claim name in a different namespace is a different volume: %+v", warnings)
+	}
+	candidate.Metadata.Namespace = "a"
+	candidate.Metadata.CreationTimestamp = source.Metadata.CreationTimestamp
+	if warnings := laterClaimWarnings(source, []PipelineRun{candidate}); len(warnings) != 0 {
+		t.Fatalf("non-later binding must not warn: %+v", warnings)
+	}
+	candidate.Metadata.CreationTimestamp = source.Metadata.CreationTimestamp.Add(time.Hour)
+	candidate.Spec.Workspaces = []map[string]any{{"name": "shared", "persistentVolumeClaim": map[string]any{"claimName": "another-claim"}}}
+	if warnings := laterClaimWarnings(source, []PipelineRun{candidate}); len(warnings) != 0 {
+		t.Fatalf("different claim must not warn: %+v", warnings)
+	}
+}

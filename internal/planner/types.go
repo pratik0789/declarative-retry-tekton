@@ -55,6 +55,7 @@ type Workspace struct {
 
 type Metadata struct {
 	Name              string            `json:"name"`
+	Namespace         string            `json:"namespace,omitempty"`
 	UID               string            `json:"uid"`
 	Generation        int64             `json:"generation"`
 	CreationTimestamp time.Time         `json:"creationTimestamp"`

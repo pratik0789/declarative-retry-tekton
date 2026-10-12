@@ -1,0 +1,230 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "creationTimestamp": "2026-10-12T00:25:53Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "pw-3"
+    },
+    "name": "pw-3-source",
+    "namespace": "retry-closure-20261011-1e62",
+    "resourceVersion": "1913621",
+    "uid": "a58c1bd3-dc6a-4c0e-8995-e3d919ff324f"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "pw-3"
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    },
+    "workspaces": [
+      {
+        "name": "shared",
+        "persistentVolumeClaim": {
+          "claimName": "pw-3-source"
+        }
+      }
+    ]
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "pw-3-source-observe",
+        "pipelineTaskName": "observe"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "pw-3-source-prepare",
+        "pipelineTaskName": "prepare"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "pw-3-source-mutate",
+        "pipelineTaskName": "mutate"
+      }
+    ],
+    "completionTime": "2026-10-12T00:26:06Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-12T00:26:06Z",
+        "message": "Tasks Completed: 3 (Failed: 1, Cancelled 0), Skipped: 2",
+        "reason": "Failed",
+        "status": "False",
+        "type": "Succeeded"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "observe",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\necho OBSERVED\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "prepare",
+          "runAfter": [
+            "observe"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"clean:d68b8c04bd565bfd\" > $(workspaces.data.path)/source.txt\nrm -f $(workspaces.data.path)/artifact.txt $(workspaces.data.path)/artifact-input.sha $(workspaces.data.path)/receipt.txt\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "mutate",
+          "runAfter": [
+            "prepare"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"pw-3-source\" in *-source) printf \"dirty:d68b8c04bd565bfd\" > $(workspaces.data.path)/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\nif [ \"`cat $(workspaces.data.path)/source.txt`\" != \"clean:d68b8c04bd565bfd\" ]; then echo DIRTY-INPUT; exit 1; fi\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "verify",
+          "runAfter": [
+            "mutate"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\necho VERIFIED-STAGE\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "publish",
+          "runAfter": [
+            "verify"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nactual=`sha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1`\nrecorded=`cat $(workspaces.data.path)/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat $(workspaces.data.path)/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > $(workspaces.data.path)/receipt.txt\necho ORACLE-CONSISTENT\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        }
+      ],
+      "workspaces": [
+        {
+          "name": "shared"
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "skippedTasks": [
+      {
+        "name": "verify",
+        "reason": "PipelineRun was stopping"
+      },
+      {
+        "name": "publish",
+        "reason": "PipelineRun was stopping"
+      }
+    ],
+    "startTime": "2026-10-12T00:25:53Z"
+  }
+}

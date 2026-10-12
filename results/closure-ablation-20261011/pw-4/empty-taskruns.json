@@ -1,0 +1,137 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/affinity-assistant": "affinity-assistant-0a31494076",
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "observe=pw-4-source-observe,prepare=pw-4-source-prepare",
+          "retry.tekton.dev/policy": "pw-4-empty-policy",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/shared-state-warning-codes": "shared-workspace-across-closure",
+          "retry.tekton.dev/shared-state-warnings-accepted": "true",
+          "retry.tekton.dev/source-pipeline": "pw-4",
+          "retry.tekton.dev/source-pipeline-run": "pw-4-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "4eae6822-b583-4490-a2f5-7a065ea7dc32"
+        },
+        "creationTimestamp": "2026-10-12T00:28:46Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "pw-4-empty-recovery",
+          "tekton.dev/pipelineRun": "pw-4-empty-recovery",
+          "tekton.dev/pipelineRunUID": "02a1f866-69bc-4f0d-bcfa-f826c27ebf29",
+          "tekton.dev/pipelineTask": "mutate"
+        },
+        "name": "pw-4-empty-recovery-mutate",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "pw-4-empty-recovery",
+            "uid": "02a1f866-69bc-4f0d-bcfa-f826c27ebf29"
+          }
+        ],
+        "resourceVersion": "1915420",
+        "uid": "de1bde2e-c8ce-49a2-8774-ea5f130d4c8b"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"pw-4-empty-recovery\" in *-source) printf \"dirty:c22f3decc2db7875\" > $(workspaces.data.path)/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\nif [ \"`cat $(workspaces.data.path)/source.txt`\" != \"clean:c22f3decc2db7875\" ]; then echo DIRTY-INPUT; exit 1; fi\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "pw-4-empty"
+            }
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:28:51Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:28:51Z",
+            "message": "\"step-run\" exited with code 1: Error",
+            "reason": "Failed",
+            "status": "False",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "pw-4-empty-recovery-mutate-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:28:46Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://b92a23025d0983cfafca1a1f389cbb60620a5f7eeacd8e7c8f0a8e45beab1e3f",
+              "exitCode": 1,
+              "finishedAt": "2026-10-12T00:28:50Z",
+              "reason": "Error",
+              "startedAt": "2026-10-12T00:28:50Z"
+            },
+            "terminationReason": "Error"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"pw-4-empty-recovery\" in *-source) printf \"dirty:c22f3decc2db7875\" > /workspace/data/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\nif [ \"`cat /workspace/data/source.txt`\" != \"clean:c22f3decc2db7875\" ]; then echo DIRTY-INPUT; exit 1; fi\nsha256sum /workspace/data/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > /workspace/data/artifact-input.sha\nprintf \"built:\" > /workspace/data/artifact.txt; cat /workspace/data/artifact-input.sha >> /workspace/data/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

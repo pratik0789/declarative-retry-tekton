@@ -1,0 +1,313 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "observe=fi-4-source-observe",
+      "retry.tekton.dev/policy": "fi-4-closure-policy",
+      "retry.tekton.dev/policy-generation": "1",
+      "retry.tekton.dev/source-pipeline": "fi-4",
+      "retry.tekton.dev/source-pipeline-run": "fi-4-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "7bfe1572-420b-4d0d-8269-f1e22550782a"
+    },
+    "creationTimestamp": "2026-10-12T00:37:05Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "fi-4-closure-recovery"
+    },
+    "name": "fi-4-closure-recovery",
+    "namespace": "retry-closure-20261011-1e62",
+    "resourceVersion": "1921091",
+    "uid": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "prepare",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"input:$(context.pipelineRun.name):0750759f00f2afc8\" > $(workspaces.data.path)/source.txt\nrm -f $(workspaces.data.path)/receipt.txt\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "build",
+          "runAfter": [
+            "prepare"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "gate",
+          "runAfter": [
+            "build"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.pipelineRun.name)\" in *-source) echo INJECTED-GATE-FAILURE; exit 1;; esac\necho GATE-PASSED\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "publish",
+          "runAfter": [
+            "gate"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nactual=`sha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1`\nrecorded=`cat $(workspaces.data.path)/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat $(workspaces.data.path)/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > $(workspaces.data.path)/receipt.txt\necho ORACLE-CONSISTENT\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        }
+      ],
+      "workspaces": [
+        {
+          "name": "shared"
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    },
+    "workspaces": [
+      {
+        "name": "shared",
+        "persistentVolumeClaim": {
+          "claimName": "fi-4-closure"
+        }
+      }
+    ]
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "fi-4-closure-recovery-prepare",
+        "pipelineTaskName": "prepare"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "fi-4-closure-recovery-build",
+        "pipelineTaskName": "build"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "fi-4-closure-recovery-gate",
+        "pipelineTaskName": "gate"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "fi-4-closure-recovery-publish",
+        "pipelineTaskName": "publish"
+      }
+    ],
+    "completionTime": "2026-10-12T00:37:25Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-12T00:37:25Z",
+        "message": "Tasks Completed: 4 (Failed: 0, Cancelled 0), Skipped: 0",
+        "reason": "Succeeded",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "prepare",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"input:fi-4-closure-recovery:0750759f00f2afc8\" > $(workspaces.data.path)/source.txt\nrm -f $(workspaces.data.path)/receipt.txt\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "build",
+          "runAfter": [
+            "prepare"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "gate",
+          "runAfter": [
+            "build"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"fi-4-closure-recovery\" in *-source) echo INJECTED-GATE-FAILURE; exit 1;; esac\necho GATE-PASSED\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "publish",
+          "runAfter": [
+            "gate"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nactual=`sha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1`\nrecorded=`cat $(workspaces.data.path)/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat $(workspaces.data.path)/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > $(workspaces.data.path)/receipt.txt\necho ORACLE-CONSISTENT\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        }
+      ],
+      "workspaces": [
+        {
+          "name": "shared"
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-12T00:37:05Z"
+  }
+}

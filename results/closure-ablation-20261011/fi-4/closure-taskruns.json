@@ -1,0 +1,494 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/affinity-assistant": "affinity-assistant-35a7c5c993",
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "observe=fi-4-source-observe",
+          "retry.tekton.dev/policy": "fi-4-closure-policy",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "fi-4",
+          "retry.tekton.dev/source-pipeline-run": "fi-4-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "7bfe1572-420b-4d0d-8269-f1e22550782a"
+        },
+        "creationTimestamp": "2026-10-12T00:37:10Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRun": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRunUID": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa",
+          "tekton.dev/pipelineTask": "build"
+        },
+        "name": "fi-4-closure-recovery-build",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "fi-4-closure-recovery",
+            "uid": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa"
+          }
+        ],
+        "resourceVersion": "1920986",
+        "uid": "ad961783-8500-4ff5-adaa-f1cb36ff6b57"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "fi-4-closure"
+            }
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:37:14Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:37:14Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "fi-4-closure-recovery-build-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:37:10Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://a452488793a3b75d0459bafd328fc22333857c69ff493cd3d112a5954ee6ed48",
+              "exitCode": 0,
+              "finishedAt": "2026-10-12T00:37:14Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-12T00:37:14Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nsha256sum /workspace/data/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > /workspace/data/artifact-input.sha\nprintf \"built:\" > /workspace/data/artifact.txt; cat /workspace/data/artifact-input.sha >> /workspace/data/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "observe=fi-4-source-observe",
+          "retry.tekton.dev/policy": "fi-4-closure-policy",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "fi-4",
+          "retry.tekton.dev/source-pipeline-run": "fi-4-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "7bfe1572-420b-4d0d-8269-f1e22550782a"
+        },
+        "creationTimestamp": "2026-10-12T00:37:14Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRun": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRunUID": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa",
+          "tekton.dev/pipelineTask": "gate"
+        },
+        "name": "fi-4-closure-recovery-gate",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "fi-4-closure-recovery",
+            "uid": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa"
+          }
+        ],
+        "resourceVersion": "1921041",
+        "uid": "19b05d4c-9d64-4b44-950d-81ccdf0ea4d1"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"fi-4-closure-recovery\" in *-source) echo INJECTED-GATE-FAILURE; exit 1;; esac\necho GATE-PASSED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:37:20Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:37:20Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "fi-4-closure-recovery-gate-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:37:15Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://7318e81900161349480f1a1ca3681d74c5386279f11626387e5e59db9851b8d9",
+              "exitCode": 0,
+              "finishedAt": "2026-10-12T00:37:19Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-12T00:37:19Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"fi-4-closure-recovery\" in *-source) echo INJECTED-GATE-FAILURE; exit 1;; esac\necho GATE-PASSED\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/affinity-assistant": "affinity-assistant-35a7c5c993",
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "observe=fi-4-source-observe",
+          "retry.tekton.dev/policy": "fi-4-closure-policy",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "fi-4",
+          "retry.tekton.dev/source-pipeline-run": "fi-4-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "7bfe1572-420b-4d0d-8269-f1e22550782a"
+        },
+        "creationTimestamp": "2026-10-12T00:37:05Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRun": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRunUID": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa",
+          "tekton.dev/pipelineTask": "prepare"
+        },
+        "name": "fi-4-closure-recovery-prepare",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "fi-4-closure-recovery",
+            "uid": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa"
+          }
+        ],
+        "resourceVersion": "1920937",
+        "uid": "e5b36d4e-a4c0-420e-9fe5-47ea5002abe1"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"input:fi-4-closure-recovery:0750759f00f2afc8\" > $(workspaces.data.path)/source.txt\nrm -f $(workspaces.data.path)/receipt.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "fi-4-closure"
+            }
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:37:10Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:37:10Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "fi-4-closure-recovery-prepare-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:37:05Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://5d9ee5311bb89dcdccdbd5ad04951ec16050b5e3db0aefb08382a5fad12a8bdb",
+              "exitCode": 0,
+              "finishedAt": "2026-10-12T00:37:10Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-12T00:37:10Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"input:fi-4-closure-recovery:0750759f00f2afc8\" > /workspace/data/source.txt\nrm -f /workspace/data/receipt.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/affinity-assistant": "affinity-assistant-35a7c5c993",
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "observe=fi-4-source-observe",
+          "retry.tekton.dev/policy": "fi-4-closure-policy",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "fi-4",
+          "retry.tekton.dev/source-pipeline-run": "fi-4-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "7bfe1572-420b-4d0d-8269-f1e22550782a"
+        },
+        "creationTimestamp": "2026-10-12T00:37:20Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRun": "fi-4-closure-recovery",
+          "tekton.dev/pipelineRunUID": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa",
+          "tekton.dev/pipelineTask": "publish"
+        },
+        "name": "fi-4-closure-recovery-publish",
+        "namespace": "retry-closure-20261011-1e62",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "fi-4-closure-recovery",
+            "uid": "d6b4de77-e3fa-433c-884a-c4f7781c4cfa"
+          }
+        ],
+        "resourceVersion": "1921089",
+        "uid": "c36b890c-9962-42d1-81c0-5b2e10cc8de8"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nactual=`sha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1`\nrecorded=`cat $(workspaces.data.path)/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat $(workspaces.data.path)/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > $(workspaces.data.path)/receipt.txt\necho ORACLE-CONSISTENT\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "fi-4-closure"
+            }
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-12T00:37:25Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-12T00:37:25Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "fi-4-closure-recovery-publish-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-12T00:37:20Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://a715b54c77d697b7af172e919d81e95306d8e52025a553ed69ab322775d54d5a",
+              "exitCode": 0,
+              "finishedAt": "2026-10-12T00:37:24Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-12T00:37:24Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nactual=`sha256sum /workspace/data/source.txt | cut -d\" \" -f1`\nrecorded=`cat /workspace/data/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat /workspace/data/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum /workspace/data/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > /workspace/data/receipt.txt\necho ORACLE-CONSISTENT\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

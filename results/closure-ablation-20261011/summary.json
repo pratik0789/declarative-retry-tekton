@@ -1,0 +1,76 @@
+{
+  "protocol": {
+    "repetitionsPerMechanism": 5,
+    "mechanisms": [
+      "partial-write",
+      "forward-invalidation"
+    ],
+    "arms": [
+      "empty",
+      "closure",
+      "full"
+    ],
+    "orderSeed": 20261011,
+    "sourceSnapshot": "one failed source per triplet; exact bytes copied to three distinct PVCs",
+    "bindingOverride": "generated recovery manifest is preserved; only claimName and generated name are overridden for isolation",
+    "oracle": "native task assertions plus external SHA-256 over actual Workspace bytes and Tekton status",
+    "timing": "not a timing benchmark; status polling every 1 second",
+    "authoring": "fixtures, policies, and assertions authored with the prototype; no independent author study"
+  },
+  "triplets": 10,
+  "armsExecuted": 30,
+  "results": {
+    "partial-write": {
+      "empty": {
+        "succeeded": 0,
+        "consistentReceipts": 0,
+        "n": 5,
+        "taskRunsPerTrial": [
+          1
+        ]
+      },
+      "closure": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          4
+        ]
+      },
+      "full": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          5
+        ]
+      }
+    },
+    "forward-invalidation": {
+      "empty": {
+        "succeeded": 0,
+        "consistentReceipts": 0,
+        "n": 5,
+        "taskRunsPerTrial": [
+          3
+        ]
+      },
+      "closure": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          4
+        ]
+      },
+      "full": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          5
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+- apiVersion: tekton.dev/v1
+  kind: PipelineRun
+  metadata:
+    name: other-branch
+    creationTimestamp: '2025-01-01T01:00:00Z'
+    namespace: evaluation
+  spec:
+    pipelineSpec: &id001
+      tasks:
+      - name: clone
+        taskSpec:
+          steps:
+          - name: clone
+            image: alpine:3.20
+            script: 'echo cloned
+
+              '
+      - name: build
+        runAfter:
+        - clone
+        taskSpec:
+          steps:
+          - name: build
+            image: alpine:3.20
+            script: 'echo built
+
+              '
+      - name: scan
+        runAfter:
+        - build
+        taskSpec:
+          steps:
+          - name: scan
+            image: alpine:3.20
+            script: 'echo scanned
+
+              '
+      - name: deploy
+        runAfter:
+        - scan
+        taskSpec:
+          steps:
+          - name: deploy
+            image: alpine:3.20
+            script: 'echo deployed
+
+              '
+      workspaces:
+      - name: shared
+    workspaces:
+    - name: shared
+      persistentVolumeClaim:
+        claimName: shared-claim
+    pipelineRef:
+      name: delivery
+    params:
+    - name: branch
+      value: feature
+  status:
+    conditions:
+    - type: Succeeded
+      status: 'False'
+    pipelineSpec: *id001

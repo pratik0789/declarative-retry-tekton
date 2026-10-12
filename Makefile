@@ -4,7 +4,7 @@ KIND_IMAGE ?= kindest/node:v1.31.4
 TEKTON_VERSION ?= v1.6.0
 KUBECTL ?= kubectl
 
-.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful ordering benchmark teardown
+.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful ordering benchmark closure-ablation teardown
 
 test:
 	go test ./...
@@ -44,6 +44,12 @@ ordering:
 
 benchmark:
 	CLUSTER=$(CLUSTER) ./hack/benchmark.sh
+
+# A namespace must be supplied; this experiment never resets existing namespaces.
+closure-ablation:
+	@test -n "$(NAMESPACE)" || (echo 'Set NAMESPACE to a new namespace name' >&2; exit 1)
+	go build -o /tmp/retryctl ./cmd/retryctl
+	python3 hack/closure_ablation.py --context kind-$(CLUSTER) --namespace $(NAMESPACE) --output artifacts/closure-ablation
 
 teardown:
 	$(KIND) delete cluster --name $(CLUSTER)

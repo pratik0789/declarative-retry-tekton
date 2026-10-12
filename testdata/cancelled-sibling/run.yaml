@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: delivery-1
+  uid: 11111111-1111-1111-1111-111111111111
+spec:
+  pipelineRef:
+    name: delivery
+status:
+  pipelineSpec:
+    tasks:
+    - name: clone
+      taskSpec:
+        steps:
+        - name: clone
+          image: alpine:3.20
+          script: 'echo cloned
+
+            '
+    - name: build
+      runAfter:
+      - clone
+      taskSpec:
+        steps:
+        - name: build
+          image: alpine:3.20
+          script: 'echo built
+
+            '
+    - name: scan
+      runAfter:
+      - clone
+      taskSpec:
+        steps:
+        - name: scan
+          image: alpine:3.20
+          script: 'echo scanned
+
+            '
+    - name: deploy
+      runAfter:
+      - build
+      - scan
+      taskSpec:
+        steps:
+        - name: deploy
+          image: alpine:3.20
+          script: 'echo deployed
+
+            '
+  childReferences:
+  - name: delivery-1-clone
+    pipelineTaskName: clone
+  - name: delivery-1-build
+    pipelineTaskName: build
+  - name: delivery-1-scan
+    pipelineTaskName: scan
