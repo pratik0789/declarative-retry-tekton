@@ -77,7 +77,12 @@ When the policy sets `retryOnlyLatest`, pass `--newer-runs-from-cluster` (with
 `--kube-context` if needed) to have retryctl list every PipelineRun in the
 source run's namespace with kubectl, or `--newer-runs` with a list of your own
 (an empty list is allowed); without either, recovery is refused. `targetParameters` restricts supersession to runs with
-equal values for those parameters. Recovery runs count as newer runs of their
+equal effective values for those parameters, including Pipeline defaults and
+explicit run overrides. Defaults come from each run's recorded PipelineSpec,
+or its embedded pipelineSpec when no recorded definition is available; defaults
+from today's referenced Pipeline are not assumed for older runs. If a required
+target value cannot be resolved and the newer run cannot otherwise be excluded
+as a different target, recovery is refused. Recovery runs count as newer runs of their
 source, except a recovery run that itself failed, so the original run can be
 recovered again. `resumeWithin` is measured from the source
 run's completion time, falling back to its creation time.

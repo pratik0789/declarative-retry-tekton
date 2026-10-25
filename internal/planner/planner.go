@@ -135,12 +135,25 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		if newerRuns == nil {
 			return refuse("retryOnlyLatest requires the PipelineRuns to compare against (--newer-runs)")
 		}
+		sourceValues := effectiveParameters(r)
+		for _, name := range policy.Spec.TargetParameters {
+			if value, ok := sourceValues[name]; !ok || value == nil {
+				return refuse(fmt.Sprintf("cannot resolve target parameter %q for PipelineRun %q", name, r.Metadata.Name))
+			}
+		}
 		for _, candidate := range newerRuns {
 			if failedRecoveryOf(candidate, r) {
 				continue
 			}
 			samePipeline := candidate.Spec.PipelineRef.Name == p.Metadata.Name || candidate.Metadata.Annotations[annotationSourcePipeline] == p.Metadata.Name
-			if samePipeline && sameTarget(policy.Spec.TargetParameters, r, candidate) && candidate.Metadata.CreationTimestamp.After(r.Metadata.CreationTimestamp) {
+			if !samePipeline || !candidate.Metadata.CreationTimestamp.After(r.Metadata.CreationTimestamp) {
+				continue
+			}
+			matches, err := sameTarget(policy.Spec.TargetParameters, sourceValues, candidate)
+			if err != nil {
+				return refuse(err.Error())
+			}
+			if matches {
 				return refuse(fmt.Sprintf("newer PipelineRun %q supersedes the source run", candidate.Metadata.Name))
 			}
 		}
@@ -376,21 +389,69 @@ func failedRecoveryOf(candidate, source PipelineRun) bool {
 	return false
 }
 
-func sameTarget(parameters []string, source, candidate PipelineRun) bool {
-	value := func(run PipelineRun, name string) any {
-		for _, param := range run.Spec.Params {
-			if param.Name == name {
-				return param.Value
+// Use the definition attached to each run, never today's Pipeline defaults:
+// the referenced Pipeline may have changed since a candidate ran.
+func effectiveParameters(run PipelineRun) map[string]any {
+	definition := run.recordedDefinition
+	if definition == nil && run.Status.PipelineSpec != nil {
+		definition = toAny(run.Status.PipelineSpec)
+	}
+	if definition == nil {
+		definition = run.inlineDefinition
+	}
+	values := map[string]any{}
+	if spec, ok := definition.(map[string]any); ok {
+		params, _ := spec["params"].([]any)
+		for _, raw := range params {
+			param, ok := raw.(map[string]any)
+			if !ok {
+				continue
+			}
+			name, _ := param["name"].(string)
+			if value, ok := param["default"]; ok && value != nil {
+				values[name] = value
 			}
 		}
-		return nil
 	}
-	for _, name := range parameters {
-		if !reflect.DeepEqual(value(source, name), value(candidate, name)) {
-			return false
+	for _, param := range run.Spec.Params {
+		// Object parameters retain default keys not supplied by the run.
+		defaults, hasDefaults := values[param.Name].(map[string]any)
+		overrides, isObject := param.Value.(map[string]any)
+		if hasDefaults && isObject {
+			merged := map[string]any{}
+			for key, value := range defaults {
+				merged[key] = value
+			}
+			for key, value := range overrides {
+				merged[key] = value
+			}
+			values[param.Name] = merged
+		} else {
+			values[param.Name] = param.Value
 		}
 	}
-	return true
+	return values
+}
+
+func sameTarget(parameters []string, sourceValues map[string]any, candidate PipelineRun) (bool, error) {
+	candidateValues := effectiveParameters(candidate)
+	var unresolved error
+	for _, name := range parameters {
+		value, ok := candidateValues[name]
+		if !ok || value == nil {
+			if unresolved == nil {
+				unresolved = fmt.Errorf("cannot resolve target parameter %q for PipelineRun %q", name, candidate.Metadata.Name)
+			}
+			continue
+		}
+		if !reflect.DeepEqual(sourceValues[name], value) {
+			return false, nil
+		}
+	}
+	if unresolved != nil {
+		return false, unresolved
+	}
+	return true, nil
 }
 
 // Binding evidence is not proof of a write. Warn even for failed recoveries and

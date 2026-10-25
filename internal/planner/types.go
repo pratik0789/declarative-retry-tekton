@@ -37,6 +37,9 @@ func (r *PipelineRun) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	var raw struct {
+		Spec struct {
+			PipelineSpec any `json:"pipelineSpec"`
+		} `json:"spec"`
 		Status struct {
 			PipelineSpec any `json:"pipelineSpec"`
 		} `json:"status"`
@@ -45,6 +48,7 @@ func (r *PipelineRun) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	r.recordedDefinition = raw.Status.PipelineSpec
+	r.inlineDefinition = raw.Spec.PipelineSpec
 	return nil
 }
 
@@ -102,6 +106,7 @@ type PipelineRun struct {
 		ChildReferences []ChildReference `json:"childReferences"`
 	} `json:"status"`
 	recordedDefinition any
+	inlineDefinition   any
 }
 
 type ChildReference struct {
