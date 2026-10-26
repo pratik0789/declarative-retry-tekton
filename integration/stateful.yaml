@@ -68,8 +68,8 @@ spec:
           - name: run
             image: alpine:3.20
             script: |
-              case "$(context.pipelineRun.name)" in
-                *-source) echo "injected scan failure"; exit 1 ;;
+              case "$(context.taskRun.name)" in
+                *-source-*) echo "injected scan failure"; exit 1 ;;
               esac
               echo "scanned $(params.image)"
     - name: deploy

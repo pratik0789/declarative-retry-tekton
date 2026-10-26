@@ -1,0 +1,261 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/finally-anchor": "retryctl-finally-anchor",
+          "retry.tekton.dev/inherited-taskruns": "build=finally-parallel-source-build,prepare=finally-parallel-source-prepare",
+          "retry.tekton.dev/policy": "parallel",
+          "retry.tekton.dev/source-pipeline": "finally-parallel",
+          "retry.tekton.dev/source-pipeline-run": "finally-parallel-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "28b10573-6571-4b05-b9fa-ae8f205044eb"
+        },
+        "creationTimestamp": "2026-10-26T04:03:39Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "finally-parallel-recovery",
+          "tekton.dev/pipelineRun": "finally-parallel-recovery",
+          "tekton.dev/pipelineRunUID": "39823c5b-5864-40f6-9924-f96c346c7630",
+          "tekton.dev/pipelineTask": "audit"
+        },
+        "name": "finally-parallel-recovery-audit",
+        "namespace": "retry-finally-20261025-r2",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-parallel-recovery",
+            "uid": "39823c5b-5864-40f6-9924-f96c346c7630"
+          }
+        ],
+        "resourceVersion": "5231660",
+        "uid": "543fb5eb-9570-4139-9bb8-2dc1d8710900"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\necho AUDITED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-26T04:03:45Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-26T04:03:45Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-parallel-recovery-audit-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-26T04:03:39Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://6d39190cf4d57fb86e6ceef7117804362fe61dfa6ea69372cefa8c0c500db776",
+              "exitCode": 0,
+              "finishedAt": "2026-10-26T04:03:44Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-26T04:03:44Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\necho AUDITED\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/finally-anchor": "retryctl-finally-anchor",
+          "retry.tekton.dev/inherited-taskruns": "build=finally-parallel-source-build,prepare=finally-parallel-source-prepare",
+          "retry.tekton.dev/policy": "parallel",
+          "retry.tekton.dev/source-pipeline": "finally-parallel",
+          "retry.tekton.dev/source-pipeline-run": "finally-parallel-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "28b10573-6571-4b05-b9fa-ae8f205044eb"
+        },
+        "creationTimestamp": "2026-10-26T04:03:39Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "finally-parallel-recovery",
+          "tekton.dev/pipelineRun": "finally-parallel-recovery",
+          "tekton.dev/pipelineRunUID": "39823c5b-5864-40f6-9924-f96c346c7630",
+          "tekton.dev/pipelineTask": "notify"
+        },
+        "name": "finally-parallel-recovery-notify",
+        "namespace": "retry-finally-20261025-r2",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-parallel-recovery",
+            "uid": "39823c5b-5864-40f6-9924-f96c346c7630"
+          }
+        ],
+        "resourceVersion": "5231654",
+        "uid": "fc58e1fd-2e1a-4ca8-99c1-1308060ef267"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "image",
+            "value": "image:finally-parallel-source"
+          }
+        ],
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"finally-parallel-recovery\" in *-source) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-26T04:03:44Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-26T04:03:44Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-parallel-recovery-notify-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "receipt",
+            "type": "string",
+            "value": "image:finally-parallel-source"
+          }
+        ],
+        "startTime": "2026-10-26T04:03:39Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://71cb3c67be8be81f89fe2d370fcf36ab22e24dcabb6215efbf380cf3bcacc1a1",
+              "exitCode": 0,
+              "finishedAt": "2026-10-26T04:03:43Z",
+              "message": "[{\"key\":\"receipt\",\"value\":\"image:finally-parallel-source\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-26T04:03:43Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"finally-parallel-recovery\" in *-source) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"image:finally-parallel-source\" > \"/tekton/results/receipt\"\necho NOTIFIED\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

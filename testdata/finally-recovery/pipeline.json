@@ -1,0 +1,76 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "name": "finally-recovery"
+  },
+  "spec": {
+    "tasks": [
+      {
+        "name": "prepare",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "echo prepare"
+            }
+          ]
+        }
+      },
+      {
+        "name": "build",
+        "runAfter": [
+          "prepare"
+        ],
+        "params": [
+          {
+            "name": "revision",
+            "value": "$(tasks.prepare.results.revision)"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "echo build"
+            }
+          ]
+        }
+      }
+    ],
+    "finally": [
+      {
+        "name": "notify",
+        "params": [
+          {
+            "name": "image",
+            "value": "$(tasks.build.results.image)"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "echo notify"
+            }
+          ]
+        }
+      },
+      {
+        "name": "audit",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "echo audit"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

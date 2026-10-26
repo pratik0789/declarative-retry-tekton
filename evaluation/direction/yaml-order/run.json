@@ -1,0 +1,90 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "name": "source"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "direction"
+    }
+  },
+  "status": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "f",
+          "runAfter": [
+            "c"
+          ],
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo direction-fixture"
+              }
+            ]
+          }
+        },
+        {
+          "name": "c",
+          "runAfter": [
+            "a"
+          ],
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo direction-fixture"
+              }
+            ]
+          }
+        },
+        {
+          "name": "b",
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo direction-fixture"
+              }
+            ]
+          }
+        },
+        {
+          "name": "a",
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo direction-fixture"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "childReferences": [
+      {
+        "name": "source-f",
+        "pipelineTaskName": "f"
+      },
+      {
+        "name": "source-c",
+        "pipelineTaskName": "c"
+      },
+      {
+        "name": "source-b",
+        "pipelineTaskName": "b"
+      },
+      {
+        "name": "source-a",
+        "pipelineTaskName": "a"
+      }
+    ]
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "observe=pw-1-source-observe,prepare=pw-1-source-prepare",
+      "retry.tekton.dev/policy": "pw-1-empty-policy",
+      "retry.tekton.dev/policy-generation": "1",
+      "retry.tekton.dev/shared-state-warning-codes": "shared-workspace-across-closure",
+      "retry.tekton.dev/shared-state-warnings-accepted": "true",
+      "retry.tekton.dev/source-pipeline": "pw-1",
+      "retry.tekton.dev/source-pipeline-run": "pw-1-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "7c657dd3-02a4-4e0e-adae-9684eef7e085"
+    },
+    "namespace": "retry-direction-20261025-r1",
+    "name": "pw-1-empty-recovery"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "mutate",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.pipelineRun.name)\" in *-source) printf \"dirty:d22cfc4932cd5f32\" > $(workspaces.data.path)/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\nif [ \"`cat $(workspaces.data.path)/source.txt`\" != \"clean:d22cfc4932cd5f32\" ]; then echo DIRTY-INPUT; exit 1; fi\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "verify",
+          "runAfter": [
+            "mutate"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\necho VERIFIED-STAGE\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        },
+        {
+          "name": "publish",
+          "runAfter": [
+            "verify"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nactual=`sha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1`\nrecorded=`cat $(workspaces.data.path)/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat $(workspaces.data.path)/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > $(workspaces.data.path)/receipt.txt\necho ORACLE-CONSISTENT\n"
+              }
+            ],
+            "workspaces": [
+              {
+                "name": "data"
+              }
+            ]
+          },
+          "workspaces": [
+            {
+              "name": "data",
+              "workspace": "shared"
+            }
+          ]
+        }
+      ],
+      "workspaces": [
+        {
+          "name": "shared"
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    },
+    "workspaces": [
+      {
+        "name": "shared",
+        "persistentVolumeClaim": {
+          "claimName": "pw-1-empty"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,293 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "audit=finally-export-source-audit,build=finally-export-source-build",
+          "retry.tekton.dev/policy": "finally-export",
+          "retry.tekton.dev/result-publishers": "retryctl-reused-results",
+          "retry.tekton.dev/source-pipeline": "finally-export",
+          "retry.tekton.dev/source-pipeline-run": "finally-export-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "716c1930-0c9f-4920-98ef-8e9caa9e61ac"
+        },
+        "creationTimestamp": "2026-10-30T04:16:53Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "finally-export-recovery",
+          "tekton.dev/pipelineRun": "finally-export-recovery",
+          "tekton.dev/pipelineRunUID": "9e359893-61a9-41c6-9b7a-9585347de816",
+          "tekton.dev/pipelineTask": "notify"
+        },
+        "name": "finally-export-recovery-notify",
+        "namespace": "retry-finally-export-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-export-recovery",
+            "uid": "9e359893-61a9-41c6-9b7a-9585347de816"
+          }
+        ],
+        "resourceVersion": "6171085",
+        "uid": "f741d234-ae69-4209-a38d-b774649ac0dc"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "image",
+            "value": "source-image"
+          }
+        ],
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo injected-failure; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:19:31Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:19:31Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-export-recovery-notify-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "receipt",
+            "type": "string",
+            "value": "source-image"
+          }
+        ],
+        "startTime": "2026-10-30T04:16:53Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://21491a2c114e383b4f2b637b1b57032ca738d2e4ede9e6ec7efbba6ed10089b7",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:19:18Z",
+              "message": "[{\"key\":\"receipt\",\"value\":\"source-image\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:19:18Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"finally-export-recovery-notify\" in *-source-*) echo injected-failure; exit 1;; esac\nprintf \"%s\" \"source-image\" > \"/tekton/results/receipt\"\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "audit=finally-export-source-audit,build=finally-export-source-build",
+          "retry.tekton.dev/policy": "finally-export",
+          "retry.tekton.dev/result-publishers": "retryctl-reused-results",
+          "retry.tekton.dev/source-pipeline": "finally-export",
+          "retry.tekton.dev/source-pipeline-run": "finally-export-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "716c1930-0c9f-4920-98ef-8e9caa9e61ac"
+        },
+        "creationTimestamp": "2026-10-30T04:16:17Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "finally-export-recovery",
+          "tekton.dev/pipelineRun": "finally-export-recovery",
+          "tekton.dev/pipelineRunUID": "9e359893-61a9-41c6-9b7a-9585347de816",
+          "tekton.dev/pipelineTask": "retryctl-reused-results"
+        },
+        "name": "finally-export-recovery-retryctl-reused-results",
+        "namespace": "retry-finally-export-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-export-recovery",
+            "uid": "9e359893-61a9-41c6-9b7a-9585347de816"
+          }
+        ],
+        "resourceVersion": "6170712",
+        "uid": "a57c152e-b767-4315-83ec-fce99dedc364"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "results": [
+            {
+              "name": "value-0",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "env": [
+                {
+                  "name": "RETRYCTL_VALUE_0",
+                  "value": "Y2hlY2tlZA=="
+                }
+              ],
+              "image": "alpine:3.20",
+              "name": "publish",
+              "script": "set -eu\nprintf '%s' \"$RETRYCTL_VALUE_0\" | base64 -d > \"$(results.value-0.path)\"\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:16:53Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:16:53Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-export-recovery-retryctl-reused-results-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "value-0",
+            "type": "string",
+            "value": "checked"
+          }
+        ],
+        "startTime": "2026-10-30T04:16:17Z",
+        "steps": [
+          {
+            "container": "step-publish",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "publish",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://4c587bfb748646d286b9a30ace6ad95fe4ca69d55b477a46c0205e8d9eede72a",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:16:22Z",
+              "message": "[{\"key\":\"value-0\",\"value\":\"checked\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:16:22Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "results": [
+            {
+              "name": "value-0",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "env": [
+                {
+                  "name": "RETRYCTL_VALUE_0",
+                  "value": "Y2hlY2tlZA=="
+                }
+              ],
+              "image": "alpine:3.20",
+              "name": "publish",
+              "script": "set -eu\nprintf '%s' \"$RETRYCTL_VALUE_0\" | base64 -d > \"/tekton/results/value-0\"\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

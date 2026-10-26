@@ -25,6 +25,59 @@ func TestCreateRequiresWarningConfirmation(t *testing.T) {
 	}
 }
 
+func TestCreateRefusesChangedDefinitionBeforeGenerating(t *testing.T) {
+	cases := []struct {
+		name, recorded, current string
+	}{
+		{"changed variable", `echo $(params.left)`, `echo $(params.right)`},
+		{"resolved value", `echo OLD`, `echo $(params.right)`},
+		{"literal to context", `echo OLD`, `echo $(context.pipelineRun.name)`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			path := func(name string) string { return filepath.Join(dir, name) }
+			pipeline, err := readRaw("../../testdata/simple/pipeline.yaml")
+			if err != nil {
+				t.Fatal(err)
+			}
+			run, err := readRaw("../../testdata/simple/run.yaml")
+			if err != nil {
+				t.Fatal(err)
+			}
+			spec := asMap(pipeline["spec"])
+			spec["params"] = []any{map[string]any{"name": "left", "default": "OLD"}, map[string]any{"name": "right", "default": "NEW"}}
+			step := asMap(asList(asMap(asMap(asList(spec["tasks"])[1])["taskSpec"])["steps"])[0])
+			step["script"] = tc.recorded
+			asMap(run["status"])["pipelineSpec"] = toAny(spec)
+			write := func(name string, value any) {
+				t.Helper()
+				data, err := json.Marshal(value)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(path(name), data, 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			write("pipeline.json", pipeline)
+			write("run.json", run)
+			create := func() ([]byte, error) {
+				return CreateRecoveryRun(path("pipeline.json"), path("run.json"), "../../testdata/simple/policy.yaml", "../../testdata/simple/taskruns.yaml", "", nil, true)
+			}
+			if manifest, err := create(); err != nil || len(manifest) == 0 {
+				t.Fatalf("unchanged control must generate: %s %v", manifest, err)
+			}
+			step["script"] = tc.current
+			write("pipeline.json", pipeline)
+			manifest, err := create()
+			if err == nil || !strings.Contains(err.Error(), "Pipeline definition changed") || len(manifest) != 0 {
+				t.Fatalf("changed definition must refuse without a manifest: %s %v", manifest, err)
+			}
+		})
+	}
+}
+
 func TestCreateRecordsAcceptedWarnings(t *testing.T) {
 	manifest, err := CreateRecoveryRun(
 		"../../testdata/result-conflict/pipeline.yaml",

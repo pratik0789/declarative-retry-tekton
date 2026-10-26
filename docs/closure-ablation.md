@@ -26,14 +26,19 @@ reinitializes the input and lets recovery complete. The task's `DIRTY-INPUT`
 check blocks the empty-policy arm; the planner itself only issues an advisory
 Workspace warning.
 
-### Forward invalidation
+### Stale build
 
 `observe -> prepare -> build -> gate -> publish`
 
 The source fails at `gate` after a successful build. The operator selects
-`prepare`, whose run-specific input changes. An empty policy inherits the old
+`prepare`, whose input includes its TaskRun name and changes on each execution. An empty policy inherits the old
 build; `publish` detects an input/artifact digest mismatch and fails before
-writing a receipt. `prepare: retryWith: [build]` regenerates the artifact.
+writing a receipt. The failed `gate` declares
+`gate: retryWith: [prepare, build]`, so recovery also regenerates the artifact.
+Both named tasks precede `gate`. The operator's `--tasks prepare` selection is
+retained in both partial-recovery arms; selecting successful earlier work is
+explicit, and an operator must include any completed later work it invalidates.
+`prepare` cannot declare the later `build` task in `retryWith`.
 The planner does not itself certify semantic consistency.
 
 ## Output oracle
@@ -55,34 +60,63 @@ operator.
 Use a new namespace; the harness never resets an existing namespace:
 
 ```bash
-go build -o /tmp/retryctl ./cmd/retryctl
+go build -trimpath -buildvcs=false -o /tmp/retryctl-closure ./cmd/retryctl
 python3 hack/closure_ablation.py --context kind-retry-paper \
   --namespace retry-closure-new-unique-name --repetitions 5 \
+  --retryctl /tmp/retryctl-closure \
   --output artifacts/closure-ablation
 python3 hack/verify_closure_ablation.py \
-  --results artifacts/closure-ablation --retryctl /tmp/retryctl
+  --results artifacts/closure-ablation --retryctl /tmp/retryctl-closure
 ```
+
+If a transient cluster error interrupts a run, repeat the same harness command
+with `--resume`. It verifies the saved cluster, namespace, and protocol, checks
+existing resource specifications, preserves completed arms, and continues the
+remaining work. Reads retry transient errors; creation requests are not retried
+blindly. The October 25 run resumed after one etcd read timeout with 18 arms
+already complete; its completed evidence was retained.
+
+The current harness injects source-only failures with
+`$(context.taskRun.name)` and the pattern `*-source-*`. TaskRun context is
+resolved when the task executes, so the original expression remains in the
+source PipelineRun's saved PipelineSpec. Stale-build input also uses the
+prepare TaskRun name. This preserves the fault mechanisms and input refresh
+while allowing the complete native saved/current specifications to match.
+The captures are never rewritten to manufacture a match.
+
+The verifier checks that every native specification matches, reruns the manual
+selection comparisons with the evaluated binary, and rejects changed scripts
+and changed context expressions in both planning and generation. Source,
+harness, and binary hashes are retained in `build-metadata.json`. CI executes
+one triplet per mechanism with the current implementation and retains its
+evidence; the paper experiment uses five per mechanism.
 
 The live harness and verifier use the Python standard library. The historical
 numerical audit additionally requires PyYAML and SciPy. Retained evidence is in
-`results/closure-ablation-20261011/` and
-`results/paper-audit-20261011/`. Build metadata records the clean v0.3.3 commit
-used for live comparisons. The companion revision adds the explicit fixtures,
-later-claim warning, harnesses, and audit.
+`results/closure-current-20261029/` and
+`results/current-version-audit-20261029/`. The current run enforces the direction
+rule and the strict Pipeline-specification guard.
+Earlier direction-only evidence in `results/closure-direction-20261025/`
+contains resolved PipelineRun context expressions and is refused by the current
+guard. It remains historical evidence, rather than the basis for the current
+IV-G claims.
+Historical evidence in `results/closure-ablation-20261011/` used an earlier
+contract with `prepare: retryWith: [build]`; those artifacts are preserved
+unchanged and do not validate the new restriction.
 
-## Observed results (2026-10-11)
+## Observed results (2026-10-29)
 
 | Mechanism | Arm | Successful / trials | Consistent receipts / trials | TaskRuns per trial |
 |---|---|---:|---:|---:|
 | Partial write | Empty | 0/5 | 0/5 | 1, then failure |
 | Partial write | Closure | 5/5 | 5/5 | 4 |
 | Partial write | Full restart | 5/5 | 5/5 | 5 |
-| Forward invalidation | Empty | 0/5 | 0/5 | 3, including failed publish |
-| Forward invalidation | Closure | 5/5 | 5/5 | 4 |
-| Forward invalidation | Full restart | 5/5 | 5/5 | 5 |
+| Stale build | Empty | 0/5 | 0/5 | 3, including failed publish |
+| Stale build | Closure | 5/5 | 5/5 | 4 |
+| Stale build | Full restart | 5/5 | 5/5 | 5 |
 
 Native objects and captured bytes verify all 30 arms. Correct manual selection
-reproduces all ten declared plans. Each successful closure avoids 1/5 TaskRuns
+reproduces all ten declared plans. Each successful recovery with the closure avoids 1/5 TaskRuns
 (20%) against restart; lower counts in failing arms are not successful savings.
 
 ## Limits

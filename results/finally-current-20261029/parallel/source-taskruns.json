@@ -1,0 +1,501 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-30T04:13:34Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "finally-parallel",
+          "tekton.dev/pipelineRun": "finally-parallel-source",
+          "tekton.dev/pipelineRunUID": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0",
+          "tekton.dev/pipelineTask": "audit"
+        },
+        "name": "finally-parallel-source-audit",
+        "namespace": "retry-finally-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-parallel-source",
+            "uid": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0"
+          }
+        ],
+        "resourceVersion": "6168734",
+        "uid": "d77afe68-878f-4771-a78d-9c58a0928ded"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\necho AUDITED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:13:40Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:13:40Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-parallel-source-audit-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T04:13:34Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://e15ffeaa9a40e74e497638e9bb7969fbc10213959cecc94e2ca9ac83b2bcaa37",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:13:39Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:13:39Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\necho AUDITED\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-30T04:13:30Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "finally-parallel",
+          "tekton.dev/pipelineRun": "finally-parallel-source",
+          "tekton.dev/pipelineRunUID": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0",
+          "tekton.dev/pipelineTask": "build"
+        },
+        "name": "finally-parallel-source-build",
+        "namespace": "retry-finally-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-parallel-source",
+            "uid": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0"
+          }
+        ],
+        "resourceVersion": "6168588",
+        "uid": "626271c9-5d50-48e0-b1d6-bfa23367a882"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "revision",
+            "value": "finally-parallel-source-prepare"
+          }
+        ],
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "params": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"image:%s\" \"$(params.revision)\" > \"$(results.image.path)\"\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:13:34Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:13:34Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-parallel-source-build-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "image",
+            "type": "string",
+            "value": "image:finally-parallel-source-prepare"
+          }
+        ],
+        "startTime": "2026-10-30T04:13:30Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://6c097c52c90ac2694b690154f1c0989844f4e826cf44edc56e53e6ba10310ee5",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:13:33Z",
+              "message": "[{\"key\":\"image\",\"value\":\"image:finally-parallel-source-prepare\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:13:33Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "params": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"image:%s\" \"finally-parallel-source-prepare\" > \"/tekton/results/image\"\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-30T04:13:34Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "finally-parallel",
+          "tekton.dev/pipelineRun": "finally-parallel-source",
+          "tekton.dev/pipelineRunUID": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0",
+          "tekton.dev/pipelineTask": "notify"
+        },
+        "name": "finally-parallel-source-notify",
+        "namespace": "retry-finally-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-parallel-source",
+            "uid": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0"
+          }
+        ],
+        "resourceVersion": "6168732",
+        "uid": "839ba1ec-ced7-449e-ba71-7902762c5f19"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "image",
+            "value": "image:finally-parallel-source-prepare"
+          }
+        ],
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:13:40Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:13:40Z",
+            "message": "\"step-run\" exited with code 1: Error",
+            "reason": "Failed",
+            "status": "False",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-parallel-source-notify-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T04:13:34Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://eb305073eda551ecf42244db6fee278c5e7517c4d3f736254b4169b6ed4fc140",
+              "exitCode": 1,
+              "finishedAt": "2026-10-30T04:13:39Z",
+              "reason": "Error",
+              "startedAt": "2026-10-30T04:13:39Z"
+            },
+            "terminationReason": "Error"
+          }
+        ],
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"finally-parallel-source-notify\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"image:finally-parallel-source-prepare\" > \"/tekton/results/receipt\"\necho NOTIFIED\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-30T04:13:24Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "finally-parallel",
+          "tekton.dev/pipelineRun": "finally-parallel-source",
+          "tekton.dev/pipelineRunUID": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0",
+          "tekton.dev/pipelineTask": "prepare"
+        },
+        "name": "finally-parallel-source-prepare",
+        "namespace": "retry-finally-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-parallel-source",
+            "uid": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0"
+          }
+        ],
+        "resourceVersion": "6168505",
+        "uid": "f08cba0d-1b36-4eb5-8091-d305506408e6"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "results": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"%s\" \"$(context.taskRun.name)\" > \"$(results.revision.path)\"\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:13:30Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:13:30Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-parallel-source-prepare-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "revision",
+            "type": "string",
+            "value": "finally-parallel-source-prepare"
+          }
+        ],
+        "startTime": "2026-10-30T04:13:24Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://6ad52fa1d845f66bd35965557e3d3d670123b0bff9c6fd1954925f12b59f8d8d",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:13:29Z",
+              "message": "[{\"key\":\"revision\",\"value\":\"finally-parallel-source-prepare\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:13:29Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "results": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"%s\" \"finally-parallel-source-prepare\" > \"/tekton/results/revision\"\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

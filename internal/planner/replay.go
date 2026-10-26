@@ -1,7 +1,6 @@
 package planner
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -69,17 +68,13 @@ func Replay(pipelinePath, policyPath, binding, completedModel string, secretWork
 		workspaces = append(workspaces, bound)
 	}
 
-	upstream := map[string][]string{}
-	for _, raw := range asList(asMap(pipeline.definition)["tasks"]) {
-		task := asMap(raw)
-		name, _ := task["name"].(string)
-		for _, dependency := range asList(task["runAfter"]) {
-			upstream[name] = append(upstream[name], fmt.Sprint(dependency))
-		}
-		encoded, _ := json.Marshal(task)
-		for _, match := range taskReference.FindAllStringSubmatch(string(encoded), -1) {
-			upstream[name] = append(upstream[name], match[1])
-		}
+	definition := pipeline.definition
+	if definition == nil {
+		definition = toAny(pipeline.Spec)
+	}
+	upstream, err := executionDependencies(definition)
+	if err != nil {
+		return ReplayReport{}, err
 	}
 	ancestors := func(name string) map[string]bool {
 		seen := map[string]bool{}
@@ -117,8 +112,8 @@ func Replay(pipelinePath, policyPath, binding, completedModel string, secretWork
 		return seen
 	}
 
-	report := ReplayReport{Pipeline: pipeline.Metadata.Name, Policy: policy.Metadata.Name, WorkspaceBinding: binding, Completed: completedModel, Tasks: len(pipeline.Spec.Tasks)}
-	for _, failedTask := range pipeline.Spec.Tasks {
+	report := ReplayReport{Pipeline: pipeline.Metadata.Name, Policy: policy.Metadata.Name, WorkspaceBinding: binding, Completed: completedModel, Tasks: len(pipeline.allTasks())}
+	for _, failedTask := range pipeline.allTasks() {
 		var run PipelineRun
 		run.Metadata.Name = "replay-" + failedTask.Name
 		run.Spec.PipelineRef.Name = pipeline.Metadata.Name
@@ -128,13 +123,13 @@ func Replay(pipelinePath, policyPath, binding, completedModel string, secretWork
 		if completedModel == "independent" {
 			downstream := descendants(failedTask.Name)
 			completed = map[string]bool{}
-			for _, task := range pipeline.Spec.Tasks {
+			for _, task := range pipeline.allTasks() {
 				if task.Name != failedTask.Name && !downstream[task.Name] {
 					completed[task.Name] = true
 				}
 			}
 		}
-		for _, task := range pipeline.Spec.Tasks {
+		for _, task := range pipeline.allTasks() {
 			if completed[task.Name] {
 				run.Status.ChildReferences = append(run.Status.ChildReferences, ChildReference{Name: run.Metadata.Name + "-" + task.Name, PipelineTask: task.Name, Status: "Succeeded"})
 			}

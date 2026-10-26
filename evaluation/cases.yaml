@@ -48,17 +48,13 @@ cases:
     policy: policies/blocked.yaml
     expectedDecision: refuse
     expectedReasonContains: blocks resume
-  - name: retry-closure-cycle
+  - name: retryWith-later-task-in-policy
     pipeline: ../testdata/simple/pipeline.yaml
     run: ../testdata/simple/run.yaml
     taskRuns: ../testdata/simple/taskruns.yaml
-    policy: policies/cycle.yaml
-    expectedDecision: recover
-    expectedActions:
-      clone: inherit
-      build: rerun
-      scan: rerun
-      deploy: continue
+    policy: policies/later-task.yaml
+    expectedDecision: refuse
+    expectedReasonContains: includes later task
   - name: unknown-task-reference
     pipeline: ../testdata/simple/pipeline.yaml
     run: ../testdata/simple/run.yaml
@@ -174,27 +170,23 @@ cases:
     policy: policies/unknown-policy-key.yaml
     expectedDecision: refuse
     expectedReasonContains: unknown task "biuld"
-  - name: forward-invalidation
+  - name: selected-task-cannot-declare-later-tasks
     pipeline: ../testdata/simple/pipeline.yaml
     run: ../testdata/simple/run.yaml
     taskRuns: ../testdata/simple/taskruns.yaml
-    policy: policies/forward.yaml
+    policy: policies/selected-later-task.yaml
     selectedTasks: [clone]
-    expectedDecision: recover
-    expectedActions:
-      clone: rerun
-      build: rerun
-      scan: rerun
-      deploy: continue
-  - name: finally-task-touches-inherited-state
+    expectedDecision: refuse
+    expectedReasonContains: includes later task
+  - name: successful-finally-task-is-reused
     pipeline: ../testdata/finally/pipeline.yaml
     run: ../testdata/finally/run.yaml
     policy: ../testdata/finally/policy.yaml
     expectedDecision: recover
-    expectedWarningContains: finally-task-touches-inherited-state
     expectedActions:
       prepare: inherit
       fail: rerun
+      cleanup: inherit
 
   - name: unknown-operator-selection
     pipeline: ../testdata/simple/pipeline.yaml
@@ -259,3 +251,104 @@ cases:
     newerRuns: ../testdata/later-claim/other-target-runs.yaml
     expectedDecision: recover
     expectedWarningContains: later-run-shares-persistent-claim
+  - name: direction-earlier-task
+    pipeline: direction/earlier-task/pipeline.json
+    run: direction/earlier-task/run.json
+    taskRuns: direction/earlier-task/taskruns.json
+    policy: direction/earlier-task/policy.json
+    expectedDecision: recover
+    expectedActions: {"a": "rerun", "b": "inherit", "c": "inherit", "f": "rerun"}
+  - name: direction-parallel-task
+    pipeline: direction/parallel-task/pipeline.json
+    run: direction/parallel-task/run.json
+    taskRuns: direction/parallel-task/taskruns.json
+    policy: direction/parallel-task/policy.json
+    expectedDecision: recover
+    expectedActions: {"a": "inherit", "b": "rerun", "c": "inherit", "f": "rerun"}
+  - name: direction-transitive-later-task
+    pipeline: direction/transitive-later-task/pipeline.json
+    run: direction/transitive-later-task/run.json
+    taskRuns: direction/transitive-later-task/taskruns.json
+    policy: direction/transitive-later-task/policy.json
+    expectedDecision: refuse
+    expectedReasonContains: includes later task
+  - name: direction-explicit-later-selection
+    pipeline: direction/explicit-later-selection/pipeline.json
+    run: direction/explicit-later-selection/run.json
+    taskRuns: direction/explicit-later-selection/taskruns.json
+    policy: direction/explicit-later-selection/policy.json
+    expectedDecision: recover
+    selectedTasks: ["a", "c"]
+    expectedActions: {"a": "rerun", "b": "inherit", "c": "rerun", "f": "rerun"}
+  - name: direction-yaml-order
+    pipeline: direction/yaml-order/pipeline.json
+    run: direction/yaml-order/run.json
+    taskRuns: direction/yaml-order/taskruns.json
+    policy: direction/yaml-order/policy.json
+    expectedDecision: recover
+    expectedActions: {"a": "rerun", "b": "inherit", "c": "inherit", "f": "rerun"}
+  - name: direction-result-order
+    pipeline: direction/result-order/pipeline.json
+    run: direction/result-order/run.json
+    taskRuns: direction/result-order/taskruns.json
+    policy: direction/result-order/policy.json
+    expectedDecision: refuse
+    expectedReasonContains: includes later task
+  - name: direction-when-order
+    pipeline: direction/when-order/pipeline.json
+    run: direction/when-order/run.json
+    taskRuns: direction/when-order/taskruns.json
+    policy: direction/when-order/policy.json
+    expectedDecision: refuse
+    expectedReasonContains: includes later task
+  - name: finally-only-failure
+    pipeline: ../testdata/finally-recovery/pipeline.json
+    run: ../testdata/finally-recovery/run.json
+    taskRuns: ../testdata/finally-recovery/taskruns.json
+    policy: ../testdata/finally-recovery/only-policy.json
+    expectedDecision: recover
+    expectedActions: {"prepare": "inherit", "build": "inherit", "notify": "rerun", "audit": "inherit"}
+  - name: finally-transitive-upstream-closure
+    pipeline: ../testdata/finally-recovery/pipeline.json
+    run: ../testdata/finally-recovery/run.json
+    taskRuns: ../testdata/finally-recovery/taskruns.json
+    policy: ../testdata/finally-recovery/upstream-policy.json
+    expectedDecision: recover
+    expectedActions: {"prepare": "rerun", "build": "rerun", "notify": "rerun", "audit": "inherit"}
+  - name: finally-parallel-closure
+    pipeline: ../testdata/finally-recovery/pipeline.json
+    run: ../testdata/finally-recovery/run.json
+    taskRuns: ../testdata/finally-recovery/taskruns.json
+    policy: ../testdata/finally-recovery/parallel-policy.json
+    expectedDecision: recover
+    expectedActions: {"prepare": "inherit", "build": "inherit", "notify": "rerun", "audit": "rerun"}
+  - name: finally-blocks-resume
+    pipeline: ../testdata/finally-recovery/pipeline.json
+    run: ../testdata/finally-recovery/run.json
+    taskRuns: ../testdata/finally-recovery/taskruns.json
+    policy: ../testdata/finally-recovery/blocked-policy.json
+    expectedDecision: refuse
+    expectedReasonContains: blocks resume
+  - name: operator-selects-successful-finally
+    pipeline: ../testdata/finally-recovery/pipeline.json
+    run: ../testdata/finally-recovery/run.json
+    taskRuns: ../testdata/finally-recovery/taskruns.json
+    policy: ../testdata/finally-recovery/only-policy.json
+    expectedDecision: recover
+    selectedTasks: ["audit"]
+    expectedActions: {"prepare": "inherit", "build": "inherit", "notify": "rerun", "audit": "rerun"}
+  - name: ordinary-task-cannot-declare-later-finally
+    pipeline: ../testdata/finally-recovery/pipeline.json
+    run: ../testdata/finally-recovery/run.json
+    taskRuns: ../testdata/finally-recovery/taskruns.json
+    policy: ../testdata/finally-recovery/later-policy.json
+    expectedDecision: refuse
+    expectedReasonContains: includes later task
+  - name: finally-recovery-warns-for-empty-workspace
+    pipeline: ../testdata/finally-recovery/ephemeral-pipeline.json
+    run: ../testdata/finally-recovery/ephemeral-run.json
+    taskRuns: ../testdata/finally-recovery/taskruns.json
+    policy: ../testdata/finally-recovery/only-policy.json
+    expectedDecision: recover
+    expectedWarningContains: ephemeral-workspace-across-closure
+    expectedActions: {prepare: inherit, build: inherit, notify: rerun, audit: inherit}

@@ -1,0 +1,91 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/finally-anchor": "retryctl-finally-anchor",
+      "retry.tekton.dev/inherited-taskruns": "audit=finally-export-source-audit,build=finally-export-source-build",
+      "retry.tekton.dev/policy": "finally-export",
+      "retry.tekton.dev/source-pipeline": "finally-export",
+      "retry.tekton.dev/source-pipeline-run": "finally-export-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "93ec488b-9699-42d9-8b59-771f0d0b9d8d"
+    },
+    "namespace": "retry-finally-export-1792994453",
+    "name": "finally-export-recovery"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "source-image"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo injected-failure; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\n"
+              }
+            ]
+          }
+        }
+      ],
+      "results": [
+        {
+          "description": "",
+          "name": "audit-note",
+          "value": "checked"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "retryctl-finally-anchor",
+          "taskSpec": {
+            "steps": [
+              {
+                "image": "alpine:3.20",
+                "name": "skipped",
+                "script": "exit 0"
+              }
+            ]
+          },
+          "when": [
+            {
+              "input": "false",
+              "operator": "in",
+              "values": [
+                "true"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  }
+}

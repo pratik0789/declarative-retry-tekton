@@ -1,0 +1,132 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "name": "pw-4"
+  },
+  "spec": {
+    "workspaces": [
+      {
+        "name": "shared"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "observe",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\necho OBSERVED\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "prepare",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\nprintf \"clean:c22f3decc2db7875\" > $(workspaces.data.path)/source.txt\nrm -f $(workspaces.data.path)/artifact.txt $(workspaces.data.path)/artifact-input.sha $(workspaces.data.path)/receipt.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "runAfter": [
+          "observe"
+        ],
+        "workspaces": [
+          {
+            "name": "data",
+            "workspace": "shared"
+          }
+        ]
+      },
+      {
+        "name": "mutate",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\ncase \"$(context.pipelineRun.name)\" in *-source) printf \"dirty:c22f3decc2db7875\" > $(workspaces.data.path)/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\nif [ \"`cat $(workspaces.data.path)/source.txt`\" != \"clean:c22f3decc2db7875\" ]; then echo DIRTY-INPUT; exit 1; fi\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "runAfter": [
+          "prepare"
+        ],
+        "workspaces": [
+          {
+            "name": "data",
+            "workspace": "shared"
+          }
+        ]
+      },
+      {
+        "name": "verify",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\necho VERIFIED-STAGE\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "runAfter": [
+          "mutate"
+        ],
+        "workspaces": [
+          {
+            "name": "data",
+            "workspace": "shared"
+          }
+        ]
+      },
+      {
+        "name": "publish",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\nactual=`sha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1`\nrecorded=`cat $(workspaces.data.path)/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat $(workspaces.data.path)/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > $(workspaces.data.path)/receipt.txt\necho ORACLE-CONSISTENT\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "runAfter": [
+          "verify"
+        ],
+        "workspaces": [
+          {
+            "name": "data",
+            "workspace": "shared"
+          }
+        ]
+      }
+    ]
+  }
+}

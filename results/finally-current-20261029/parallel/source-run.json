@@ -1,0 +1,190 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "creationTimestamp": "2026-10-30T04:13:24Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "finally-parallel"
+    },
+    "name": "finally-parallel-source",
+    "namespace": "retry-finally-current-20261029-r1",
+    "resourceVersion": "6168738",
+    "uid": "e2eaf755-3ef1-43b3-a6d7-e7b3879146c0"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "finally-parallel"
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-parallel-source-prepare",
+        "pipelineTaskName": "prepare"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-parallel-source-build",
+        "pipelineTaskName": "build"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-parallel-source-notify",
+        "pipelineTaskName": "notify"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-parallel-source-audit",
+        "pipelineTaskName": "audit"
+      }
+    ],
+    "completionTime": "2026-10-30T04:13:40Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T04:13:40Z",
+        "message": "Tasks Completed: 4 (Failed: 1, Cancelled 0), Skipped: 0",
+        "reason": "Failed",
+        "status": "False",
+        "type": "Succeeded"
+      }
+    ],
+    "finallyStartTime": "2026-10-30T04:13:34Z",
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "$(tasks.build.results.image)"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "audit",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\necho AUDITED\n"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "prepare",
+          "taskSpec": {
+            "metadata": {},
+            "results": [
+              {
+                "name": "revision",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"%s\" \"$(context.taskRun.name)\" > \"$(results.revision.path)\"\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "build",
+          "params": [
+            {
+              "name": "revision",
+              "value": "$(tasks.prepare.results.revision)"
+            }
+          ],
+          "runAfter": [
+            "prepare"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "revision",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"image:%s\" \"$(params.revision)\" > \"$(results.image.path)\"\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-30T04:13:24Z"
+  }
+}

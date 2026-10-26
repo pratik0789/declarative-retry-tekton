@@ -21,21 +21,53 @@ def main():
     ap.add_argument('--repetitions', type=int, default=5)
     ap.add_argument('--retryctl', default='/tmp/retryctl')
     ap.add_argument('--output', required=True)
+    ap.add_argument('--resume', action='store_true', help='continue this saved experiment in its original namespace')
     args = ap.parse_args()
+    root = pathlib.Path(__file__).resolve().parents[1]
     out = pathlib.Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     k = ['kubectl', '--context', args.context, '-n', args.namespace]
 
     def cmd(argv, data=None):
-        p = subprocess.run(argv, input=data, text=True, capture_output=True)
-        if p.returncode:
-            raise RuntimeError(f'{argv}: {p.stderr}\n{p.stdout}')
-        return p.stdout
+        # Retry reads only. A timed-out creation may already have committed.
+        read_only = data is None and argv[0] == 'kubectl' and any(x in argv for x in ['get', 'logs', 'version'])
+        for attempt in range(5):
+            p = subprocess.run(argv, input=data, text=True, capture_output=True)
+            if not p.returncode:
+                return p.stdout
+            transient = any(x in p.stderr.lower() for x in ['request timed out', 'timeout', 'temporarily unavailable', 'connection refused'])
+            if not (read_only and transient and attempt < 4):
+                raise RuntimeError(f'{argv}: {p.stderr}\n{p.stdout}')
+            time.sleep(attempt + 1)
 
     def save(path, data):
         path.write_text(json.dumps(data, indent=2) + '\n')
 
+    source_paths = sorted(root.glob('internal/planner/*.go')) + sorted(root.glob('cmd/retryctl/*.go'))
+    source_paths += [root / p for p in ['go.mod', 'go.sum', 'hack/closure_ablation.py', 'hack/verify_closure_ablation.py']]
+    source_hashes = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
+
     def create(obj):
+        if args.resume:
+            found = cmd(k + ['get', obj['kind'], obj['metadata']['name'], '--ignore-not-found', '-o', 'json'])
+            if found:
+                existing = json.loads(found)
+                def contains(actual, expected, field=None):
+                    if isinstance(expected, dict):
+                        return isinstance(actual, dict) and all(key in actual and contains(actual[key], value, key) for key, value in expected.items())
+                    if isinstance(expected, list):
+                        if field in ('volumes', 'volumeMounts') and isinstance(actual, list):
+                            # Admission adds a service-account volume and mount to Pods.
+                            declared = {item['name'] for item in expected}
+                            kept = [item for item in actual if item.get('name') in declared]
+                            extras = [item for item in actual if item.get('name') not in declared]
+                            return (all(item.get('name', '').startswith('kube-api-access-') for item in extras)
+                                    and len(kept) == len(expected)
+                                    and all(contains(a, e) for a, e in zip(kept, expected)))
+                        return isinstance(actual, list) and len(actual) == len(expected) and all(contains(a, e) for a, e in zip(actual, expected))
+                    return actual == expected
+                assert contains(existing.get('spec', {}), obj.get('spec', {})), ('resume specification changed', obj['kind'], obj['metadata']['name'])
+                return existing
         return json.loads(cmd(k + ['create', '-f', '-', '-o', 'json'], json.dumps(obj)))
 
     def get(kind, name=None):
@@ -94,29 +126,59 @@ def main():
             t['taskSpec']['workspaces'] = [{'name': 'data'}]
         return t
 
-    create({'apiVersion': 'v1', 'kind': 'Namespace', 'metadata': {'name': args.namespace}})
+    if args.resume:
+        metadata = json.loads((out / 'build-metadata.json').read_text())
+        assert metadata['namespace'] == args.namespace and metadata['context'] == args.context, 'resume must use the original cluster and namespace'
+        assert metadata['binarySHA256'] == hashlib.sha256(pathlib.Path(args.retryctl).read_bytes()).hexdigest(), 'resume must use the original retryctl binary'
+        assert metadata['sourceSHA256'] == source_hashes, 'resume must use the original source and harness'
+    else:
+        create({'apiVersion': 'v1', 'kind': 'Namespace', 'metadata': {'name': args.namespace}})
+        save(out / 'build-metadata.json', {
+            'context': args.context, 'namespace': args.namespace,
+            'binarySHA256': hashlib.sha256(pathlib.Path(args.retryctl).read_bytes()).hexdigest(),
+            'harnessSHA256': hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
+            'sourceBaseCommit': cmd(['git', '-C', str(root), 'rev-parse', 'HEAD']).strip(),
+            'sourceSHA256': source_hashes,
+            'goVersion': cmd(['go', 'version']).strip(),
+            'binaryBuildInfo': cmd(['go', 'version', '-m', args.retryctl]),
+        })
     save(out / 'kubernetes-version.json', json.loads(cmd(k + ['version', '-o', 'json'])))
     save(out / 'tekton-version.json', json.loads(cmd(['kubectl', '--context', args.context, '-n', 'tekton-pipelines', 'get', 'configmap', 'pipelines-info', '-o', 'json'])))
-    protocol = {'repetitionsPerMechanism': args.repetitions, 'mechanisms': ['partial-write', 'forward-invalidation'],
+    protocol = {'repetitionsPerMechanism': args.repetitions, 'mechanisms': ['partial-write', 'stale-build'],
                 'arms': ['empty', 'closure', 'full'], 'orderSeed': 20261011,
                 'sourceSnapshot': 'one failed source per triplet; exact bytes copied to three distinct PVCs',
                 'bindingOverride': 'generated recovery manifest is preserved; only claimName and generated name are overridden for isolation',
                 'oracle': 'native task assertions plus external SHA-256 over actual Workspace bytes and Tekton status',
                 'timing': 'not a timing benchmark; status polling every 1 second',
-                'authoring': 'fixtures, policies, and assertions authored with the prototype; no independent author study'}
-    save(out / 'protocol.json', protocol)
+                'authoring': 'fixtures, policies, and assertions authored with the prototype; no independent author study',
+                'retryWithDirection': 'earlier or parallel tasks only, checked transitively for each policy root',
+                'definitionGuard': 'exact saved/current specification comparison; native captures are never rewritten',
+                'taskContext': 'TaskRun name injects source-only failures and refreshes stale-build input without resolving the saved PipelineSpec',
+                'staleBuildSelection': 'operator selects prepare; failed gate declares retryWith [prepare, build]'}
+    if args.resume:
+        assert json.loads((out / 'protocol.json').read_text()) == protocol, 'resume protocol changed'
+    else:
+        save(out / 'protocol.json', protocol)
     rng = random.Random(protocol['orderSeed'])
-    rows = []
+    rows = json.loads((out / 'trials.json').read_text()) if args.resume else []
     for mechanism in protocol['mechanisms']:
         for rep in range(1, args.repetitions + 1):
             case = f'{"pw" if mechanism == "partial-write" else "fi"}-{rep}'
+            order = ['empty', 'closure', 'full']
+            rng.shuffle(order)
+            completed = {row['arm'] for row in rows if row['mechanism'] == mechanism and row['repetition'] == rep}
+            assert all(row['armOrder'] == order for row in rows if row['mechanism'] == mechanism and row['repetition'] == rep)
+            if completed == set(order):
+                continue
             d = out / case
-            d.mkdir()
+            d.mkdir(exist_ok=args.resume)
             pipeline_name = case
             source_name = case + '-source'
             nonce = hashlib.sha256(f'closure-ablation-20261011-{case}'.encode()).hexdigest()[:16]
             w = '$(workspaces.data.path)'
-            source_check = f'case "$(context.pipelineRun.name)" in *-source)'
+            # PipelineRun context is resolved in status.pipelineSpec, losing the
+            # original expression. TaskRun context is resolved when a task runs.
+            source_check = 'case "$(context.taskRun.name)" in *-source-*)'
             if mechanism == 'partial-write':
                 prepare = f'printf "clean:{nonce}" > {w}/source.txt\nrm -f {w}/artifact.txt {w}/artifact-input.sha {w}/receipt.txt\n'
                 mutate = (f'{source_check} printf "dirty:{nonce}" > {w}/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac\n'
@@ -128,14 +190,14 @@ def main():
                 rule = {'mutate': {'retryWith': ['prepare']}}
                 selected = []
             else:
-                prepare = (f'printf "input:$(context.pipelineRun.name):{nonce}" > {w}/source.txt\n'
+                prepare = (f'printf "input:$(context.taskRun.name):{nonce}" > {w}/source.txt\n'
                            f'rm -f {w}/receipt.txt\n')
                 build = (f'sha256sum {w}/source.txt | cut -d" " -f1 | tr -d "\\n" > {w}/artifact-input.sha\n'
                          f'printf "built:" > {w}/artifact.txt; cat {w}/artifact-input.sha >> {w}/artifact.txt\n')
                 gate = f'{source_check} echo INJECTED-GATE-FAILURE; exit 1;; esac\necho GATE-PASSED\n'
                 tasks = [task('observe', 'echo OBSERVED\n', workspace=False), task('prepare', prepare, 'observe'),
                          task('build', build, 'prepare'), task('gate', gate, 'build', workspace=False)]
-                rule = {'prepare': {'retryWith': ['build']}}
+                rule = {'gate': {'retryWith': ['prepare', 'build']}}
                 selected = ['prepare']
             publish = (f'actual=`sha256sum {w}/source.txt | cut -d" " -f1`\n'
                        f'recorded=`cat {w}/artifact-input.sha`\n'
@@ -157,14 +219,18 @@ def main():
             source, source_ok = wait_run(source_name)
             assert not source_ok
             save(d / 'source-run.json', source)
-            save(d / 'source-taskruns.json', json.loads(cmd(k + ['get', 'taskrun', '-l', 'tekton.dev/pipelineRun=' + source_name, '-o', 'json'])))
+            source_trs = json.loads(cmd(k + ['get', 'taskrun', '-l', 'tekton.dev/pipelineRun=' + source_name, '-o', 'json']))
+            statuses = {t['metadata']['labels']['tekton.dev/pipelineTask']: next(c['status'] for c in t['status']['conditions'] if c['type'] == 'Succeeded') for t in source_trs['items']}
+            expected_statuses = {'observe': 'True', 'prepare': 'True', 'mutate': 'False'} if mechanism == 'partial-write' else {'observe': 'True', 'prepare': 'True', 'build': 'True', 'gate': 'False'}
+            assert statuses == expected_statuses, (case, 'wrong source failure', statuses)
+            save(d / 'source-taskruns.json', source_trs)
             save(d / 'pipeline-live.json', get('pipeline', pipeline_name))
             snapshot_log = pod(case + '-fork', claims, 'cp -a /v0/. /v1/\ncp -a /v0/. /v2/\ncp -a /v0/. /v3/\n' + read_script)
             original = contents(snapshot_log)
             save(d / 'source-snapshot.json', {f: base64.b64encode(b).decode() for f, b in original.items()})
-            order = ['empty', 'closure', 'full']
-            rng.shuffle(order)
             for arm in order:
+                if arm in completed:
+                    continue
                 claim = claims[['source', 'empty', 'closure', 'full'].index(arm)]
                 before = contents(pod(case + '-' + arm + '-before', [claim], read_script))
                 assert before == original, (case, arm, 'unequal fork')
@@ -184,6 +250,7 @@ def main():
                         inputs += ['--tasks', ','.join(selected)]
                     plan = json.loads(cmd([args.retryctl, 'plan'] + inputs))
                     save(d / (arm + '-plan.json'), plan)
+                    assert plan['decision'] == 'recover', (case, arm, plan)
                     generated = cmd([args.retryctl, 'create'] + inputs + ['--confirm-warnings'])
                     (d / (arm + '-generated.yaml')).write_text(generated)
                     manifest = json.loads(cmd(k + ['create', '--dry-run=client', '-f', '-', '-o', 'json'], generated))

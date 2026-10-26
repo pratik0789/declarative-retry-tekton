@@ -1,0 +1,46 @@
+{
+  "sourceRun": "finally-only-source",
+  "sourceRunUID": "6daa12a1-733a-4210-a829-c3ee94b4a188",
+  "pipeline": "finally-only",
+  "policy": "only",
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "audit",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "finally-only-source-audit"
+    },
+    {
+      "name": "build",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "finally-only-source-build",
+      "results": {
+        "image": "image:finally-only-source-prepare"
+      }
+    },
+    {
+      "name": "notify",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "prepare",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "finally-only-source-prepare",
+      "results": {
+        "revision": "finally-only-source-prepare"
+      }
+    }
+  ],
+  "metrics": {
+    "totalTasks": 4,
+    "rerunTasks": 1,
+    "inheritedTasks": 3,
+    "continuingTasks": 0,
+    "tasksAvoided": 3,
+    "avoidancePercent": 75
+  }
+}

@@ -1,6 +1,7 @@
 package planner
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -21,11 +22,13 @@ const (
 	annotationInheritedRuns    = "retry.tekton.dev/inherited-taskruns"
 	annotationWarningsAccepted = "retry.tekton.dev/shared-state-warnings-accepted"
 	annotationWarningCodes     = "retry.tekton.dev/shared-state-warning-codes"
+	annotationFinallyAnchor    = "retry.tekton.dev/finally-anchor"
+	annotationResultPublishers = "retry.tekton.dev/result-publishers"
 )
 
 var (
-	resultReference = regexp.MustCompile(`\$\(tasks\.([^.()]+)\.results\.([^.()\[\]]+)\)`)
-	taskReference   = regexp.MustCompile(`\$\(tasks\.([^.()]+)\.`)
+	resultReference = regexp.MustCompile(`\$\((?:tasks|finally)\.([^.()]+)\.results\.([^.()\[\]]+)\)`)
+	taskReference   = regexp.MustCompile(`\$\((?:tasks|finally)\.([^.()]+)\.`)
 )
 
 // Operates on raw manifests so Tekton fields the planner does not model survive unchanged.
@@ -71,17 +74,9 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 	}
 
 	pipelineSpec := asMap(pipeline["spec"])
-	upstream := map[string][]string{}
-	for _, raw := range asList(pipelineSpec["tasks"]) {
-		task := asMap(raw)
-		name, _ := task["name"].(string)
-		for _, dependency := range asList(task["runAfter"]) {
-			upstream[name] = append(upstream[name], fmt.Sprint(dependency))
-		}
-		encoded, _ := json.Marshal(task)
-		for _, match := range taskReference.FindAllStringSubmatch(string(encoded), -1) {
-			upstream[name] = append(upstream[name], match[1])
-		}
+	upstream, err := executionDependencies(pipelineSpec)
+	if err != nil {
+		return nil, err
 	}
 	// An edge to an inherited task still orders against whatever reruns above it.
 	var nearestRemaining func(string, map[string]bool) []string
@@ -137,24 +132,58 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 		}
 		tasks = append(tasks, prepared)
 	}
-	pipelineSpec["tasks"] = tasks
-	finallyNames := map[string]bool{}
+	if len(tasks) == 0 {
+		delete(pipelineSpec, "tasks")
+	} else {
+		pipelineSpec["tasks"] = tasks
+	}
+	var finalTasks []any
 	for _, raw := range asList(pipelineSpec["finally"]) {
+		name, _ := asMap(raw)["name"].(string)
+		if !remaining[name] {
+			continue
+		}
 		prepared, err := prepare(raw)
 		if err != nil {
 			return nil, err
 		}
-		name, _ := prepared["name"].(string)
-		finallyNames[name] = true
+		finalTasks = append(finalTasks, prepared)
 	}
+	if len(finalTasks) == 0 {
+		delete(pipelineSpec, "finally")
+	} else {
+		pipelineSpec["finally"] = finalTasks
+	}
+	var publishers []any
 	if results, ok := pipelineSpec["results"]; ok {
 		holder := map[string]any{"results": results}
-		if err := substituteResults(holder, inherited); err != nil {
+		publishers, err = publishInheritedPipelineResults(holder, inherited, upstream)
+		if err != nil {
 			return nil, fmt.Errorf("pipeline results: %w", err)
 		}
 		pipelineSpec["results"] = holder["results"]
+		if len(publishers) > 0 {
+			tasks = append(tasks, publishers...)
+			pipelineSpec["tasks"] = tasks
+		}
 	}
-
+	anchor := ""
+	if len(tasks) == 0 && len(finalTasks) > 0 {
+		// Tekton requires at least one ordinary task when finally is present.
+		// This task is always skipped, so it creates no TaskRun or user work.
+		anchor = "retryctl-finally-anchor"
+		for suffix := 1; ; suffix++ {
+			if _, exists := upstream[anchor]; !exists {
+				break
+			}
+			anchor = fmt.Sprintf("retryctl-finally-anchor-%d", suffix)
+		}
+		pipelineSpec["tasks"] = []any{map[string]any{
+			"name":     anchor,
+			"when":     []any{map[string]any{"input": "false", "operator": "in", "values": []any{"true"}}},
+			"taskSpec": map[string]any{"steps": []any{map[string]any{"name": "skipped", "image": "alpine:3.20", "script": "exit 0"}}},
+		}}
+	}
 	spec := asMap(sourceRun["spec"])
 	delete(spec, "pipelineRef")
 	delete(spec, "status")
@@ -163,7 +192,7 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 		var kept []any
 		for _, raw := range asList(specs) {
 			name, _ := asMap(raw)["pipelineTaskName"].(string)
-			if remaining[name] || finallyNames[name] {
+			if remaining[name] {
 				kept = append(kept, raw)
 			}
 		}
@@ -176,6 +205,16 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 		annotationSourceRunUID:   plan.SourceRunUID,
 		annotationSourcePipeline: plan.Pipeline,
 		annotationPolicy:         plan.Policy,
+	}
+	if anchor != "" {
+		annotations[annotationFinallyAnchor] = anchor
+	}
+	if len(publishers) > 0 {
+		var names []string
+		for _, publisher := range publishers {
+			names = append(names, asMap(publisher)["name"].(string))
+		}
+		annotations[annotationResultPublishers] = strings.Join(names, ",")
 	}
 	if plan.PolicyGeneration != 0 {
 		annotations[annotationPolicyGeneration] = strconv.FormatInt(plan.PolicyGeneration, 10)
@@ -239,6 +278,84 @@ func substituteResults(node map[string]any, inherited map[string]TaskPlan) error
 		return value
 	}
 	walk(node)
+	return rejectUnresolvedInheritedReferences(node, inherited)
+}
+
+// Tekton requires Pipeline outputs to reference task results, not literals.
+// Publish saved strings without rerunning the original producing task. One
+// publisher per producer avoids combining multiple source TaskRun result limits.
+func publishInheritedPipelineResults(node map[string]any, inherited map[string]TaskPlan, originalTasks map[string][]string) ([]any, error) {
+	var publishers []any
+	byProducer := map[string]map[string]any{}
+	references := map[string]map[string]string{}
+	used := map[string]bool{}
+	for name := range originalTasks {
+		used[name] = true
+	}
+	var walk func(any) any
+	walk = func(value any) any {
+		switch typed := value.(type) {
+		case string:
+			return resultReference.ReplaceAllStringFunc(typed, func(match string) string {
+				parts := resultReference.FindStringSubmatch(match)
+				producer, resultName := parts[1], parts[2]
+				task, ok := inherited[producer]
+				if !ok {
+					return match
+				}
+				value, ok := task.Results[resultName].(string)
+				if !ok {
+					return match
+				}
+				if reference := references[producer][resultName]; reference != "" {
+					return reference
+				}
+				publisher := byProducer[producer]
+				if publisher == nil {
+					name := "retryctl-reused-results"
+					for suffix := 1; used[name]; suffix++ {
+						name = fmt.Sprintf("retryctl-reused-results-%d", suffix)
+					}
+					used[name] = true
+					publisher = map[string]any{"name": name, "taskSpec": map[string]any{
+						"results": []any{}, "steps": []any{map[string]any{"name": "publish", "image": "alpine:3.20", "script": "set -eu\n", "env": []any{}}},
+					}}
+					publishers = append(publishers, publisher)
+					byProducer[producer] = publisher
+					references[producer] = map[string]string{}
+				}
+				spec := asMap(publisher["taskSpec"])
+				index := len(asList(spec["results"]))
+				output := fmt.Sprintf("value-%d", index)
+				env := fmt.Sprintf("RETRYCTL_VALUE_%d", index)
+				spec["results"] = append(asList(spec["results"]), map[string]any{"name": output, "type": "string"})
+				step := asMap(asList(spec["steps"])[0])
+				step["env"] = append(asList(step["env"]), map[string]any{"name": env, "value": base64.StdEncoding.EncodeToString([]byte(value))})
+				step["script"] = step["script"].(string) + fmt.Sprintf("printf '%%s' \"$%s\" | base64 -d > \"$(results.%s.path)\"\n", env, output)
+				reference := fmt.Sprintf("$(tasks.%s.results.%s)", publisher["name"], output)
+				references[producer][resultName] = reference
+				return reference
+			})
+		case map[string]any:
+			for key, item := range typed {
+				typed[key] = walk(item)
+			}
+		case []any:
+			for index, item := range typed {
+				typed[index] = walk(item)
+			}
+		}
+		return value
+	}
+	// Names and descriptions are metadata, not output expressions.
+	for _, raw := range asList(node["results"]) {
+		result := asMap(raw)
+		result["value"] = walk(result["value"])
+	}
+	return publishers, rejectUnresolvedInheritedReferences(node, inherited)
+}
+
+func rejectUnresolvedInheritedReferences(node map[string]any, inherited map[string]TaskPlan) error {
 	encoded, err := json.Marshal(node)
 	if err != nil {
 		return err

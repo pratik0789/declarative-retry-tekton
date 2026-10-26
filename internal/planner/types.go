@@ -15,6 +15,10 @@ type Pipeline struct {
 	definition any
 }
 
+func (p Pipeline) allTasks() []PipelineTask {
+	return append(append([]PipelineTask(nil), p.Spec.Tasks...), p.Spec.Finally...)
+}
+
 // The planner only models a subset of Tekton fields; the full spec is kept for definition checks.
 func (p *Pipeline) UnmarshalJSON(data []byte) error {
 	type plain Pipeline
@@ -101,6 +105,7 @@ type PipelineRun struct {
 		Conditions     []Condition `json:"conditions,omitempty"`
 		PipelineSpec   *struct {
 			Tasks      []PipelineTask `json:"tasks"`
+			Finally    []PipelineTask `json:"finally,omitempty"`
 			Workspaces []Workspace    `json:"workspaces"`
 		} `json:"pipelineSpec"`
 		ChildReferences []ChildReference `json:"childReferences"`
