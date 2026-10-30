@@ -1,0 +1,64 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/finally-anchor: retryctl-finally-anchor
+    retry.tekton.dev/inherited-taskruns: build=finally-parallel-source-build,prepare=finally-parallel-source-prepare
+    retry.tekton.dev/policy: parallel
+    retry.tekton.dev/source-pipeline: finally-parallel
+    retry.tekton.dev/source-pipeline-run: finally-parallel-source
+    retry.tekton.dev/source-pipeline-run-uid: 28b10573-6571-4b05-b9fa-ae8f205044eb
+  generateName: finally-parallel-retry-
+  namespace: retry-finally-20261025-r2
+spec:
+  pipelineSpec:
+    finally:
+    - name: notify
+      params:
+      - name: image
+        value: image:finally-parallel-source
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        results:
+        - name: receipt
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            case "$(context.pipelineRun.name)" in *-source) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac
+            printf "%s" "$(params.image)" > "$(results.receipt.path)"
+            echo NOTIFIED
+    - name: audit
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            echo AUDITED
+    tasks:
+    - name: retryctl-finally-anchor
+      taskSpec:
+        steps:
+        - image: alpine:3.20
+          name: skipped
+          script: exit 0
+      when:
+      - input: "false"
+        operator: in
+        values:
+        - "true"
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

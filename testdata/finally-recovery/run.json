@@ -1,0 +1,120 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "name": "source",
+    "uid": "source-uid"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "finally-recovery"
+    },
+    "taskRunSpecs": [
+      {
+        "pipelineTaskName": "prepare",
+        "serviceAccountName": "builder"
+      },
+      {
+        "pipelineTaskName": "build",
+        "serviceAccountName": "builder"
+      },
+      {
+        "pipelineTaskName": "notify",
+        "serviceAccountName": "builder"
+      },
+      {
+        "pipelineTaskName": "audit",
+        "serviceAccountName": "builder"
+      }
+    ]
+  },
+  "status": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "prepare",
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo prepare"
+              }
+            ]
+          }
+        },
+        {
+          "name": "build",
+          "runAfter": [
+            "prepare"
+          ],
+          "params": [
+            {
+              "name": "revision",
+              "value": "$(tasks.prepare.results.revision)"
+            }
+          ],
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo build"
+              }
+            ]
+          }
+        }
+      ],
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "$(tasks.build.results.image)"
+            }
+          ],
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo notify"
+              }
+            ]
+          }
+        },
+        {
+          "name": "audit",
+          "taskSpec": {
+            "steps": [
+              {
+                "name": "run",
+                "image": "alpine:3.20",
+                "script": "echo audit"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "childReferences": [
+      {
+        "name": "source-prepare",
+        "pipelineTaskName": "prepare"
+      },
+      {
+        "name": "source-build",
+        "pipelineTaskName": "build"
+      },
+      {
+        "name": "source-notify",
+        "pipelineTaskName": "notify"
+      },
+      {
+        "name": "source-audit",
+        "pipelineTaskName": "audit"
+      }
+    ]
+  }
+}

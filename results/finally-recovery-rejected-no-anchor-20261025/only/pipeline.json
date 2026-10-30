@@ -1,0 +1,123 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "creationTimestamp": "2026-10-26T04:00:43Z",
+    "generation": 1,
+    "name": "finally-only",
+    "namespace": "retry-finally-20261025-r1",
+    "resourceVersion": "5230252",
+    "uid": "87cd56d2-0d16-4a98-805f-97b41686477e"
+  },
+  "spec": {
+    "finally": [
+      {
+        "name": "notify",
+        "params": [
+          {
+            "name": "image",
+            "value": "$(tasks.build.results.image)"
+          }
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"$(context.pipelineRun.name)\" in *-source) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "audit",
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\necho AUDITED\n"
+            }
+          ]
+        }
+      }
+    ],
+    "tasks": [
+      {
+        "name": "prepare",
+        "taskSpec": {
+          "metadata": {},
+          "results": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"%s\" \"$(context.pipelineRun.name)\" > \"$(results.revision.path)\"\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "build",
+        "params": [
+          {
+            "name": "revision",
+            "value": "$(tasks.prepare.results.revision)"
+          }
+        ],
+        "runAfter": [
+          "prepare"
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "params": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"image:%s\" \"$(params.revision)\" > \"$(results.image.path)\"\n"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

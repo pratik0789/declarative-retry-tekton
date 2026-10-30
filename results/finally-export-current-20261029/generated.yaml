@@ -1,0 +1,59 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: audit=finally-export-source-audit,build=finally-export-source-build
+    retry.tekton.dev/policy: finally-export
+    retry.tekton.dev/result-publishers: retryctl-reused-results
+    retry.tekton.dev/source-pipeline: finally-export
+    retry.tekton.dev/source-pipeline-run: finally-export-source
+    retry.tekton.dev/source-pipeline-run-uid: 716c1930-0c9f-4920-98ef-8e9caa9e61ac
+  generateName: finally-export-retry-
+  namespace: retry-finally-export-current-20261029-r1
+spec:
+  pipelineSpec:
+    finally:
+    - name: notify
+      params:
+      - name: image
+        value: source-image
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        results:
+        - name: receipt
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            case "$(context.taskRun.name)" in *-source-*) echo injected-failure; exit 1;; esac
+            printf "%s" "$(params.image)" > "$(results.receipt.path)"
+    results:
+    - description: ""
+      name: audit-note
+      value: $(tasks.retryctl-reused-results.results.value-0)
+    tasks:
+    - name: retryctl-reused-results
+      taskSpec:
+        results:
+        - name: value-0
+          type: string
+        steps:
+        - env:
+          - name: RETRYCTL_VALUE_0
+            value: Y2hlY2tlZA==
+          image: alpine:3.20
+          name: publish
+          script: |
+            set -eu
+            printf '%s' "$RETRYCTL_VALUE_0" | base64 -d > "$(results.value-0.path)"
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

@@ -1,0 +1,17 @@
+{
+  "apiVersion": "retry.tekton.dev/v1alpha1",
+  "kind": "PipelineRetryPolicy",
+  "metadata": {
+    "name": "later"
+  },
+  "spec": {
+    "pipelineRef": "finally-recovery",
+    "tasks": {
+      "build": {
+        "retryWith": [
+          "notify"
+        ]
+      }
+    }
+  }
+}

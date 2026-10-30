@@ -64,7 +64,7 @@ for size in ${sizes}; do
           echo '            script: |'
           echo "              sleep ${task_sleep}"
           if [ "${index}" -eq "${failure_index}" ]; then
-            echo "              if [ \"\$(context.pipelineRun.name)\" = \"${source_name}\" ]; then exit 1; fi"
+            echo "              case \"\$(context.taskRun.name)\" in \"${source_name}\"-*) exit 1;; esac"
           fi
           echo "              echo ${name}"
         done

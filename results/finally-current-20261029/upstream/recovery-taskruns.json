@@ -1,0 +1,423 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "audit=finally-upstream-source-audit",
+          "retry.tekton.dev/policy": "upstream",
+          "retry.tekton.dev/source-pipeline": "finally-upstream",
+          "retry.tekton.dev/source-pipeline-run": "finally-upstream-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "caf65b49-24dd-4645-8b0f-cb2bcaad1d4b"
+        },
+        "creationTimestamp": "2026-10-30T04:13:14Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "finally-upstream-recovery",
+          "tekton.dev/pipelineRun": "finally-upstream-recovery",
+          "tekton.dev/pipelineRunUID": "9ea20da6-50c0-4e68-9872-a01abec578d5",
+          "tekton.dev/pipelineTask": "build"
+        },
+        "name": "finally-upstream-recovery-build",
+        "namespace": "retry-finally-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-upstream-recovery",
+            "uid": "9ea20da6-50c0-4e68-9872-a01abec578d5"
+          }
+        ],
+        "resourceVersion": "6168272",
+        "uid": "c6f2aeeb-cb75-4707-82c9-3c39d1d88089"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "revision",
+            "value": "finally-upstream-recovery-prepare"
+          }
+        ],
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "params": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"image:%s\" \"$(params.revision)\" > \"$(results.image.path)\"\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:13:18Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:13:18Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-upstream-recovery-build-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "image",
+            "type": "string",
+            "value": "image:finally-upstream-recovery-prepare"
+          }
+        ],
+        "startTime": "2026-10-30T04:13:14Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://8a2b7b8136cd1e85c31a43db1643edf91017091df68495facb556141a524695f",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:13:18Z",
+              "message": "[{\"key\":\"image\",\"value\":\"image:finally-upstream-recovery-prepare\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:13:18Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "params": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"image:%s\" \"finally-upstream-recovery-prepare\" > \"/tekton/results/image\"\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "audit=finally-upstream-source-audit",
+          "retry.tekton.dev/policy": "upstream",
+          "retry.tekton.dev/source-pipeline": "finally-upstream",
+          "retry.tekton.dev/source-pipeline-run": "finally-upstream-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "caf65b49-24dd-4645-8b0f-cb2bcaad1d4b"
+        },
+        "creationTimestamp": "2026-10-30T04:13:18Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "finally-upstream-recovery",
+          "tekton.dev/pipelineRun": "finally-upstream-recovery",
+          "tekton.dev/pipelineRunUID": "9ea20da6-50c0-4e68-9872-a01abec578d5",
+          "tekton.dev/pipelineTask": "notify"
+        },
+        "name": "finally-upstream-recovery-notify",
+        "namespace": "retry-finally-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-upstream-recovery",
+            "uid": "9ea20da6-50c0-4e68-9872-a01abec578d5"
+          }
+        ],
+        "resourceVersion": "6168382",
+        "uid": "3700864f-a3e9-451d-bb6b-a643d42880da"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "image",
+            "value": "image:finally-upstream-recovery-prepare"
+          }
+        ],
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:13:24Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:13:24Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-upstream-recovery-notify-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "receipt",
+            "type": "string",
+            "value": "image:finally-upstream-recovery-prepare"
+          }
+        ],
+        "startTime": "2026-10-30T04:13:18Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://4031abeb0ba77ce445a7392c86f127995134726508ad29ea59bfc188bedb6e49",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:13:23Z",
+              "message": "[{\"key\":\"receipt\",\"value\":\"image:finally-upstream-recovery-prepare\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:13:23Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"finally-upstream-recovery-notify\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"image:finally-upstream-recovery-prepare\" > \"/tekton/results/receipt\"\necho NOTIFIED\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "audit=finally-upstream-source-audit",
+          "retry.tekton.dev/policy": "upstream",
+          "retry.tekton.dev/source-pipeline": "finally-upstream",
+          "retry.tekton.dev/source-pipeline-run": "finally-upstream-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "caf65b49-24dd-4645-8b0f-cb2bcaad1d4b"
+        },
+        "creationTimestamp": "2026-10-30T04:13:10Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "finally-upstream-recovery",
+          "tekton.dev/pipelineRun": "finally-upstream-recovery",
+          "tekton.dev/pipelineRunUID": "9ea20da6-50c0-4e68-9872-a01abec578d5",
+          "tekton.dev/pipelineTask": "prepare"
+        },
+        "name": "finally-upstream-recovery-prepare",
+        "namespace": "retry-finally-current-20261029-r1",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-upstream-recovery",
+            "uid": "9ea20da6-50c0-4e68-9872-a01abec578d5"
+          }
+        ],
+        "resourceVersion": "6168194",
+        "uid": "ebdd6d03-3cde-4503-b752-30687c3c982c"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "results": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"%s\" \"$(context.taskRun.name)\" > \"$(results.revision.path)\"\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T04:13:14Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T04:13:14Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-upstream-recovery-prepare-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "revision",
+            "type": "string",
+            "value": "finally-upstream-recovery-prepare"
+          }
+        ],
+        "startTime": "2026-10-30T04:13:10Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://8bbc8c398bb6df868d2cc9cc08d4396828e657d04ea86675448b4f856d29d027",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T04:13:13Z",
+              "message": "[{\"key\":\"revision\",\"value\":\"finally-upstream-recovery-prepare\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T04:13:13Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "results": [
+            {
+              "name": "revision",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"%s\" \"finally-upstream-recovery-prepare\" > \"/tekton/results/revision\"\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

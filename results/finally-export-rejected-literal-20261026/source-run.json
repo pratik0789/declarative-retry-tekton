@@ -1,0 +1,167 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "creationTimestamp": "2026-10-26T06:00:54Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "finally-export"
+    },
+    "name": "finally-export-source",
+    "namespace": "retry-finally-export-1792994453",
+    "resourceVersion": "5251071",
+    "uid": "93ec488b-9699-42d9-8b59-771f0d0b9d8d"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "finally-export"
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-export-source-build",
+        "pipelineTaskName": "build"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-export-source-audit",
+        "pipelineTaskName": "audit"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-export-source-notify",
+        "pipelineTaskName": "notify"
+      }
+    ],
+    "completionTime": "2026-10-26T06:01:06Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-26T06:01:06Z",
+        "message": "Tasks Completed: 3 (Failed: 1, Cancelled 0), Skipped: 0",
+        "reason": "Failed",
+        "status": "False",
+        "type": "Succeeded"
+      }
+    ],
+    "finallyStartTime": "2026-10-26T06:01:00Z",
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "audit",
+          "taskSpec": {
+            "metadata": {},
+            "results": [
+              {
+                "name": "note",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"%s\" checked > \"$(results.note.path)\"\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "$(tasks.build.results.image)"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo injected-failure; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\n"
+              }
+            ]
+          }
+        }
+      ],
+      "results": [
+        {
+          "description": "",
+          "name": "audit-note",
+          "value": "$(finally.audit.results.note)"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "build",
+          "taskSpec": {
+            "metadata": {},
+            "results": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"%s\" source-image > \"$(results.image.path)\"\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "results": [
+      {
+        "name": "audit-note",
+        "value": "checked"
+      }
+    ],
+    "startTime": "2026-10-26T06:00:54Z"
+  }
+}

@@ -1,22 +1,116 @@
 # Evaluation status
 
-The original offline evaluation contained 23 deterministic cases: eleven
-accepted recovery plans and twelve refusals, with five warning-bearing accepted
-plans. The companion revision expands it to 31 cases: fifteen accepted plans,
-sixteen refusals, and eight warning-bearing accepted plans. Added paths cover
-unknown operator selection, `emptyDir`, creation-time window fallback, a
-cancelled sibling declaring `blocksResume`, failed recovery supersession,
-direct recovery of an embedded recovery run, and later shared-claim warnings
-for failed recoveries and other targets. All specified decisions, dispositions,
-refusal reasons, and required warning codes pass. These authored examples
-establish finite specification coverage, not population correctness.
+The current evaluation contains 45 deterministic cases:
+22 accepted recovery plans, 23 refusals, and eight warning-bearing accepted
+plans. All specified decisions, dispositions, refusal reasons, and required
+warning codes pass. The report is retained in
+`results/current-version-audit-20261029/planner-evaluation.json`.
+
+The original suite contained 23 cases and the earlier companion revision 31.
+The current revision changes two formerly accepted later-task declarations to
+refusals and adds seven cases for earlier and parallel tasks, a transitive
+violation through a parallel branch, explicit operator selection, YAML order,
+and result references in parameters and conditions. Unit tests also cover
+unreachable policy entries, embedded task references, and unresolved execution
+dependencies. These authored examples establish finite specification coverage,
+not population correctness.
+
+The finally-support revision adds seven cases for failed finally tasks, ordinary
+and parallel closure members, explicit selection, `blocksResume`, the phase
+ordering restriction, and shared ephemeral Workspaces. The existing finally
+case now expects a successful cleanup task to be reused instead of always
+running again.
 
 Run them with `make test evaluate`.
+
+The definition guard now requires literal equality of the saved and current
+Pipeline specifications. Regression tests cover changed variable references,
+literal-to-variable edits, ambiguous resolved values, and deleted tasks. The
+45-case planner suite remains the same authored suite; these regressions are
+additional unit tests. PipelineRun generation is not Pipeline generation.
+Both IV-G mechanisms and all three finally-task recovery cases were rerun with
+the current strict guard on October 29, 2026. Their task scripts now use TaskRun
+context for source-only failures and fresh input, preserving original
+expressions in the saved PipelineSpec. Native saved/current specifications
+match without rewriting captures. The IV-G verifier also refuses changed
+scripts and context expressions before producing a recovery manifest. All
+eight Konflux replay variants regenerate with the current binary and match the
+retained results.
+
+Earlier finally and closure captures whose PipelineSpec resolved PipelineRun
+context expressions remain conservatively refused by the current guard. These
+historical outcomes are retained, but current IV-G and finally-case claims use
+the new captures. The basic CI integration also uses TaskRun context.
 
 See [matched closure comparisons](closure-ablation.md) for the new live
 three-arm experiment and its independent recomputation of native objects and
 Workspace bytes. Its output oracle does not use planner labels; policies and
 task assertions nevertheless share authorship.
+
+## Finally-task recovery
+
+Finally tasks use the same policy and task dispositions as ordinary tasks. A
+failed finally task seeds its closure; successful finally tasks outside that
+closure are reused. Generation keeps tasks in their original ordinary or final
+phase. Ordinary tasks precede all finally tasks, and finally tasks on parallel
+branches can be named in the same recovery closure.
+
+The live harness runs three source failures, each confined to `notify` in the
+final phase, and verifies the generated recoveries:
+
+- Only failed `notify` runs again; all ordinary work and successful `audit` are reused.
+- `notify` pulls in `build`, which pulls in `prepare`; the new build finishes before notification.
+- `notify` pulls in successful parallel `audit`; both finally tasks run again.
+
+When all ordinary tasks are reused, Tekton v1.6 requires a nonempty ordinary
+`tasks` section. The generator adds an always-skipped placeholder, records its
+name in an annotation, and creates no TaskRun for it. The first and third runs
+therefore execute only finally tasks. Notification
+receipts are checked against the actual inherited or newly produced image
+result, and native TaskRuns are checked against the plan. Evidence is in
+`results/finally-current-20261029/`. These are three synthetic feasibility
+cases, rather than a timing or production effectiveness study.
+
+```bash
+go build -o /tmp/retryctl ./cmd/retryctl
+python3 hack/finally_recovery.py --context kind-retry-paper \
+  --namespace retry-finally-new-unique-name --retryctl /tmp/retryctl \
+  --output artifacts/finally-recovery
+```
+
+## Current-version finally-result regression
+
+The current implementation was tested with native captured inputs whose
+Pipeline specification matches exactly. `build` and finally task `audit`
+succeed; finally task `notify` fails. The Pipeline exports
+`$(finally.audit.results.note)`, whose saved string value is `checked`.
+The pre-fix generator removes audit and leaves that reference unresolved; the
+Tekton admission webhook rejects the generated run. A literal replacement is
+also rejected because Tekton requires Pipeline outputs to reference task results.
+
+The fixed generator reuses build and audit and emits a small ordinary task
+that publishes audit's saved value. The recovery runs only that publisher and
+notify: two TaskRuns, without repeating the original audit or build work.
+Native TaskRun and PipelineRun results confirm the exported value `checked`
+and notification receipt `source-image`. The recovery succeeds. This is one
+synthetic composition regression, not a timing or production effectiveness
+result. The October 29 rerun with the same current binary used for IV-G is in
+`results/finally-export-current-20261029/`. An etcd read timeout interrupted the
+harness after submission; guarded `--resume` verified existing specifications
+and collected the completed recovery without creating another run. The
+October 26 evidence remains in `results/finally-export-recovery-20261026/`; the rejected
+literal attempt is retained in `results/finally-export-rejected-literal-20261026/`.
+
+```bash
+go build -o /tmp/retryctl ./cmd/retryctl
+uv run --with pyyaml python hack/finally_export_recovery.py \
+  --context kind-retry-paper --namespace retry-finally-export-new-unique-name \
+  --retryctl /tmp/retryctl --output artifacts/finally-export
+```
+
+After an interrupted read, repeat the same command with `--resume`. It checks
+the original namespace, context, generator source, binary, and existing
+resource specifications. Only reads are retried automatically.
 
 ## Stateful recovery on kind
 

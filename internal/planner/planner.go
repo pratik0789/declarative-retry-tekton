@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -173,7 +172,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	}
 
 	tasks := map[string]PipelineTask{}
-	for _, task := range p.Spec.Tasks {
+	for _, task := range p.allTasks() {
 		if _, exists := tasks[task.Name]; exists {
 			return Plan{}, fmt.Errorf("duplicate pipeline task %q", task.Name)
 		}
@@ -190,6 +189,13 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 				return refuse(fmt.Sprintf("policy references unknown task %q", referenced))
 			}
 		}
+	}
+	upstream, err := executionDependencies(current)
+	if err != nil {
+		return refuse(err.Error())
+	}
+	if err := validateRetryDirections(upstream, policy.Spec.Tasks); err != nil {
+		return refuse(err.Error())
 	}
 	states := map[string]ChildReference{}
 	failed := map[string]bool{}
@@ -277,7 +283,6 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			})
 		}
 	}
-	plan.Warnings = append(plan.Warnings, finallyWorkspaceWarnings(p, rerun, states)...)
 	plan.Warnings = append(plan.Warnings, laterClaimWarnings(r, newerRuns)...)
 	sort.Slice(plan.Warnings, func(i, j int) bool {
 		left := plan.Warnings[i].Code + strings.Join(plan.Warnings[i].Tasks, "\x00") + plan.Warnings[i].StateName + plan.Warnings[i].Message
@@ -302,9 +307,9 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	return plan, nil
 }
 
-var variableReference = regexp.MustCompile(`\$\([^()]*\)`)
-
-// Tekton substitutes $(...) variables in the recorded spec, so they match any value; everything else must be equal.
+// Compare the complete saved specification without resolving or wildcarding
+// variables. A resolved value cannot establish which expression originally
+// produced it, so ambiguous historical definitions are conservatively refused.
 func definitionMatches(current, recorded any) bool {
 	switch typed := current.(type) {
 	case map[string]any:
@@ -334,11 +339,7 @@ func definitionMatches(current, recorded any) bool {
 		if !ok {
 			return false
 		}
-		literals := variableReference.Split(typed, -1)
-		for index, literal := range literals {
-			literals[index] = regexp.QuoteMeta(literal)
-		}
-		return regexp.MustCompile(`^` + strings.Join(literals, `(?s:.*)`) + `$`).MatchString(other)
+		return typed == other
 	default:
 		return reflect.DeepEqual(current, recorded)
 	}
@@ -513,7 +514,7 @@ func ephemeralWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool
 	}
 	inheritedUsers := map[string][]string{}
 	remainingUsers := map[string][]string{}
-	for _, task := range p.Spec.Tasks {
+	for _, task := range p.allTasks() {
 		child, ran := states[task.Name]
 		inherited := ran && strings.EqualFold(child.Status, "Succeeded") && !rerun[task.Name]
 		for _, binding := range task.Workspaces {
@@ -543,40 +544,6 @@ func ephemeralWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool
 			StateKind: "workspace",
 			StateName: workspace,
 		})
-	}
-	return warnings
-}
-
-// Finally tasks always run again in a recovery run; flag those that touch state inherited tasks left behind.
-func finallyWorkspaceWarnings(p Pipeline, rerun map[string]bool, states map[string]ChildReference) []Warning {
-	workspaceOf := func(binding WorkspaceBinding) string {
-		if binding.Workspace != "" {
-			return binding.Workspace
-		}
-		return binding.Name
-	}
-	inheritedUsers := map[string]bool{}
-	for _, task := range p.Spec.Tasks {
-		child, ran := states[task.Name]
-		if ran && strings.EqualFold(child.Status, "Succeeded") && !rerun[task.Name] {
-			for _, binding := range task.Workspaces {
-				inheritedUsers[workspaceOf(binding)] = true
-			}
-		}
-	}
-	var warnings []Warning
-	for _, task := range p.Spec.Finally {
-		for _, binding := range task.Workspaces {
-			if workspace := workspaceOf(binding); inheritedUsers[workspace] {
-				warnings = append(warnings, Warning{
-					Code:      "finally-task-touches-inherited-state",
-					Message:   fmt.Sprintf("finally task %q runs again and binds workspace %q, which holds state from inherited tasks", task.Name, workspace),
-					Tasks:     []string{task.Name},
-					StateKind: "workspace",
-					StateName: workspace,
-				})
-			}
-		}
 	}
 	return warnings
 }
@@ -619,7 +586,7 @@ func sharedWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool, s
 		}
 	}
 	users := map[string]map[string]bool{}
-	for _, task := range p.Spec.Tasks {
+	for _, task := range p.allTasks() {
 		for _, binding := range task.Workspaces {
 			workspace := binding.Workspace
 			if workspace == "" {

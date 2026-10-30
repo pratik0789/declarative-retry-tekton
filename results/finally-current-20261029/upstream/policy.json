@@ -1,0 +1,22 @@
+{
+  "apiVersion": "retry.tekton.dev/v1alpha1",
+  "kind": "PipelineRetryPolicy",
+  "metadata": {
+    "name": "upstream"
+  },
+  "spec": {
+    "pipelineRef": "finally-upstream",
+    "tasks": {
+      "notify": {
+        "retryWith": [
+          "build"
+        ]
+      },
+      "build": {
+        "retryWith": [
+          "prepare"
+        ]
+      }
+    }
+  }
+}

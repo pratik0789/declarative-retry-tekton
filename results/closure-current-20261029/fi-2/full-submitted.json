@@ -1,0 +1,20 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "name": "fi-2-full-recovery"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "fi-2"
+    },
+    "workspaces": [
+      {
+        "name": "shared",
+        "persistentVolumeClaim": {
+          "claimName": "fi-2-full"
+        }
+      }
+    ]
+  }
+}

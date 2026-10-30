@@ -1,0 +1,77 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: audit=finally-upstream-source-audit
+    retry.tekton.dev/policy: upstream
+    retry.tekton.dev/source-pipeline: finally-upstream
+    retry.tekton.dev/source-pipeline-run: finally-upstream-source
+    retry.tekton.dev/source-pipeline-run-uid: 540456b0-6ac4-4f67-ab1a-1ab25bb41d11
+  generateName: finally-upstream-retry-
+  namespace: retry-finally-20261025-r2
+spec:
+  pipelineSpec:
+    finally:
+    - name: notify
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        results:
+        - name: receipt
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            case "$(context.pipelineRun.name)" in *-source) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac
+            printf "%s" "$(params.image)" > "$(results.receipt.path)"
+            echo NOTIFIED
+    tasks:
+    - name: prepare
+      taskSpec:
+        metadata: {}
+        results:
+        - name: revision
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            printf "%s" "$(context.pipelineRun.name)" > "$(results.revision.path)"
+    - name: build
+      params:
+      - name: revision
+        value: $(tasks.prepare.results.revision)
+      runAfter:
+      - prepare
+      taskSpec:
+        metadata: {}
+        params:
+        - name: revision
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            printf "image:%s" "$(params.revision)" > "$(results.image.path)"
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

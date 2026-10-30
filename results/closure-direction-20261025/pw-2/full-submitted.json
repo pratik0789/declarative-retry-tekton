@@ -1,0 +1,20 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "name": "pw-2-full-recovery"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "pw-2"
+    },
+    "workspaces": [
+      {
+        "name": "shared",
+        "persistentVolumeClaim": {
+          "claimName": "pw-2-full"
+        }
+      }
+    ]
+  }
+}

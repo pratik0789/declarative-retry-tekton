@@ -1,0 +1,44 @@
+{
+  "sourceRun": "pw-3-source",
+  "sourceRunUID": "cc1c9889-c9f3-4359-b358-8306e1ffebd4",
+  "pipeline": "pw-3",
+  "policy": "pw-3-closure-policy",
+  "policyGeneration": 1,
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "mutate",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "observe",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "pw-3-source-observe"
+    },
+    {
+      "name": "prepare",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "publish",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "name": "verify",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 5,
+    "rerunTasks": 2,
+    "inheritedTasks": 1,
+    "continuingTasks": 2,
+    "tasksAvoided": 1,
+    "avoidancePercent": 20
+  }
+}

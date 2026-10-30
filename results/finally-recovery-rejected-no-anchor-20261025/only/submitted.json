@@ -1,0 +1,60 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "audit=finally-only-source-audit,build=finally-only-source-build,prepare=finally-only-source-prepare",
+      "retry.tekton.dev/policy": "only",
+      "retry.tekton.dev/source-pipeline": "finally-only",
+      "retry.tekton.dev/source-pipeline-run": "finally-only-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "224b2857-b96f-4b63-8c9c-490d2e451bc8"
+    },
+    "namespace": "retry-finally-20261025-r1",
+    "name": "finally-only-recovery"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "image:finally-only-source"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.pipelineRun.name)\" in *-source) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: selected-later-task}
+spec:
+  pipelineRef: delivery
+  tasks:
+    # Invalid: clone cannot declare tasks that execute after it.
+    # Operators must select completed build/scan explicitly when needed.
+    clone: {retryWith: [build, scan]}

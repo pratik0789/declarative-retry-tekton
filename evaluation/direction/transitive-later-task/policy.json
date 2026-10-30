@@ -1,0 +1,22 @@
+{
+  "apiVersion": "retry.tekton.dev/v1alpha1",
+  "kind": "PipelineRetryPolicy",
+  "metadata": {
+    "name": "transitive-later-task"
+  },
+  "spec": {
+    "pipelineRef": "direction",
+    "tasks": {
+      "a": {
+        "retryWith": [
+          "b"
+        ]
+      },
+      "b": {
+        "retryWith": [
+          "c"
+        ]
+      }
+    }
+  }
+}

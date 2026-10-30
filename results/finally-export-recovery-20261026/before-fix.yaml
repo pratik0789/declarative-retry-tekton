@@ -1,0 +1,56 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/finally-anchor: retryctl-finally-anchor
+    retry.tekton.dev/inherited-taskruns: audit=finally-export-source-audit,build=finally-export-source-build
+    retry.tekton.dev/policy: finally-export
+    retry.tekton.dev/source-pipeline: finally-export
+    retry.tekton.dev/source-pipeline-run: finally-export-source
+    retry.tekton.dev/source-pipeline-run-uid: 5fb86473-c1b8-4a07-ba3a-5302113eb764
+  generateName: finally-export-retry-
+  namespace: retry-finally-export-native-1792995000
+spec:
+  pipelineSpec:
+    finally:
+    - name: notify
+      params:
+      - name: image
+        value: source-image
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        results:
+        - name: receipt
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            case "$(context.taskRun.name)" in *-source-*) echo injected-failure; exit 1;; esac
+            printf "%s" "$(params.image)" > "$(results.receipt.path)"
+    results:
+    - description: ""
+      name: audit-note
+      value: $(finally.audit.results.note)
+    tasks:
+    - name: retryctl-finally-anchor
+      taskSpec:
+        steps:
+        - image: alpine:3.20
+          name: skipped
+          script: exit 0
+      when:
+      - input: "false"
+        operator: in
+        values:
+        - "true"
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

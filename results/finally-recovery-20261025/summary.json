@@ -1,0 +1,44 @@
+{
+  "cases": [
+    {
+      "case": "only",
+      "sourceFailedOnlyInFinally": true,
+      "recoverySucceeded": true,
+      "executedTasks": [
+        "notify"
+      ],
+      "taskRuns": 1,
+      "receipt": "image:finally-only-source",
+      "expectedReceipt": "image:finally-only-source",
+      "finalPhasePreserved": true
+    },
+    {
+      "case": "upstream",
+      "sourceFailedOnlyInFinally": true,
+      "recoverySucceeded": true,
+      "executedTasks": [
+        "build",
+        "notify",
+        "prepare"
+      ],
+      "taskRuns": 3,
+      "receipt": "image:finally-upstream-recovery",
+      "expectedReceipt": "image:finally-upstream-recovery",
+      "finalPhasePreserved": true
+    },
+    {
+      "case": "parallel",
+      "sourceFailedOnlyInFinally": true,
+      "recoverySucceeded": true,
+      "executedTasks": [
+        "audit",
+        "notify"
+      ],
+      "taskRuns": 2,
+      "receipt": "image:finally-parallel-source",
+      "expectedReceipt": "image:finally-parallel-source",
+      "finalPhasePreserved": true
+    }
+  ],
+  "scope": "Three synthetic finally-task recovery cases; no timing or production effectiveness claim."
+}

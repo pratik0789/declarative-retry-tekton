@@ -63,6 +63,7 @@ func TestBuildRefusesChangedPipeline(t *testing.T) {
 	p, r, policy := safetyFixture()
 	r.Status.PipelineSpec = &struct {
 		Tasks      []PipelineTask `json:"tasks"`
+		Finally    []PipelineTask `json:"finally,omitempty"`
 		Workspaces []Workspace    `json:"workspaces"`
 	}{Tasks: []PipelineTask{{Name: "old-build"}}}
 	plan, err := Build(p, recorded(r, p), policy, time.Now())
@@ -208,7 +209,7 @@ func TestBuildRefusesBlockedTask(t *testing.T) {
 	}
 }
 
-func TestBuildAllowsRetryClosureCycle(t *testing.T) {
+func TestBuildFollowsParallelRecoveryDeclarations(t *testing.T) {
 	var p Pipeline
 	p.Metadata.Name = "p"
 	p.Spec.Tasks = []PipelineTask{{Name: "build"}, {Name: "scan"}}
@@ -241,8 +242,9 @@ func recorded(r PipelineRun, p Pipeline) PipelineRun {
 	if r.Status.PipelineSpec == nil {
 		r.Status.PipelineSpec = &struct {
 			Tasks      []PipelineTask `json:"tasks"`
+			Finally    []PipelineTask `json:"finally,omitempty"`
 			Workspaces []Workspace    `json:"workspaces"`
-		}{Tasks: p.Spec.Tasks, Workspaces: p.Spec.Workspaces}
+		}{Tasks: p.Spec.Tasks, Finally: p.Spec.Finally, Workspaces: p.Spec.Workspaces}
 	}
 	return r
 }
@@ -290,16 +292,28 @@ func TestBuildRefusesWithoutRecordedDefinition(t *testing.T) {
 	}
 }
 
-func TestDefinitionMatchesTreatsVariablesAsWildcards(t *testing.T) {
-	current := map[string]any{"script": `case "$(context.pipelineRun.name)" in x) exit 1 ;; esac`}
-	if !definitionMatches(current, map[string]any{"script": `case "retry-integration-source" in x) exit 1 ;; esac`}) {
-		t.Fatal("substituted variable must match")
+func TestDefinitionMatchesRequiresExactSpecification(t *testing.T) {
+	cases := []struct {
+		name              string
+		current, recorded any
+		match             bool
+	}{
+		{"unchanged variable", map[string]any{"script": `echo $(params.left)`}, map[string]any{"script": `echo $(params.left)`}, true},
+		{"changed variable", map[string]any{"script": `echo $(params.right)`}, map[string]any{"script": `echo $(params.left)`}, false},
+		{"resolved variable is ambiguous", map[string]any{"script": `echo $(params.right)`}, map[string]any{"script": `echo OLD`}, false},
+		{"literal changed to variable", map[string]any{"script": `echo $(context.pipelineRun.name)`}, map[string]any{"script": `echo built`}, false},
+		{"resolved context is ambiguous", map[string]any{"script": `echo $(context.pipelineRun.name)`}, map[string]any{"script": `echo source`}, false},
+		{"changed script", map[string]any{"script": `exit 2`}, map[string]any{"script": `exit 1`}, false},
+		{"changed retry count", map[string]any{"retries": float64(2)}, map[string]any{"retries": float64(3)}, false},
+		{"unchanged map order", map[string]any{"script": "echo built", "retries": float64(2)}, map[string]any{"retries": float64(2), "script": "echo built"}, true},
+		{"deleted task", map[string]any{"tasks": []any{}}, map[string]any{"tasks": []any{map[string]any{"name": "build"}}}, false},
 	}
-	if definitionMatches(current, map[string]any{"script": `case "retry-integration-source" in x) exit 2 ;; esac`}) {
-		t.Fatal("a literal change must not match")
-	}
-	if definitionMatches(map[string]any{"retries": float64(2)}, map[string]any{"retries": float64(3)}) {
-		t.Fatal("changed number must not match")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := definitionMatches(tc.current, tc.recorded); got != tc.match {
+				t.Fatalf("definitionMatches = %v, want %v", got, tc.match)
+			}
+		})
 	}
 }
 

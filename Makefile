@@ -4,7 +4,7 @@ KIND_IMAGE ?= kindest/node:v1.31.4
 TEKTON_VERSION ?= v1.6.0
 KUBECTL ?= kubectl
 
-.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful ordering benchmark closure-ablation teardown
+.PHONY: test evaluate replay generate cluster install-tekton wait-tekton integration stateful ordering benchmark closure-ablation closure-smoke teardown
 
 test:
 	go test ./...
@@ -32,9 +32,20 @@ install-tekton:
 
 wait-tekton:
 	$(KUBECTL) --context kind-$(CLUSTER) wait --for=condition=Available --timeout=5m deployment --all -n tekton-pipelines
+	python3 hack/wait_tekton_webhook.py --context kind-$(CLUSTER) --kubectl $(KUBECTL)
 
 integration:
 	CLUSTER=$(CLUSTER) ./hack/integration.sh
+ifeq ($(CI),true)
+	$(MAKE) closure-smoke
+endif
+
+closure-smoke:
+	@mkdir -p artifacts
+	go build -trimpath -buildvcs=false -o artifacts/retryctl-closure ./cmd/retryctl
+	python3 hack/closure_ablation.py --context kind-$(CLUSTER) --namespace retry-closure-ci \
+		--repetitions 1 --retryctl artifacts/retryctl-closure --output artifacts/integration/closure-ablation
+	python3 hack/verify_closure_ablation.py --results artifacts/integration/closure-ablation --retryctl artifacts/retryctl-closure
 
 stateful:
 	CLUSTER=$(CLUSTER) ./hack/stateful.sh
@@ -48,8 +59,11 @@ benchmark:
 # A namespace must be supplied; this experiment never resets existing namespaces.
 closure-ablation:
 	@test -n "$(NAMESPACE)" || (echo 'Set NAMESPACE to a new namespace name' >&2; exit 1)
-	go build -o /tmp/retryctl ./cmd/retryctl
-	python3 hack/closure_ablation.py --context kind-$(CLUSTER) --namespace $(NAMESPACE) --output artifacts/closure-ablation
+	@mkdir -p artifacts
+	go build -trimpath -buildvcs=false -o artifacts/retryctl-closure ./cmd/retryctl
+	python3 hack/closure_ablation.py --context kind-$(CLUSTER) --namespace $(NAMESPACE) \
+		--retryctl artifacts/retryctl-closure --output artifacts/closure-ablation
+	python3 hack/verify_closure_ablation.py --results artifacts/closure-ablation --retryctl artifacts/retryctl-closure
 
 teardown:
 	$(KIND) delete cluster --name $(CLUSTER)

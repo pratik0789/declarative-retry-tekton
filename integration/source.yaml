@@ -21,8 +21,8 @@ spec:
           - name: run
             image: alpine:3.20
             script: |
-              case "$(context.pipelineRun.name)" in
-                retry-integration-source) echo "injected source failure"; exit 1 ;;
+              case "$(context.taskRun.name)" in
+                retry-integration-source-*) echo "injected source failure"; exit 1 ;;
                 *) echo "scan succeeded" ;;
               esac
     - name: deploy

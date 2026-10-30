@@ -1,0 +1,9 @@
+# Invalid fixture: build names its later execution descendant scan.
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: later-task}
+spec:
+  pipelineRef: delivery
+  tasks:
+    scan: {retryWith: [build]}
+    build: {retryWith: [scan]}

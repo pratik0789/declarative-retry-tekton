@@ -1,0 +1,19 @@
+{
+  "apiVersion": "retry.tekton.dev/v1alpha1",
+  "kind": "PipelineRetryPolicy",
+  "metadata": {
+    "name": "fi-1-closure-policy",
+    "generation": 1
+  },
+  "spec": {
+    "pipelineRef": "fi-1",
+    "tasks": {
+      "gate": {
+        "retryWith": [
+          "prepare",
+          "build"
+        ]
+      }
+    }
+  }
+}

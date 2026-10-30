@@ -1,0 +1,15 @@
+{
+  "apiVersion": "retry.tekton.dev/v1alpha1",
+  "kind": "PipelineRetryPolicy",
+  "metadata": {
+    "name": "blocked"
+  },
+  "spec": {
+    "pipelineRef": "finally-recovery",
+    "tasks": {
+      "notify": {
+        "blocksResume": true
+      }
+    }
+  }
+}

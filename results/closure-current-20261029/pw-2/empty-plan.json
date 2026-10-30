@@ -1,0 +1,57 @@
+{
+  "sourceRun": "pw-2-source",
+  "sourceRunUID": "62e3bb39-7701-4517-81ac-4c7536032927",
+  "pipeline": "pw-2",
+  "policy": "pw-2-empty-policy",
+  "policyGeneration": 1,
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "mutate",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "observe",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "pw-2-source-observe"
+    },
+    {
+      "name": "prepare",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "pw-2-source-prepare"
+    },
+    {
+      "name": "publish",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "name": "verify",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "shared-workspace-across-closure",
+      "message": "writable workspace \"shared\" is shared by rerun and reused tasks",
+      "tasks": [
+        "mutate",
+        "prepare"
+      ],
+      "stateKind": "workspace",
+      "stateName": "shared"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 5,
+    "rerunTasks": 1,
+    "inheritedTasks": 2,
+    "continuingTasks": 2,
+    "tasksAvoided": 2,
+    "avoidancePercent": 40
+  }
+}

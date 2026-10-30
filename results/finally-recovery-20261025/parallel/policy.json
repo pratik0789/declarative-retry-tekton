@@ -1,0 +1,17 @@
+{
+  "apiVersion": "retry.tekton.dev/v1alpha1",
+  "kind": "PipelineRetryPolicy",
+  "metadata": {
+    "name": "parallel"
+  },
+  "spec": {
+    "pipelineRef": "finally-parallel",
+    "tasks": {
+      "notify": {
+        "retryWith": [
+          "audit"
+        ]
+      }
+    }
+  }
+}
