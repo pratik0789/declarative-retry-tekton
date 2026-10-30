@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "name": "source-adjudication-1"
+  },
+  "spec": {
+    "pipelineRef": "external-recovery",
+    "tasks": {
+      "publish": {
+        "retryWith": [
+          "acquire"
+        ]
+      },
+      "sign": {
+        "retryWith": [
+          "acquire",
+          "publish"
+        ]
+      },
+      "scan": {
+        "retryWith": [
+          "acquire",
+          "publish",
+          "sign"
+        ]
+      }
+    }
+  }
+}

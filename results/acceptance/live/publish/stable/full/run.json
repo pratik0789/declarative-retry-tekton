@@ -1,0 +1,202 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"tekton.dev/v1\",\"kind\":\"PipelineRun\",\"metadata\":{\"annotations\":{},\"name\":\"full-publish-stable\",\"namespace\":\"retry-acceptance-20261030\"},\"spec\":{\"pipelineRef\":{\"name\":\"external-recovery\"}}}\n"
+    },
+    "creationTimestamp": "2026-10-30T06:40:34Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "external-recovery"
+    },
+    "name": "full-publish-stable",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6200282",
+    "uid": "9f3462fa-5779-45a0-8f3c-4cddc4240548"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "external-recovery"
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "full-publish-stable-warmup",
+        "pipelineTaskName": "warmup"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "full-publish-stable-acquire",
+        "pipelineTaskName": "acquire"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "full-publish-stable-publish",
+        "pipelineTaskName": "publish"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "full-publish-stable-sign",
+        "pipelineTaskName": "sign"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "full-publish-stable-scan",
+        "pipelineTaskName": "scan"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "full-publish-stable-deploy",
+        "pipelineTaskName": "deploy"
+      }
+    ],
+    "completionTime": "2026-10-30T06:41:06Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T06:41:06Z",
+        "message": "Tasks Completed: 6 (Failed: 0, Cancelled 0), Skipped: 0",
+        "reason": "Succeeded",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "warmup",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\necho warmed\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "acquire",
+          "runAfter": [
+            "warmup"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "publish",
+          "runAfter": [
+            "acquire"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sign",
+          "runAfter": [
+            "publish"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "scan",
+          "runAfter": [
+            "sign"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-30T06:40:34Z"
+  }
+}

@@ -1,0 +1,71 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: t01=bench-s5-e-r9-source-t01
+    retry.tekton.dev/policy: policy-s5-e-r9
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"bench-s5-e-r9","resumeWithin":"","retryOnlyLatest":false,"tasks":{}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:8c8887b811d79ec476269509034e2b08e32e069eecf6cb58eaf2f0558f734d85
+    retry.tekton.dev/source-pipeline: bench-s5-e-r9
+    retry.tekton.dev/source-pipeline-run: bench-s5-e-r9-source
+    retry.tekton.dev/source-pipeline-run-uid: e19cfe2d-5f8e-44e0-8cc2-3d7a85c9cc9c
+  generateName: bench-s5-e-r9-retry-
+  namespace: retry-value-benchmark-20261030
+spec:
+  pipelineSpec:
+    tasks:
+    - name: t02
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            case "$(context.taskRun.name)" in "bench-s5-e-r9-source"-*) exit 1;; esac
+            echo t02
+    - name: t03
+      runAfter:
+      - t02
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t03
+    - name: t04
+      runAfter:
+      - t03
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t04
+    - name: t05
+      runAfter:
+      - t04
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t05
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

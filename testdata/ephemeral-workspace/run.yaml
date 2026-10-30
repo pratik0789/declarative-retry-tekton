@@ -7,6 +7,7 @@ spec:
     - name: source
       volumeClaimTemplate: {spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 1Gi}}}}
 status:
+  conditions: [{type: Succeeded, status: "False", reason: Failed}]
   pipelineSpec: {"tasks":[{"name":"prepare","workspaces":[{"name":"src","workspace":"source"}]},{"name":"fail","workspaces":[{"name":"src","workspace":"source"}]}],"workspaces":[{"name":"source"}]}
   childReferences:
     - {name: prepare-run, pipelineTaskName: prepare, status: Succeeded}

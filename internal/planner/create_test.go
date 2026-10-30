@@ -175,7 +175,7 @@ func createProbe(t *testing.T, pipeline, run, taskRuns string) (map[string]any, 
 		t.Fatal(err)
 	}
 	recordedSpec, _ := json.Marshal(definition.Spec)
-	if err := os.WriteFile(path("run.yaml"), []byte(run+"status:\n  pipelineSpec: "+string(recordedSpec)+"\n"), 0o600); err != nil {
+	if err := os.WriteFile(path("run.yaml"), []byte(run+"status:\n  conditions: [{type: Succeeded, status: \"False\"}]\n  pipelineSpec: "+string(recordedSpec)+"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	manifest, err := CreateRecoveryRun(path("pipeline.yaml"), path("run.yaml"), path("policy.yaml"), path("taskruns.yaml"), "", nil, true)
@@ -243,6 +243,24 @@ func TestCreateRefusesUnresolvableInheritedResult(t *testing.T) {
 	}
 }
 
+func TestCreateRefusesSavedResultSubstitutionSyntax(t *testing.T) {
+	for _, value := range []string{
+		"$(tasks.ghost.results.value)",
+		"$(finally.cleanup.results.value)",
+		"$(params.image)",
+		"prefix-$(context.pipelineRun.name)-suffix",
+		"$$(tasks.ghost.results.value)",
+	} {
+		t.Run(value, func(t *testing.T) {
+			taskRuns := strings.Replace(probeTaskRuns, "value: a1b2c3", "value: '"+value+"'", 1)
+			out, err := createProbe(t, probePipeline, probeRun("persistentVolumeClaim: {claimName: shared-pvc}"), taskRuns)
+			if err == nil || !strings.Contains(err.Error(), "contains substitution syntax") || out != nil {
+				t.Fatalf("saved data must not introduce live references: output=%v error=%v", out, err)
+			}
+		})
+	}
+}
+
 func TestCreateWarnsButProceedsForEphemeralWorkspace(t *testing.T) {
 	for _, binding := range []string{"volumeClaimTemplate: {spec: {accessModes: [ReadWriteOnce]}}", "emptyDir: {}"} {
 		out, err := createProbe(t, probePipeline, probeRun(binding), probeTaskRuns)
@@ -297,7 +315,7 @@ items:
 	}
 	recordedSpec, _ := json.Marshal(definition.Spec)
 	policy := "apiVersion: retry.tekton.dev/v1alpha1\nkind: PipelineRetryPolicy\nmetadata: {name: p}\nspec: {pipelineRef: probe, tasks: {scan: {retryWith: [build]}}}\n"
-	files := map[string]string{"pipeline.yaml": pipeline, "run.yaml": run + "status:\n  pipelineSpec: " + string(recordedSpec) + "\n", "policy.yaml": policy, "taskruns.yaml": taskRuns}
+	files := map[string]string{"pipeline.yaml": pipeline, "run.yaml": run + "status:\n  conditions: [{type: Succeeded, status: \"False\"}]\n  pipelineSpec: " + string(recordedSpec) + "\n", "policy.yaml": policy, "taskruns.yaml": taskRuns}
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600); err != nil {
 			t.Fatal(err)
@@ -353,7 +371,7 @@ spec:
 	dir := t.TempDir()
 	files := map[string]string{
 		"pipeline.yaml": pipeline,
-		"run.yaml":      "apiVersion: tekton.dev/v1\nkind: PipelineRun\nmetadata: {name: probe-1}\nspec: {pipelineRef: {name: probe}}\nstatus:\n  pipelineSpec: " + string(recordedSpec) + "\n",
+		"run.yaml":      "apiVersion: tekton.dev/v1\nkind: PipelineRun\nmetadata: {name: probe-1}\nspec: {pipelineRef: {name: probe}}\nstatus:\n  conditions: [{type: Succeeded, status: \"False\"}]\n  pipelineSpec: " + string(recordedSpec) + "\n",
 		"policy.yaml":   "apiVersion: retry.tekton.dev/v1alpha1\nkind: PipelineRetryPolicy\nmetadata: {name: p}\nspec: {pipelineRef: probe, tasks: {}}\n",
 		"taskruns.yaml": "items:\n" + strings.Join(items, "\n") + "\n",
 	}

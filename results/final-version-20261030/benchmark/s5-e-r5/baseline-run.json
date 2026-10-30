@@ -1,0 +1,175 @@
+{
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+        "creationTimestamp": "2026-10-30T15:28:58Z",
+        "generation": 1,
+        "labels": {
+            "tekton.dev/pipeline": "bench-s5-e-r5"
+        },
+        "name": "bench-s5-e-r5-full",
+        "namespace": "retry-value-benchmark-20261030",
+        "resourceVersion": "6299114",
+        "uid": "08920f74-a3c1-4e24-8338-bf4e58ce3066"
+    },
+    "spec": {
+        "pipelineRef": {
+            "name": "bench-s5-e-r5"
+        },
+        "taskRunTemplate": {
+            "serviceAccountName": "default"
+        },
+        "timeouts": {
+            "pipeline": "1h0m0s"
+        }
+    },
+    "status": {
+        "childReferences": [
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-full-t01",
+                "pipelineTaskName": "t01"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-full-t02",
+                "pipelineTaskName": "t02"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-full-t03",
+                "pipelineTaskName": "t03"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-full-t04",
+                "pipelineTaskName": "t04"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-full-t05",
+                "pipelineTaskName": "t05"
+            }
+        ],
+        "completionTime": "2026-10-30T15:29:29Z",
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-10-30T15:29:29Z",
+                "message": "Tasks Completed: 5 (Failed: 0, Cancelled 0), Skipped: 0",
+                "reason": "Succeeded",
+                "status": "True",
+                "type": "Succeeded"
+            }
+        ],
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t01",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t01\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t02",
+                    "runAfter": [
+                        "t01"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-e-r5-source\"-*) exit 1;; esac\necho t02\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t03",
+                    "runAfter": [
+                        "t02"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t03\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t04",
+                    "runAfter": [
+                        "t03"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t04\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t05",
+                    "runAfter": [
+                        "t04"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t05\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "provenance": {
+            "featureFlags": {
+                "awaitSidecarReadiness": true,
+                "coschedule": "workspaces",
+                "enableAPIFields": "beta",
+                "enableProvenanceInStatus": true,
+                "enforceNonfalsifiability": "none",
+                "maxResultSize": 4096,
+                "resultExtractionMethod": "termination-message",
+                "runningInEnvWithInjectedSidecars": true,
+                "verificationNoMatchPolicy": "ignore"
+            }
+        },
+        "startTime": "2026-10-30T15:28:58Z"
+    }
+}

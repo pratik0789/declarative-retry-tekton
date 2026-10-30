@@ -1,0 +1,131 @@
+original plan 0 {
+  "sourceRun": "source",
+  "sourceRunUID": "source-id",
+  "pipeline": "literal",
+  "policy": "empty",
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "consume",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "produce",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "produce-run",
+      "results": {
+        "out": "$(tasks.ghost.results.value)"
+      }
+    }
+  ],
+  "metrics": {
+    "totalTasks": 2,
+    "rerunTasks": 1,
+    "inheritedTasks": 1,
+    "continuingTasks": 0,
+    "tasksAvoided": 1,
+    "avoidancePercent": 50
+  }
+}
+ 
+original create 0 apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: produce=produce-run
+    retry.tekton.dev/policy: empty
+    retry.tekton.dev/source-pipeline: literal
+    retry.tekton.dev/source-pipeline-run: source
+    retry.tekton.dev/source-pipeline-run-uid: source-id
+  generateName: literal-retry-
+spec:
+  pipelineSpec:
+    tasks:
+    - name: consume
+      params:
+      - name: msg
+        value: $(tasks.ghost.results.value)
+      taskSpec:
+        params:
+        - name: msg
+          type: string
+        steps:
+        - env:
+          - name: MSG
+            value: $(params.msg)
+          image: alpine:3.20
+          name: s
+          script: printf "%s" "$MSG"
+ 
+supplement plan 0 {
+  "sourceRun": "source",
+  "sourceRunUID": "source-id",
+  "pipeline": "literal",
+  "policy": "empty",
+  "policySpecSHA256": "sha256:03fc4ba2ccb418a129034ea2b6a0c750661cdc82289708415a6a64d1aab41bff",
+  "policySpec": {
+    "pipelineRef": "literal",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {}
+  },
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "consume",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "produce",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "produce-run",
+      "results": {
+        "out": "$(tasks.ghost.results.value)"
+      }
+    }
+  ],
+  "metrics": {
+    "totalTasks": 2,
+    "rerunTasks": 1,
+    "inheritedTasks": 1,
+    "continuingTasks": 0,
+    "tasksAvoided": 1,
+    "avoidancePercent": 50
+  }
+}
+ 
+supplement create 0 apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: produce=produce-run
+    retry.tekton.dev/policy: empty
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"literal","resumeWithin":"","retryOnlyLatest":false,"tasks":{}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:03fc4ba2ccb418a129034ea2b6a0c750661cdc82289708415a6a64d1aab41bff
+    retry.tekton.dev/source-pipeline: literal
+    retry.tekton.dev/source-pipeline-run: source
+    retry.tekton.dev/source-pipeline-run-uid: source-id
+  generateName: literal-retry-
+spec:
+  pipelineSpec:
+    tasks:
+    - name: consume
+      params:
+      - name: msg
+        value: $(tasks.ghost.results.value)
+      taskSpec:
+        params:
+        - name: msg
+          type: string
+        steps:
+        - env:
+          - name: MSG
+            value: $(params.msg)
+          image: alpine:3.20
+          name: s
+          script: printf "%s" "$MSG"
+ 

@@ -1,0 +1,33 @@
+namespace/retry-value-ordering-20261030 created
+pipeline.tekton.dev/retry-ordering created
+pipelinerun.tekton.dev/retry-ordering-source created
+pipeline.tekton.dev/retry-fanin created
+pipelinerun.tekton.dev/retry-fanin-source created
+pipelinerun.tekton.dev/retry-ordering-source condition met
+pipelinerun.tekton.dev/retry-fanin-source condition met
+{
+  "linear": {
+    "tasksRun": [
+      "build",
+      "deploy",
+      "scan"
+    ],
+    "upstreamRerunCompleted": "2026-10-30T19:48:25Z",
+    "deployStarted": "2026-10-30T19:48:25Z",
+    "deployStartedAfterUpstream": true
+  },
+  "fanIn": {
+    "tasksRun": [
+      "build-a",
+      "deploy"
+    ],
+    "upstreamRerunCompleted": "2026-10-30T19:48:43Z",
+    "deployStarted": "2026-10-30T19:48:43Z",
+    "deployStartedAfterUpstream": true
+  },
+  "retryOnlyLatestFromCluster": {
+    "beforeRecovery": "recover",
+    "afterRecovery": "refuse: newer PipelineRun \"retry-fanin-retry-xcdlx\" supersedes the source run"
+  }
+}
+Warning: version difference between client (1.34) and server (1.31) exceeds the supported minor version skew of +/-1

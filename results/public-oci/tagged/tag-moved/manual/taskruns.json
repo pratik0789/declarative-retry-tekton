@@ -1,0 +1,477 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "build=source-final-tagged-build,clone=source-final-tagged-clone",
+          "retry.tekton.dev/policy": "public-oci-empty",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"public-oci-tagged\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+          "retry.tekton.dev/policy-spec-sha256": "sha256:0c98470d5359b2b0496633ed5421e714de96418cd4d345acebab9f9a35ee6c92",
+          "retry.tekton.dev/source-pipeline": "public-oci-tagged",
+          "retry.tekton.dev/source-pipeline-run": "source-final-tagged",
+          "retry.tekton.dev/source-pipeline-run-uid": "7358c17e-bf48-4b31-acff-3aac9c3aee45"
+        },
+        "creationTimestamp": "2026-10-30T08:18:57Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "public-oci-tagged-retry-b2ml7",
+          "tekton.dev/pipelineRun": "public-oci-tagged-retry-b2ml7",
+          "tekton.dev/pipelineRunUID": "7fd86e86-996c-4c55-a141-4b21f6eabafb",
+          "tekton.dev/pipelineTask": "promote"
+        },
+        "name": "public-oci-tagged-retry-b2ml7-promote",
+        "namespace": "retry-public-oci-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "public-oci-tagged-retry-b2ml7",
+            "uid": "7fd86e86-996c-4c55-a141-4b21f6eabafb"
+          }
+        ],
+        "resourceVersion": "6221218",
+        "uid": "b6354e1f-5bb4-4144-b2fa-d420b855558f"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "srcImageURL",
+            "value": "docker://registry-source:5000/release:latest"
+          },
+          {
+            "name": "destImageURL",
+            "value": "docker://registry-delivery:5000/delivery:latest"
+          },
+          {
+            "name": "srcTLSverify",
+            "value": "false"
+          },
+          {
+            "name": "destTLSverify",
+            "value": "false"
+          }
+        ],
+        "podTemplate": {
+          "securityContext": {
+            "fsGroup": 65532
+          }
+        },
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "description": "Skopeo is a command line tool for working with remote image registries.\nSkopeo doesn\u2019t require a daemon to be running while performing its operations. In particular, the handy skopeo command called copy will ease the whole image copy operation. The copy command will take care of copying the image from internal.registry to production.registry. If your production registry requires credentials to login in order to push the image, skopeo can handle that as well.",
+          "params": [
+            {
+              "default": "",
+              "description": "URL of the image to be copied to the destination registry",
+              "name": "srcImageURL",
+              "type": "string"
+            },
+            {
+              "default": "",
+              "description": "URL of the image where the image from source should be copied to",
+              "name": "destImageURL",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the src registry endpoint",
+              "name": "srcTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the dest registry endpoint",
+              "name": "destTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "system",
+              "description": "How to handle multi-architecture images (system, all, or index-only)",
+              "name": "multiArch",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "env": [
+                {
+                  "name": "HOME",
+                  "value": "/tekton/home"
+                }
+              ],
+              "image": "quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b",
+              "name": "skopeo-copy",
+              "script": "# Function to copy multiple images.\n#\ncopyimages() {\n  filename=\"$(workspaces.images-url.path)/url.txt\"\n  while IFS= read -r line || [ -n \"$line\" ]\n  do\n    cmd=\"\"\n    for url in $line\n    do\n      # echo $url\n      cmd=\"$cmd \\\n          $url\"\n    done\n    read -ra sourceDest <<<\"${cmd}\"\n    skopeo copy --multi-arch=\"$(params.multiArch)\" \"${sourceDest[@]}\" --src-tls-verify=\"$(params.srcTLSverify)\" --dest-tls-verify=\"$(params.destTLSverify)\"\n    echo \"$cmd\"\n  done < \"$filename\"\n}\n# Check that the multiArch parm is one of the supported methods\n#\ncase \"$(params.multiArch)\" in all|system|index-only)\n    ;;\n  *)\n    echo \"Unrecognized multiArch choice: $(params.multiArch)\"\n    exit 1;;\nesac\n#\n# If single image is to be copied then, it can be passed through\n# params in the taskrun.\n#\nif [ \"$(params.srcImageURL)\" != \"\" ] && [ \"$(params.destImageURL)\" != \"\" ] ; then\n  skopeo copy --multi-arch=\"$(params.multiArch)\" \"$(params.srcImageURL)\" \"$(params.destImageURL)\" --src-tls-verify=\"$(params.srcTLSverify)\" --dest-tls-verify=\"$(params.destTLSverify)\"\nelse\n  # If file is provided as a configmap in the workspace then multiple images can be copied.\n  #\n  copyimages\nfi\n",
+              "securityContext": {
+                "runAsNonRoot": true,
+                "runAsUser": 65532
+              }
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "images-url"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "emptyDir": {},
+            "name": "images-url"
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T08:19:03Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T08:19:03Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "public-oci-tagged-retry-b2ml7-promote-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T08:18:57Z",
+        "steps": [
+          {
+            "container": "step-skopeo-copy",
+            "imageID": "quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b",
+            "name": "skopeo-copy",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://3b6aeb4cd280a004c21076ef776ef0cd394261e5e9fd9ad8e94b1acec6b233f2",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T08:19:02Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T08:19:02Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "description": "Skopeo is a command line tool for working with remote image registries.\nSkopeo doesn\u2019t require a daemon to be running while performing its operations. In particular, the handy skopeo command called copy will ease the whole image copy operation. The copy command will take care of copying the image from internal.registry to production.registry. If your production registry requires credentials to login in order to push the image, skopeo can handle that as well.",
+          "params": [
+            {
+              "default": "",
+              "description": "URL of the image to be copied to the destination registry",
+              "name": "srcImageURL",
+              "type": "string"
+            },
+            {
+              "default": "",
+              "description": "URL of the image where the image from source should be copied to",
+              "name": "destImageURL",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the src registry endpoint",
+              "name": "srcTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the dest registry endpoint",
+              "name": "destTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "system",
+              "description": "How to handle multi-architecture images (system, all, or index-only)",
+              "name": "multiArch",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "env": [
+                {
+                  "name": "HOME",
+                  "value": "/tekton/home"
+                }
+              ],
+              "image": "quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b",
+              "name": "skopeo-copy",
+              "script": "# Function to copy multiple images.\n#\ncopyimages() {\n  filename=\"/workspace/images-url/url.txt\"\n  while IFS= read -r line || [ -n \"$line\" ]\n  do\n    cmd=\"\"\n    for url in $line\n    do\n      # echo $url\n      cmd=\"$cmd \\\n          $url\"\n    done\n    read -ra sourceDest <<<\"${cmd}\"\n    skopeo copy --multi-arch=\"system\" \"${sourceDest[@]}\" --src-tls-verify=\"false\" --dest-tls-verify=\"false\"\n    echo \"$cmd\"\n  done < \"$filename\"\n}\n# Check that the multiArch parm is one of the supported methods\n#\ncase \"system\" in all|system|index-only)\n    ;;\n  *)\n    echo \"Unrecognized multiArch choice: system\"\n    exit 1;;\nesac\n#\n# If single image is to be copied then, it can be passed through\n# params in the taskrun.\n#\nif [ \"docker://registry-source:5000/release:latest\" != \"\" ] && [ \"docker://registry-delivery:5000/delivery:latest\" != \"\" ] ; then\n  skopeo copy --multi-arch=\"system\" \"docker://registry-source:5000/release:latest\" \"docker://registry-delivery:5000/delivery:latest\" --src-tls-verify=\"false\" --dest-tls-verify=\"false\"\nelse\n  # If file is provided as a configmap in the workspace then multiple images can be copied.\n  #\n  copyimages\nfi\n",
+              "securityContext": {
+                "runAsNonRoot": true,
+                "runAsUser": 65532
+              }
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "images-url"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "build=source-final-tagged-build,clone=source-final-tagged-clone",
+          "retry.tekton.dev/policy": "public-oci-empty",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"public-oci-tagged\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+          "retry.tekton.dev/policy-spec-sha256": "sha256:0c98470d5359b2b0496633ed5421e714de96418cd4d345acebab9f9a35ee6c92",
+          "retry.tekton.dev/source-pipeline": "public-oci-tagged",
+          "retry.tekton.dev/source-pipeline-run": "source-final-tagged",
+          "retry.tekton.dev/source-pipeline-run-uid": "7358c17e-bf48-4b31-acff-3aac9c3aee45"
+        },
+        "creationTimestamp": "2026-10-30T08:18:51Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "public-oci-tagged-retry-b2ml7",
+          "tekton.dev/pipelineRun": "public-oci-tagged-retry-b2ml7",
+          "tekton.dev/pipelineRunUID": "7fd86e86-996c-4c55-a141-4b21f6eabafb",
+          "tekton.dev/pipelineTask": "retag"
+        },
+        "name": "public-oci-tagged-retry-b2ml7-retag",
+        "namespace": "retry-public-oci-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "public-oci-tagged-retry-b2ml7",
+            "uid": "7fd86e86-996c-4c55-a141-4b21f6eabafb"
+          }
+        ],
+        "resourceVersion": "6221159",
+        "uid": "2102533c-38e0-419f-89e0-795ef10f3ab5"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "srcImageURL",
+            "value": "docker://registry-source:5000/application@sha256:4898cf423428d46ab710940b7dca2daaa07226e6a98a31440c473bb134332549"
+          },
+          {
+            "name": "destImageURL",
+            "value": "docker://registry-source:5000/release:latest"
+          },
+          {
+            "name": "srcTLSverify",
+            "value": "false"
+          },
+          {
+            "name": "destTLSverify",
+            "value": "false"
+          }
+        ],
+        "podTemplate": {
+          "securityContext": {
+            "fsGroup": 65532
+          }
+        },
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "description": "Skopeo is a command line tool for working with remote image registries.\nSkopeo doesn\u2019t require a daemon to be running while performing its operations. In particular, the handy skopeo command called copy will ease the whole image copy operation. The copy command will take care of copying the image from internal.registry to production.registry. If your production registry requires credentials to login in order to push the image, skopeo can handle that as well.",
+          "params": [
+            {
+              "default": "",
+              "description": "URL of the image to be copied to the destination registry",
+              "name": "srcImageURL",
+              "type": "string"
+            },
+            {
+              "default": "",
+              "description": "URL of the image where the image from source should be copied to",
+              "name": "destImageURL",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the src registry endpoint",
+              "name": "srcTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the dest registry endpoint",
+              "name": "destTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "system",
+              "description": "How to handle multi-architecture images (system, all, or index-only)",
+              "name": "multiArch",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "env": [
+                {
+                  "name": "HOME",
+                  "value": "/tekton/home"
+                }
+              ],
+              "image": "quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b",
+              "name": "skopeo-copy",
+              "script": "# Function to copy multiple images.\n#\ncopyimages() {\n  filename=\"$(workspaces.images-url.path)/url.txt\"\n  while IFS= read -r line || [ -n \"$line\" ]\n  do\n    cmd=\"\"\n    for url in $line\n    do\n      # echo $url\n      cmd=\"$cmd \\\n          $url\"\n    done\n    read -ra sourceDest <<<\"${cmd}\"\n    skopeo copy --multi-arch=\"$(params.multiArch)\" \"${sourceDest[@]}\" --src-tls-verify=\"$(params.srcTLSverify)\" --dest-tls-verify=\"$(params.destTLSverify)\"\n    echo \"$cmd\"\n  done < \"$filename\"\n}\n# Check that the multiArch parm is one of the supported methods\n#\ncase \"$(params.multiArch)\" in all|system|index-only)\n    ;;\n  *)\n    echo \"Unrecognized multiArch choice: $(params.multiArch)\"\n    exit 1;;\nesac\n#\n# If single image is to be copied then, it can be passed through\n# params in the taskrun.\n#\nif [ \"$(params.srcImageURL)\" != \"\" ] && [ \"$(params.destImageURL)\" != \"\" ] ; then\n  skopeo copy --multi-arch=\"$(params.multiArch)\" \"$(params.srcImageURL)\" \"$(params.destImageURL)\" --src-tls-verify=\"$(params.srcTLSverify)\" --dest-tls-verify=\"$(params.destTLSverify)\"\nelse\n  # If file is provided as a configmap in the workspace then multiple images can be copied.\n  #\n  copyimages\nfi\n",
+              "securityContext": {
+                "runAsNonRoot": true,
+                "runAsUser": 65532
+              }
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "images-url"
+            }
+          ]
+        },
+        "timeout": "1h0m0s",
+        "workspaces": [
+          {
+            "emptyDir": {},
+            "name": "images-url"
+          }
+        ]
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T08:18:57Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T08:18:57Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "public-oci-tagged-retry-b2ml7-retag-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T08:18:51Z",
+        "steps": [
+          {
+            "container": "step-skopeo-copy",
+            "imageID": "quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b",
+            "name": "skopeo-copy",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://6ca0abb73f740b47cf288b5c3d3e29534b6151b6695dd1025ceb759465f7d1bc",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T08:18:56Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T08:18:56Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "description": "Skopeo is a command line tool for working with remote image registries.\nSkopeo doesn\u2019t require a daemon to be running while performing its operations. In particular, the handy skopeo command called copy will ease the whole image copy operation. The copy command will take care of copying the image from internal.registry to production.registry. If your production registry requires credentials to login in order to push the image, skopeo can handle that as well.",
+          "params": [
+            {
+              "default": "",
+              "description": "URL of the image to be copied to the destination registry",
+              "name": "srcImageURL",
+              "type": "string"
+            },
+            {
+              "default": "",
+              "description": "URL of the image where the image from source should be copied to",
+              "name": "destImageURL",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the src registry endpoint",
+              "name": "srcTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "true",
+              "description": "Verify the TLS on the dest registry endpoint",
+              "name": "destTLSverify",
+              "type": "string"
+            },
+            {
+              "default": "system",
+              "description": "How to handle multi-architecture images (system, all, or index-only)",
+              "name": "multiArch",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "env": [
+                {
+                  "name": "HOME",
+                  "value": "/tekton/home"
+                }
+              ],
+              "image": "quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b",
+              "name": "skopeo-copy",
+              "script": "# Function to copy multiple images.\n#\ncopyimages() {\n  filename=\"/workspace/images-url/url.txt\"\n  while IFS= read -r line || [ -n \"$line\" ]\n  do\n    cmd=\"\"\n    for url in $line\n    do\n      # echo $url\n      cmd=\"$cmd \\\n          $url\"\n    done\n    read -ra sourceDest <<<\"${cmd}\"\n    skopeo copy --multi-arch=\"system\" \"${sourceDest[@]}\" --src-tls-verify=\"false\" --dest-tls-verify=\"false\"\n    echo \"$cmd\"\n  done < \"$filename\"\n}\n# Check that the multiArch parm is one of the supported methods\n#\ncase \"system\" in all|system|index-only)\n    ;;\n  *)\n    echo \"Unrecognized multiArch choice: system\"\n    exit 1;;\nesac\n#\n# If single image is to be copied then, it can be passed through\n# params in the taskrun.\n#\nif [ \"docker://registry-source:5000/application@sha256:4898cf423428d46ab710940b7dca2daaa07226e6a98a31440c473bb134332549\" != \"\" ] && [ \"docker://registry-source:5000/release:latest\" != \"\" ] ; then\n  skopeo copy --multi-arch=\"system\" \"docker://registry-source:5000/application@sha256:4898cf423428d46ab710940b7dca2daaa07226e6a98a31440c473bb134332549\" \"docker://registry-source:5000/release:latest\" --src-tls-verify=\"false\" --dest-tls-verify=\"false\"\nelse\n  # If file is provided as a configmap in the workspace then multiple images can be copied.\n  #\n  copyimages\nfi\n",
+              "securityContext": {
+                "runAsNonRoot": true,
+                "runAsUser": 65532
+              }
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "images-url"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

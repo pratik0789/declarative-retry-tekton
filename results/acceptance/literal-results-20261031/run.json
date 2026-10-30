@@ -1,0 +1,85 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "name": "source",
+    "uid": "source-id",
+    "creationTimestamp": "2026-10-31T00:00:00Z"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "literal"
+    }
+  },
+  "status": {
+    "conditions": [
+      {
+        "type": "Succeeded",
+        "status": "False"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "produce",
+          "taskSpec": {
+            "results": [
+              {
+                "name": "out"
+              }
+            ],
+            "steps": [
+              {
+                "name": "s",
+                "image": "alpine:3.20",
+                "script": "exit 0"
+              }
+            ]
+          }
+        },
+        {
+          "name": "consume",
+          "params": [
+            {
+              "name": "msg",
+              "value": "$(tasks.produce.results.out)"
+            }
+          ],
+          "taskSpec": {
+            "params": [
+              {
+                "name": "msg",
+                "type": "string"
+              }
+            ],
+            "steps": [
+              {
+                "name": "s",
+                "image": "alpine:3.20",
+                "env": [
+                  {
+                    "name": "MSG",
+                    "value": "$(params.msg)"
+                  }
+                ],
+                "script": "printf \"%s\" \"$MSG\""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "childReferences": [
+      {
+        "name": "produce-run",
+        "pipelineTaskName": "produce",
+        "kind": "TaskRun"
+      },
+      {
+        "name": "consume-run",
+        "pipelineTaskName": "consume",
+        "kind": "TaskRun"
+      }
+    ]
+  }
+}

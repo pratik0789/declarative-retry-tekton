@@ -1,0 +1,136 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: t01=bench-s10-e-r5-source-t01
+    retry.tekton.dev/policy: policy-s10-e-r5
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"bench-s10-e-r5","resumeWithin":"","retryOnlyLatest":false,"tasks":{}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:5c62cb70ce200ce98886cddff843017e4e53223fc01755e2ba876b67eb11a6b1
+    retry.tekton.dev/source-pipeline: bench-s10-e-r5
+    retry.tekton.dev/source-pipeline-run: bench-s10-e-r5-source
+    retry.tekton.dev/source-pipeline-run-uid: d86102a4-1d6e-46f3-820c-072762bef00f
+  generateName: bench-s10-e-r5-retry-
+  namespace: retry-value-benchmark-20261030
+spec:
+  pipelineSpec:
+    tasks:
+    - name: t02
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            case "$(context.taskRun.name)" in "bench-s10-e-r5-source"-*) exit 1;; esac
+            echo t02
+    - name: t03
+      runAfter:
+      - t02
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t03
+    - name: t04
+      runAfter:
+      - t03
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t04
+    - name: t05
+      runAfter:
+      - t04
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t05
+    - name: t06
+      runAfter:
+      - t05
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t06
+    - name: t07
+      runAfter:
+      - t06
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t07
+    - name: t08
+      runAfter:
+      - t07
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t08
+    - name: t09
+      runAfter:
+      - t08
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t09
+    - name: t10
+      runAfter:
+      - t09
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t10
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

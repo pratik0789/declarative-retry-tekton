@@ -1,0 +1,469 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-fanin-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-fanin"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:29Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-fanin
+      tekton.dev/pipelineRun: retry-fanin-source
+      tekton.dev/pipelineRunUID: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+      tekton.dev/pipelineTask: build-a
+    name: retry-fanin-source-build-a
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-fanin-source
+      uid: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+    resourceVersion: "6379131"
+    uid: 3739d5bf-c232-48a3-8295-a7cc908d100b
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 4
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:40Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:40Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-fanin-source-build-a-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:29Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://9c77e37c8205fc50cc8f10f4d93aed88f182e06b3b2085153ee83d714a374283
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:40Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:36Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 4
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-fanin-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-fanin"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:29Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-fanin
+      tekton.dev/pipelineRun: retry-fanin-source
+      tekton.dev/pipelineRunUID: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+      tekton.dev/pipelineTask: build-b
+    name: retry-fanin-source-build-b
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-fanin-source
+      uid: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+    resourceVersion: "6379100"
+    uid: 2d8b6433-9ca5-48d5-92cd-1777f240daef
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:38Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:38Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-fanin-source-build-b-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:29Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://4660186b3b4f83a1bfe30579fd28fb14151f91bbeea09b7a2966795b2394948d
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:37Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:36Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-fanin-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-fanin"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:21Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-fanin
+      tekton.dev/pipelineRun: retry-fanin-source
+      tekton.dev/pipelineRunUID: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+      tekton.dev/pipelineTask: clone
+    name: retry-fanin-source-clone
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-fanin-source
+      uid: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+    resourceVersion: "6378971"
+    uid: 5343e8c5-3ee3-49fb-9afa-71e3561c858d
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:29Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:29Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-fanin-source-clone-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:21Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://24e716a85c5926d6c8efae7587c72c56a94d7289a3062ba694b8b21b43dc4765
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:28Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:27Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-fanin-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-fanin"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:56Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-fanin
+      tekton.dev/pipelineRun: retry-fanin-source
+      tekton.dev/pipelineRunUID: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+      tekton.dev/pipelineTask: deploy
+    name: retry-fanin-source-deploy
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-fanin-source
+      uid: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+    resourceVersion: "6379418"
+    uid: 4d525056-cc50-4120-808f-80b041cbcedf
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "$(context.taskRun.name)" in
+            *-source-*) echo "injected deploy failure"; exit 1 ;;
+          esac
+          echo deployed
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:48:03Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:48:03Z"
+      message: '"step-run" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: retry-fanin-source-deploy-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:56Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://75ef5575eb9c9bf227b1d252321ce04a93215c6248c675e37fe9b9f13cd20563
+        exitCode: 1
+        finishedAt: "2026-10-30T19:48:02Z"
+        reason: Error
+        startedAt: "2026-10-30T19:48:02Z"
+      terminationReason: Error
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-fanin-source-deploy" in
+            *-source-*) echo "injected deploy failure"; exit 1 ;;
+          esac
+          echo deployed
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-fanin-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-fanin"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:40Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-fanin
+      tekton.dev/pipelineRun: retry-fanin-source
+      tekton.dev/pipelineRunUID: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+      tekton.dev/pipelineTask: package
+    name: retry-fanin-source-package
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-fanin-source
+      uid: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+    resourceVersion: "6379213"
+    uid: 137a4278-a6c3-4d2e-bda1-845ffc7be2df
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:47Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:47Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-fanin-source-package-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:40Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://5d242a73a8c48f9c6b182877a86dc911f30488c23e6203e576ecfed1fe839c14
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:46Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:45Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-fanin-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-fanin"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:47Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-fanin
+      tekton.dev/pipelineRun: retry-fanin-source
+      tekton.dev/pipelineRunUID: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+      tekton.dev/pipelineTask: publish
+    name: retry-fanin-source-publish
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-fanin-source
+      uid: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+    resourceVersion: "6379318"
+    uid: f6a640f3-e1db-42ba-a2c2-503f306e5ede
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:56Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:56Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-fanin-source-publish-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:48Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://21194186d50b03ee8d6bb024f5cfe1576910b62d0eae6e3ba947fc903707a2f7
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:55Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:54Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+kind: List
+metadata:
+  resourceVersion: ""

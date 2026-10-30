@@ -1,0 +1,43 @@
+2026/10/30 08:15:42 Decoded script /tekton/scripts/script-1-97rmz
+[36mINFO[0m[0000] Resolved base name registry-source:5000/base/golang:1.18 to builder 
+[36mINFO[0m[0000] Retrieving image manifest registry-source:5000/base/golang:1.18 
+[36mINFO[0m[0000] Retrieving image registry-source:5000/base/golang:1.18 from registry registry-source:5000 
+[36mINFO[0m[0000] Retrieving image manifest registry-source:5000/base/alpine:3 
+[36mINFO[0m[0000] Retrieving image registry-source:5000/base/alpine:3 from registry registry-source:5000 
+[36mINFO[0m[0000] Built cross stage deps: map[0:[/app]]        
+[36mINFO[0m[0000] Retrieving image manifest registry-source:5000/base/golang:1.18 
+[36mINFO[0m[0000] Returning cached image manifest              
+[36mINFO[0m[0000] Executing 0 build triggers                   
+[36mINFO[0m[0000] Building stage 'registry-source:5000/base/golang:1.18' [idx: '0', base-idx: '-1'] 
+[36mINFO[0m[0000] Unpacking rootfs as cmd COPY main.go . requires it. 
+[36mINFO[0m[0009] WORKDIR /code                                
+[36mINFO[0m[0009] Cmd: workdir                                 
+[36mINFO[0m[0009] Changed working directory to /code           
+[36mINFO[0m[0009] Creating directory /code with uid -1 and gid -1 
+[36mINFO[0m[0009] Taking snapshot of files...                  
+[36mINFO[0m[0009] COPY main.go .                               
+[36mINFO[0m[0009] Taking snapshot of files...                  
+[36mINFO[0m[0009] COPY go.mod .                                
+[36mINFO[0m[0009] Taking snapshot of files...                  
+[36mINFO[0m[0009] ARG SKAFFOLD_GO_GCFLAGS                      
+[36mINFO[0m[0009] RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -trimpath -o /app main.go 
+[36mINFO[0m[0009] Initializing snapshotter ...                 
+[36mINFO[0m[0009] Taking snapshot of full filesystem...        
+[36mINFO[0m[0015] Cmd: /bin/sh                                 
+[36mINFO[0m[0015] Args: [-c go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -trimpath -o /app main.go] 
+[36mINFO[0m[0015] Running: [/bin/sh -c go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -trimpath -o /app main.go] 
+[36mINFO[0m[0019] Taking snapshot of full filesystem...        
+[36mINFO[0m[0021] Saving file app for later use                
+[36mINFO[0m[0021] Deleting filesystem...                       
+[36mINFO[0m[0021] Retrieving image manifest registry-source:5000/base/alpine:3 
+[36mINFO[0m[0021] Returning cached image manifest              
+[36mINFO[0m[0021] Executing 0 build triggers                   
+[36mINFO[0m[0021] Building stage 'registry-source:5000/base/alpine:3' [idx: '1', base-idx: '-1'] 
+[36mINFO[0m[0021] Unpacking rootfs as cmd COPY --from=builder /app . requires it. 
+[36mINFO[0m[0021] ENV GOTRACEBACK=single                       
+[36mINFO[0m[0021] CMD ["./app"]                                
+[36mINFO[0m[0021] COPY --from=builder /app .                   
+[36mINFO[0m[0021] Taking snapshot of files...                  
+[36mINFO[0m[0022] Pushing image to registry-source:5000/application:build 
+[36mINFO[0m[0023] Pushed registry-source:5000/application@sha256:4898cf423428d46ab710940b7dca2daaa07226e6a98a31440c473bb134332549 
+registry-source:5000/application:build2026/10/30 08:15:42 Entrypoint initialization

@@ -1,0 +1,231 @@
+{
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+        "annotations": {
+            "retry.tekton.dev/inherited-taskruns": "t01=bench-s5-e-r5-source-t01",
+            "retry.tekton.dev/policy": "policy-s5-e-r5",
+            "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"bench-s5-e-r5\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+            "retry.tekton.dev/policy-spec-sha256": "sha256:51ab40b69dcc95067123b2be4e35af9228871e66bad7cf793b044386e4ff2f96",
+            "retry.tekton.dev/source-pipeline": "bench-s5-e-r5",
+            "retry.tekton.dev/source-pipeline-run": "bench-s5-e-r5-source",
+            "retry.tekton.dev/source-pipeline-run-uid": "dc1fb4b4-e3f0-444d-a279-b651bec06b04"
+        },
+        "creationTimestamp": "2026-10-30T15:29:29Z",
+        "generateName": "bench-s5-e-r5-retry-",
+        "generation": 1,
+        "labels": {
+            "tekton.dev/pipeline": "bench-s5-e-r5-retry-49f8p"
+        },
+        "name": "bench-s5-e-r5-retry-49f8p",
+        "namespace": "retry-value-benchmark-20261030",
+        "resourceVersion": "6299334",
+        "uid": "57c722a0-e565-4175-9a17-bed128f6c17b"
+    },
+    "spec": {
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t02",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-e-r5-source\"-*) exit 1;; esac\necho t02\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t03",
+                    "runAfter": [
+                        "t02"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t03\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t04",
+                    "runAfter": [
+                        "t03"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t04\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t05",
+                    "runAfter": [
+                        "t04"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t05\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "taskRunTemplate": {
+            "serviceAccountName": "default"
+        },
+        "timeouts": {
+            "pipeline": "1h0m0s"
+        }
+    },
+    "status": {
+        "childReferences": [
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-retry-49f8p-t02",
+                "pipelineTaskName": "t02"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-retry-49f8p-t03",
+                "pipelineTaskName": "t03"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-retry-49f8p-t04",
+                "pipelineTaskName": "t04"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-e-r5-retry-49f8p-t05",
+                "pipelineTaskName": "t05"
+            }
+        ],
+        "completionTime": "2026-10-30T15:29:52Z",
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-10-30T15:29:52Z",
+                "message": "Tasks Completed: 4 (Failed: 0, Cancelled 0), Skipped: 0",
+                "reason": "Succeeded",
+                "status": "True",
+                "type": "Succeeded"
+            }
+        ],
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t02",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-e-r5-source\"-*) exit 1;; esac\necho t02\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t03",
+                    "runAfter": [
+                        "t02"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t03\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t04",
+                    "runAfter": [
+                        "t03"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t04\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t05",
+                    "runAfter": [
+                        "t04"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t05\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "provenance": {
+            "featureFlags": {
+                "awaitSidecarReadiness": true,
+                "coschedule": "workspaces",
+                "enableAPIFields": "beta",
+                "enableProvenanceInStatus": true,
+                "enforceNonfalsifiability": "none",
+                "maxResultSize": 4096,
+                "resultExtractionMethod": "termination-message",
+                "runningInEnvWithInjectedSidecars": true,
+                "verificationNoMatchPolicy": "ignore"
+            }
+        },
+        "startTime": "2026-10-30T15:29:29Z"
+    }
+}

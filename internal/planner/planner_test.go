@@ -166,6 +166,7 @@ func safetyFixture() (Pipeline, PipelineRun, Policy) {
 	p.Spec.Tasks = []PipelineTask{{Name: "build"}, {Name: "consume"}, {Name: "fail"}}
 	var r PipelineRun
 	r.Metadata.Name = "r"
+	r.Status.Conditions = []Condition{{Type: "Succeeded", Status: "False"}}
 	r.Spec.PipelineRef.Name = "p"
 	r.Status.ChildReferences = []ChildReference{{Name: "build-run", PipelineTask: "build", Status: "Succeeded"}, {Name: "consume-run", PipelineTask: "consume", Status: "Succeeded"}, {Name: "fail-run", PipelineTask: "fail", Status: "Failed"}}
 	var policy Policy
@@ -194,6 +195,7 @@ func TestBuildRefusesBlockedTask(t *testing.T) {
 	p.Spec.Tasks = []PipelineTask{{Name: "migrate"}}
 	var r PipelineRun
 	r.Metadata.Name = "r"
+	r.Status.Conditions = []Condition{{Type: "Succeeded", Status: "False"}}
 	r.Spec.PipelineRef.Name = "p"
 	r.Status.ChildReferences = []ChildReference{{PipelineTask: "migrate", Status: "Failed"}}
 	var policy Policy
@@ -215,6 +217,7 @@ func TestBuildFollowsParallelRecoveryDeclarations(t *testing.T) {
 	p.Spec.Tasks = []PipelineTask{{Name: "build"}, {Name: "scan"}}
 	var r PipelineRun
 	r.Metadata.Name = "r"
+	r.Status.Conditions = []Condition{{Type: "Succeeded", Status: "False"}}
 	r.Spec.PipelineRef.Name = "p"
 	r.Status.ChildReferences = []ChildReference{{PipelineTask: "build", Status: "Succeeded"}, {PipelineTask: "scan", Status: "Failed"}}
 	var policy Policy
@@ -239,6 +242,9 @@ func TestBuildFollowsParallelRecoveryDeclarations(t *testing.T) {
 }
 
 func recorded(r PipelineRun, p Pipeline) PipelineRun {
+	if r.Status.Conditions == nil {
+		r.Status.Conditions = []Condition{{Type: "Succeeded", Status: "False"}}
+	}
 	if r.Status.PipelineSpec == nil {
 		r.Status.PipelineSpec = &struct {
 			Tasks      []PipelineTask `json:"tasks"`

@@ -1,0 +1,229 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "acquire=source-publish-acquire,warmup=source-publish-warmup",
+      "retry.tekton.dev/policy": "empty",
+      "retry.tekton.dev/source-pipeline": "external-recovery",
+      "retry.tekton.dev/source-pipeline-run": "source-publish",
+      "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+    },
+    "creationTimestamp": "2026-10-30T06:40:07Z",
+    "generateName": "external-recovery-retry-",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "external-recovery-retry-w447b"
+    },
+    "name": "external-recovery-retry-w447b",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6199955",
+    "uid": "f1876104-43c9-4662-bd5a-a018b1a5fb54"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "publish",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sign",
+          "runAfter": [
+            "publish"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "scan",
+          "runAfter": [
+            "sign"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-w447b-publish",
+        "pipelineTaskName": "publish"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-w447b-sign",
+        "pipelineTaskName": "sign"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-w447b-scan",
+        "pipelineTaskName": "scan"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-w447b-deploy",
+        "pipelineTaskName": "deploy"
+      }
+    ],
+    "completionTime": "2026-10-30T06:40:31Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T06:40:31Z",
+        "message": "Tasks Completed: 4 (Failed: 0, Cancelled 0), Skipped: 0",
+        "reason": "Succeeded",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "publish",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sign",
+          "runAfter": [
+            "publish"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "scan",
+          "runAfter": [
+            "sign"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-30T06:40:07Z"
+  }
+}

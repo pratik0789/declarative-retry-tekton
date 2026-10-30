@@ -1,0 +1,272 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "warmup=source-sign-warmup",
+      "retry.tekton.dev/policy": "external-contract",
+      "retry.tekton.dev/policy-generation": "1",
+      "retry.tekton.dev/source-pipeline": "external-recovery",
+      "retry.tekton.dev/source-pipeline-run": "source-sign",
+      "retry.tekton.dev/source-pipeline-run-uid": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e"
+    },
+    "creationTimestamp": "2026-10-30T06:47:13Z",
+    "generateName": "external-recovery-retry-",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "external-recovery-retry-tvxjs"
+    },
+    "name": "external-recovery-retry-tvxjs",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6203890",
+    "uid": "34841223-7cac-4d4e-8ab5-1dbbe19a800d"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "acquire",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "publish",
+          "runAfter": [
+            "acquire"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sign",
+          "runAfter": [
+            "publish"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "scan",
+          "runAfter": [
+            "sign"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-tvxjs-acquire",
+        "pipelineTaskName": "acquire"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-tvxjs-publish",
+        "pipelineTaskName": "publish"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-tvxjs-sign",
+        "pipelineTaskName": "sign"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-tvxjs-scan",
+        "pipelineTaskName": "scan"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-tvxjs-deploy",
+        "pipelineTaskName": "deploy"
+      }
+    ],
+    "completionTime": "2026-10-30T06:47:41Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T06:47:41Z",
+        "message": "Tasks Completed: 5 (Failed: 0, Cancelled 0), Skipped: 0",
+        "reason": "Succeeded",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "acquire",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "publish",
+          "runAfter": [
+            "acquire"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sign",
+          "runAfter": [
+            "publish"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "scan",
+          "runAfter": [
+            "sign"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-30T06:47:13Z"
+  }
+}

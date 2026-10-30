@@ -1,0 +1,49 @@
+{
+  "decision": "recover",
+  "metrics": {
+    "avoidancePercent": 16.666666666666668,
+    "continuingTasks": 2,
+    "inheritedTasks": 1,
+    "rerunTasks": 3,
+    "tasksAvoided": 1,
+    "totalTasks": 6
+  },
+  "pipeline": "external-recovery",
+  "policy": "external-contract",
+  "policyGeneration": 1,
+  "sourceRun": "source-sign",
+  "sourceRunUID": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e",
+  "tasks": [
+    {
+      "action": "rerun",
+      "name": "acquire",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "action": "continue",
+      "name": "deploy",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "action": "rerun",
+      "name": "publish",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "action": "continue",
+      "name": "scan",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "action": "rerun",
+      "name": "sign",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "action": "inherit",
+      "name": "warmup",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "source-sign-warmup"
+    }
+  ]
+}

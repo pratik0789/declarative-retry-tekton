@@ -1,0 +1,514 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522"
+                },
+                "creationTimestamp": "2026-10-30T15:35:17Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "bench-s5-e-r10",
+                    "tekton.dev/pipelineRun": "bench-s5-e-r10-full",
+                    "tekton.dev/pipelineRunUID": "75e28c03-5236-4b89-9f0e-66100fc6a6da",
+                    "tekton.dev/pipelineTask": "t01"
+                },
+                "name": "bench-s5-e-r10-full-t01",
+                "namespace": "retry-value-benchmark-20261030",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "bench-s5-e-r10-full",
+                        "uid": "75e28c03-5236-4b89-9f0e-66100fc6a6da"
+                    }
+                ],
+                "resourceVersion": "6302344",
+                "uid": "24604157-186b-45cd-a1bf-10dadb0d6b90"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t01\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-30T15:35:23Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-30T15:35:23Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "bench-s5-e-r10-full-t01-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-30T15:35:17Z",
+                "steps": [
+                    {
+                        "container": "step-work",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "work",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://d0313eced9817d32c45e44fc0f2e48ce8e793d2adcd431df3ab61f16926c4282",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-30T15:35:22Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-30T15:35:22Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t01\n"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522"
+                },
+                "creationTimestamp": "2026-10-30T15:35:23Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "bench-s5-e-r10",
+                    "tekton.dev/pipelineRun": "bench-s5-e-r10-full",
+                    "tekton.dev/pipelineRunUID": "75e28c03-5236-4b89-9f0e-66100fc6a6da",
+                    "tekton.dev/pipelineTask": "t02"
+                },
+                "name": "bench-s5-e-r10-full-t02",
+                "namespace": "retry-value-benchmark-20261030",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "bench-s5-e-r10-full",
+                        "uid": "75e28c03-5236-4b89-9f0e-66100fc6a6da"
+                    }
+                ],
+                "resourceVersion": "6302403",
+                "uid": "1af2c010-e5d1-49e1-ac53-286896a403d9"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-e-r10-source\"-*) exit 1;; esac\necho t02\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-30T15:35:28Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-30T15:35:28Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "bench-s5-e-r10-full-t02-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-30T15:35:23Z",
+                "steps": [
+                    {
+                        "container": "step-work",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "work",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://cd887dcd86392aacb3dcf769a2d4768f02624e02718f5bf3ea4709758d076104",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-30T15:35:27Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-30T15:35:27Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\ncase \"bench-s5-e-r10-full-t02\" in \"bench-s5-e-r10-source\"-*) exit 1;; esac\necho t02\n"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522"
+                },
+                "creationTimestamp": "2026-10-30T15:35:28Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "bench-s5-e-r10",
+                    "tekton.dev/pipelineRun": "bench-s5-e-r10-full",
+                    "tekton.dev/pipelineRunUID": "75e28c03-5236-4b89-9f0e-66100fc6a6da",
+                    "tekton.dev/pipelineTask": "t03"
+                },
+                "name": "bench-s5-e-r10-full-t03",
+                "namespace": "retry-value-benchmark-20261030",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "bench-s5-e-r10-full",
+                        "uid": "75e28c03-5236-4b89-9f0e-66100fc6a6da"
+                    }
+                ],
+                "resourceVersion": "6302447",
+                "uid": "15819ad9-4867-4cb8-9e01-8bf957e2f44e"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t03\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-30T15:35:34Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-30T15:35:34Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "bench-s5-e-r10-full-t03-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-30T15:35:28Z",
+                "steps": [
+                    {
+                        "container": "step-work",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "work",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://bf19f918a0bb6156ea0938be2f3b7a5ec2b0753d93cc1c096788e26bec21c3b1",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-30T15:35:34Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-30T15:35:33Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t03\n"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522"
+                },
+                "creationTimestamp": "2026-10-30T15:35:34Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "bench-s5-e-r10",
+                    "tekton.dev/pipelineRun": "bench-s5-e-r10-full",
+                    "tekton.dev/pipelineRunUID": "75e28c03-5236-4b89-9f0e-66100fc6a6da",
+                    "tekton.dev/pipelineTask": "t04"
+                },
+                "name": "bench-s5-e-r10-full-t04",
+                "namespace": "retry-value-benchmark-20261030",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "bench-s5-e-r10-full",
+                        "uid": "75e28c03-5236-4b89-9f0e-66100fc6a6da"
+                    }
+                ],
+                "resourceVersion": "6302506",
+                "uid": "59763c26-294b-41f4-bd95-14888de29a79"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t04\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-30T15:35:40Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-30T15:35:40Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "bench-s5-e-r10-full-t04-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-30T15:35:34Z",
+                "steps": [
+                    {
+                        "container": "step-work",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "work",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://4d6bbcef02498fac40b26f76f92a9fb2d72e213b97d6b6df25e1c72bc3655dd5",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-30T15:35:39Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-30T15:35:39Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t04\n"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "tekton.dev/v1",
+            "kind": "TaskRun",
+            "metadata": {
+                "annotations": {
+                    "pipeline.tekton.dev/release": "fcba522"
+                },
+                "creationTimestamp": "2026-10-30T15:35:40Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/managed-by": "tekton-pipelines",
+                    "tekton.dev/memberOf": "tasks",
+                    "tekton.dev/pipeline": "bench-s5-e-r10",
+                    "tekton.dev/pipelineRun": "bench-s5-e-r10-full",
+                    "tekton.dev/pipelineRunUID": "75e28c03-5236-4b89-9f0e-66100fc6a6da",
+                    "tekton.dev/pipelineTask": "t05"
+                },
+                "name": "bench-s5-e-r10-full-t05",
+                "namespace": "retry-value-benchmark-20261030",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "tekton.dev/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "PipelineRun",
+                        "name": "bench-s5-e-r10-full",
+                        "uid": "75e28c03-5236-4b89-9f0e-66100fc6a6da"
+                    }
+                ],
+                "resourceVersion": "6302548",
+                "uid": "1ce7b823-be65-4c95-9d4c-08db3afd1341"
+            },
+            "spec": {
+                "serviceAccountName": "default",
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t05\n"
+                        }
+                    ]
+                },
+                "timeout": "1h0m0s"
+            },
+            "status": {
+                "artifacts": {},
+                "completionTime": "2026-10-30T15:35:45Z",
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-10-30T15:35:45Z",
+                        "message": "All Steps have completed executing",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Succeeded"
+                    }
+                ],
+                "podName": "bench-s5-e-r10-full-t05-pod",
+                "provenance": {
+                    "featureFlags": {
+                        "awaitSidecarReadiness": true,
+                        "coschedule": "workspaces",
+                        "enableAPIFields": "beta",
+                        "enableProvenanceInStatus": true,
+                        "enforceNonfalsifiability": "none",
+                        "maxResultSize": 4096,
+                        "resultExtractionMethod": "termination-message",
+                        "runningInEnvWithInjectedSidecars": true,
+                        "verificationNoMatchPolicy": "ignore"
+                    }
+                },
+                "startTime": "2026-10-30T15:35:40Z",
+                "steps": [
+                    {
+                        "container": "step-work",
+                        "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+                        "name": "work",
+                        "provenance": {},
+                        "terminated": {
+                            "containerID": "containerd://d69e7ffe48526d03d297a8286692b45827eaec2ed4831f91bf0d7b68637e9ffe",
+                            "exitCode": 0,
+                            "finishedAt": "2026-10-30T15:35:44Z",
+                            "reason": "Completed",
+                            "startedAt": "2026-10-30T15:35:44Z"
+                        },
+                        "terminationReason": "Completed"
+                    }
+                ],
+                "taskSpec": {
+                    "steps": [
+                        {
+                            "computeResources": {},
+                            "image": "alpine:3.20",
+                            "name": "work",
+                            "script": "sleep 0.2\necho t05\n"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

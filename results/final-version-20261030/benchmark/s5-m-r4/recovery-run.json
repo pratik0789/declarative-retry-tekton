@@ -1,0 +1,189 @@
+{
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+        "annotations": {
+            "retry.tekton.dev/inherited-taskruns": "t01=bench-s5-m-r4-source-t01,t02=bench-s5-m-r4-source-t02",
+            "retry.tekton.dev/policy": "policy-s5-m-r4",
+            "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"bench-s5-m-r4\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+            "retry.tekton.dev/policy-spec-sha256": "sha256:05d4fa35c9a444ac78e60d5b0ae458fed5ee4199e13fb33af24c541c5fcd7c90",
+            "retry.tekton.dev/source-pipeline": "bench-s5-m-r4",
+            "retry.tekton.dev/source-pipeline-run": "bench-s5-m-r4-source",
+            "retry.tekton.dev/source-pipeline-run-uid": "49b751a1-28c9-4b0e-9331-e9e97d7c4506"
+        },
+        "creationTimestamp": "2026-10-30T15:39:31Z",
+        "generateName": "bench-s5-m-r4-retry-",
+        "generation": 1,
+        "labels": {
+            "tekton.dev/pipeline": "bench-s5-m-r4-retry-wct78"
+        },
+        "name": "bench-s5-m-r4-retry-wct78",
+        "namespace": "retry-value-benchmark-20261030",
+        "resourceVersion": "6304855",
+        "uid": "0cec4e93-f246-447d-8a6b-f3275f588cd5"
+    },
+    "spec": {
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t03",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-m-r4-source\"-*) exit 1;; esac\necho t03\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t04",
+                    "runAfter": [
+                        "t03"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t04\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t05",
+                    "runAfter": [
+                        "t04"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t05\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "taskRunTemplate": {
+            "serviceAccountName": "default"
+        },
+        "timeouts": {
+            "pipeline": "1h0m0s"
+        }
+    },
+    "status": {
+        "childReferences": [
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-m-r4-retry-wct78-t03",
+                "pipelineTaskName": "t03"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-m-r4-retry-wct78-t04",
+                "pipelineTaskName": "t04"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-m-r4-retry-wct78-t05",
+                "pipelineTaskName": "t05"
+            }
+        ],
+        "completionTime": "2026-10-30T15:39:50Z",
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-10-30T15:39:50Z",
+                "message": "Tasks Completed: 3 (Failed: 0, Cancelled 0), Skipped: 0",
+                "reason": "Succeeded",
+                "status": "True",
+                "type": "Succeeded"
+            }
+        ],
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t03",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-m-r4-source\"-*) exit 1;; esac\necho t03\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t04",
+                    "runAfter": [
+                        "t03"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t04\n"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "t05",
+                    "runAfter": [
+                        "t04"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\necho t05\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "provenance": {
+            "featureFlags": {
+                "awaitSidecarReadiness": true,
+                "coschedule": "workspaces",
+                "enableAPIFields": "beta",
+                "enableProvenanceInStatus": true,
+                "enforceNonfalsifiability": "none",
+                "maxResultSize": 4096,
+                "resultExtractionMethod": "termination-message",
+                "runningInEnvWithInjectedSidecars": true,
+                "verificationNoMatchPolicy": "ignore"
+            }
+        },
+        "startTime": "2026-10-30T15:39:31Z"
+    }
+}

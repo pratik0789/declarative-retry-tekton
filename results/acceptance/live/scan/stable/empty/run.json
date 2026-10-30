@@ -1,0 +1,145 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "acquire=source-scan-acquire,publish=source-scan-publish,sign=source-scan-sign,warmup=source-scan-warmup",
+      "retry.tekton.dev/policy": "empty",
+      "retry.tekton.dev/source-pipeline": "external-recovery",
+      "retry.tekton.dev/source-pipeline-run": "source-scan",
+      "retry.tekton.dev/source-pipeline-run-uid": "868f8412-4a59-4ec4-b657-42efbbe57bb6"
+    },
+    "creationTimestamp": "2026-10-30T06:49:54Z",
+    "generateName": "external-recovery-retry-",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "external-recovery-retry-vpn6s"
+    },
+    "name": "external-recovery-retry-vpn6s",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6205195",
+    "uid": "36495556-0ab5-472c-a609-4ad258f3ce03"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "scan",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-vpn6s-scan",
+        "pipelineTaskName": "scan"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-vpn6s-deploy",
+        "pipelineTaskName": "deploy"
+      }
+    ],
+    "completionTime": "2026-10-30T06:50:04Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T06:50:04Z",
+        "message": "Tasks Completed: 2 (Failed: 0, Cancelled 0), Skipped: 0",
+        "reason": "Succeeded",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "scan",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-30T06:49:54Z"
+  }
+}

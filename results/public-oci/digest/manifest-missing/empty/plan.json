@@ -1,0 +1,79 @@
+{
+  "decision": "recover",
+  "metrics": {
+    "avoidancePercent": 75,
+    "continuingTasks": 0,
+    "inheritedTasks": 3,
+    "rerunTasks": 1,
+    "tasksAvoided": 3,
+    "totalTasks": 4
+  },
+  "pipeline": "public-oci-digest",
+  "policy": "public-oci-empty",
+  "policyGeneration": 1,
+  "policySpec": {
+    "pipelineRef": "public-oci-digest",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {}
+  },
+  "policySpecSHA256": "sha256:44c53b1f4a7c67116ede63b6f3150ab7c6a777673acafcf9c732afca65880c66",
+  "sourceRun": "source-final-digest",
+  "sourceRunUID": "a3715520-643d-458d-87d5-cf82f02b658b",
+  "tasks": [
+    {
+      "action": "inherit",
+      "name": "build",
+      "reason": "successful result reused from source run",
+      "results": {
+        "IMAGE_DIGEST": "sha256:4898cf423428d46ab710940b7dca2daaa07226e6a98a31440c473bb134332549",
+        "IMAGE_URL": "registry-source:5000/application:build"
+      },
+      "sourceTaskRun": "source-final-digest-build"
+    },
+    {
+      "action": "inherit",
+      "name": "clone",
+      "reason": "successful result reused from source run",
+      "results": {
+        "commit": "035e3ddc3589c1c64cb69c563b178f34b1cccc5e",
+        "committer-date": "1792593062",
+        "url": "git://git-source:9418/skaffold.git"
+      },
+      "sourceTaskRun": "source-final-digest-clone"
+    },
+    {
+      "action": "rerun",
+      "name": "promote",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "action": "inherit",
+      "name": "retag",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "source-final-digest-retag"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "ephemeral-workspace-across-closure",
+      "message": "workspace \"copy-input\" is bound by emptyDir, so the recovery run starts with a new, empty volume; contents written by inherited tasks are not carried over",
+      "stateKind": "workspace",
+      "stateName": "copy-input",
+      "tasks": [
+        "promote",
+        "retag"
+      ]
+    },
+    {
+      "code": "shared-workspace-across-closure",
+      "message": "writable workspace \"copy-input\" is shared by rerun and reused tasks",
+      "stateKind": "workspace",
+      "stateName": "copy-input",
+      "tasks": [
+        "promote",
+        "retag"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "generation": 1,
+    "name": "external-contract"
+  },
+  "spec": {
+    "pipelineRef": "external-recovery",
+    "tasks": {
+      "deploy": {
+        "retryWith": [
+          "scan"
+        ]
+      },
+      "publish": {
+        "retryWith": [
+          "acquire"
+        ]
+      },
+      "scan": {
+        "retryWith": [
+          "sign"
+        ]
+      },
+      "sign": {
+        "retryWith": [
+          "publish"
+        ]
+      }
+    }
+  }
+}

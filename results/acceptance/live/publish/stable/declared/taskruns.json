@@ -1,0 +1,544 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:41:37Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRun": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRunUID": "e85e0cd0-910f-4078-9940-f8d599b261d6",
+          "tekton.dev/pipelineTask": "acquire"
+        },
+        "name": "external-recovery-retry-fmzlt-acquire",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-fmzlt",
+            "uid": "e85e0cd0-910f-4078-9940-f8d599b261d6"
+          }
+        ],
+        "resourceVersion": "6200636",
+        "uid": "863116ff-df2f-47e5-933d-ff8869766d9c"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:41:44Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:41:44Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-fmzlt-acquire-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:41:37Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://74d1cea82697ca784551d7d78650e99856d9563dd4a8c73be93f33fe22980999",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:41:44Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:41:44Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:42:01Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRun": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRunUID": "e85e0cd0-910f-4078-9940-f8d599b261d6",
+          "tekton.dev/pipelineTask": "deploy"
+        },
+        "name": "external-recovery-retry-fmzlt-deploy",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-fmzlt",
+            "uid": "e85e0cd0-910f-4078-9940-f8d599b261d6"
+          }
+        ],
+        "resourceVersion": "6200853",
+        "uid": "40527c55-56d8-4ebf-9e12-4306233820e8"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:42:06Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:42:06Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-fmzlt-deploy-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:42:01Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://1580649ede624860012784af961f294b0d05c5ab971247595f10af04b15c5205",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:42:05Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:42:05Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:41:44Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRun": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRunUID": "e85e0cd0-910f-4078-9940-f8d599b261d6",
+          "tekton.dev/pipelineTask": "publish"
+        },
+        "name": "external-recovery-retry-fmzlt-publish",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-fmzlt",
+            "uid": "e85e0cd0-910f-4078-9940-f8d599b261d6"
+          }
+        ],
+        "resourceVersion": "6200697",
+        "uid": "d95bd166-41df-42df-9f60-caaaf013c8f0"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:41:50Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:41:50Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-fmzlt-publish-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:41:44Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://27579a9baf49ba0dc3657f374044d32e02ab88f0ccf00a9514d3d0a7edb44889",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:41:49Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:41:49Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:41:55Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRun": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRunUID": "e85e0cd0-910f-4078-9940-f8d599b261d6",
+          "tekton.dev/pipelineTask": "scan"
+        },
+        "name": "external-recovery-retry-fmzlt-scan",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-fmzlt",
+            "uid": "e85e0cd0-910f-4078-9940-f8d599b261d6"
+          }
+        ],
+        "resourceVersion": "6200807",
+        "uid": "700c1813-0f32-47b6-8d41-e7659492d553"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:42:01Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:42:01Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-fmzlt-scan-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:41:55Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://d77c81706041da458cbf897574ba77661bb2384e4c783636f6eece8a705306e6",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:42:00Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:42:00Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:41:50Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRun": "external-recovery-retry-fmzlt",
+          "tekton.dev/pipelineRunUID": "e85e0cd0-910f-4078-9940-f8d599b261d6",
+          "tekton.dev/pipelineTask": "sign"
+        },
+        "name": "external-recovery-retry-fmzlt-sign",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-fmzlt",
+            "uid": "e85e0cd0-910f-4078-9940-f8d599b261d6"
+          }
+        ],
+        "resourceVersion": "6200744",
+        "uid": "0e47ccfb-be14-427c-bb29-a8347def5cc6"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:41:55Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:41:55Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-fmzlt-sign-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:41:50Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://34d3972cf4a3b1fe4ec62e49eb944bab203ee15c8e315fa72be5b55eb74c8650",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:41:54Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:41:54Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

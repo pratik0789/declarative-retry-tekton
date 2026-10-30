@@ -1,0 +1,44 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: acquire=source-scan-acquire,publish=source-scan-publish,sign=source-scan-sign,warmup=source-scan-warmup
+    retry.tekton.dev/policy: empty
+    retry.tekton.dev/source-pipeline: external-recovery
+    retry.tekton.dev/source-pipeline-run: source-scan
+    retry.tekton.dev/source-pipeline-run-uid: 868f8412-4a59-4ec4-b657-42efbbe57bb6
+  generateName: external-recovery-retry-
+  namespace: retry-acceptance-20261030
+spec:
+  pipelineSpec:
+    tasks:
+    - name: scan
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: execute
+          script: |
+            #!/bin/sh
+            set -eu
+            wget -q -O- --post-data='{}' http://oracle:8000/execute/scan
+    - name: deploy
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: execute
+          script: |
+            #!/bin/sh
+            set -eu
+            wget -q -O- --post-data='{}' http://oracle:8000/execute/deploy
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

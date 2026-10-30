@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "generation": 1,
+    "name": "public-oci-rebuild"
+  },
+  "spec": {
+    "pipelineRef": "public-oci-tagged",
+    "tasks": {
+      "promote": {
+        "retryWith": [
+          "build",
+          "retag"
+        ]
+      }
+    }
+  }
+}

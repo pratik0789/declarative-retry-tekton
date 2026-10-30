@@ -161,16 +161,19 @@ type TaskRule struct {
 }
 
 type Plan struct {
-	SourceRun        string     `json:"sourceRun"`
-	SourceRunUID     string     `json:"sourceRunUID,omitempty"`
-	Pipeline         string     `json:"pipeline"`
-	Policy           string     `json:"policy"`
-	PolicyGeneration int64      `json:"policyGeneration,omitempty"`
-	Decision         string     `json:"decision"`
-	Tasks            []TaskPlan `json:"tasks"`
-	Warnings         []Warning  `json:"warnings,omitempty"`
-	RefusalReason    string     `json:"refusalReason,omitempty"`
-	Metrics          Metrics    `json:"metrics"`
+	SourceRun        string `json:"sourceRun"`
+	SourceRunUID     string `json:"sourceRunUID,omitempty"`
+	Pipeline         string `json:"pipeline"`
+	Policy           string `json:"policy"`
+	PolicyGeneration int64  `json:"policyGeneration,omitempty"`
+	// Normalized supported specification used for this decision, excluding metadata.
+	PolicySpecSHA256 string          `json:"policySpecSHA256"`
+	PolicySpec       json.RawMessage `json:"policySpec"`
+	Decision         string          `json:"decision"`
+	Tasks            []TaskPlan      `json:"tasks"`
+	Warnings         []Warning       `json:"warnings,omitempty"`
+	RefusalReason    string          `json:"refusalReason,omitempty"`
+	Metrics          Metrics         `json:"metrics"`
 }
 
 type Warning struct {

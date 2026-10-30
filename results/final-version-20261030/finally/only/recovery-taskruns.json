@@ -1,0 +1,156 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/finally-anchor": "retryctl-finally-anchor",
+          "retry.tekton.dev/inherited-taskruns": "audit=finally-only-source-audit,build=finally-only-source-build,prepare=finally-only-source-prepare",
+          "retry.tekton.dev/policy": "only",
+          "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"finally-only\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+          "retry.tekton.dev/policy-spec-sha256": "sha256:f8560ef701d5e4936b5b49f1ace9ea0779afd85b1c4ec77973b3f5e9d6c570dc",
+          "retry.tekton.dev/source-pipeline": "finally-only",
+          "retry.tekton.dev/source-pipeline-run": "finally-only-source",
+          "retry.tekton.dev/source-pipeline-run-uid": "1c7f1908-8493-4db3-b2f3-e181bb84455d"
+        },
+        "creationTimestamp": "2026-10-30T19:49:15Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "finally-only-recovery",
+          "tekton.dev/pipelineRun": "finally-only-recovery",
+          "tekton.dev/pipelineRunUID": "451a2a64-b09c-44a4-87de-ad69db578d7f",
+          "tekton.dev/pipelineTask": "notify"
+        },
+        "name": "finally-only-recovery-notify",
+        "namespace": "retry-value-finally-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "finally-only-recovery",
+            "uid": "451a2a64-b09c-44a4-87de-ad69db578d7f"
+          }
+        ],
+        "resourceVersion": "6380079",
+        "uid": "e47a7fde-f11f-4c9a-921b-97851e67d7a0"
+      },
+      "spec": {
+        "params": [
+          {
+            "name": "image",
+            "value": "image:finally-only-source-prepare"
+          }
+        ],
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T19:49:22Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T19:49:22Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "finally-only-recovery-notify-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "results": [
+          {
+            "name": "receipt",
+            "type": "string",
+            "value": "image:finally-only-source-prepare"
+          }
+        ],
+        "startTime": "2026-10-30T19:49:15Z",
+        "steps": [
+          {
+            "container": "step-run",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "run",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://077bf3a1ccfcc128cd87258a07be152931d8b72c6f6d7070ac0763487d5fcab1",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T19:49:21Z",
+              "message": "[{\"key\":\"receipt\",\"value\":\"image:finally-only-source-prepare\",\"type\":1}]",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T19:49:21Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"finally-only-recovery-notify\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"image:finally-only-source-prepare\" > \"/tekton/results/receipt\"\necho NOTIFIED\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

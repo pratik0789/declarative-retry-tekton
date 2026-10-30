@@ -1,0 +1,51 @@
+{
+  "sourceRun": "pw-5-source",
+  "sourceRunUID": "a771cf91-c098-448e-97fe-4a34c9368dd8",
+  "pipeline": "pw-5",
+  "policy": "pw-5-empty-policy",
+  "policyGeneration": 1,
+  "policySpecSHA256": "sha256:983587927bfeb2080d9ddbda520f7d4b050125804f83d7641f86c0fbfcd49c3d",
+  "policySpec": {
+    "pipelineRef": "pw-5",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {}
+  },
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "mutate",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "observe",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "pw-5-source-observe"
+    },
+    {
+      "name": "prepare",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "publish",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "name": "verify",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 5,
+    "rerunTasks": 2,
+    "inheritedTasks": 1,
+    "continuingTasks": 2,
+    "tasksAvoided": 1,
+    "avoidancePercent": 20
+  }
+}

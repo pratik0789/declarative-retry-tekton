@@ -1,0 +1,36 @@
+namespace/retry-value-stateful-20261030-6 created
+persistentvolumeclaim/retry-stateful-pvc created
+pipeline.tekton.dev/retry-stateful created
+pipelinerun.tekton.dev/retry-stateful-pvc-source created
+pipelinerun.tekton.dev/retry-stateful-vct-source created
+pipelinerun.tekton.dev/retry-stateful-pvc-source condition met
+pipelinerun.tekton.dev/retry-stateful-vct-source condition met
+pipelinerun.tekton.dev/retry-stateful-retry-9khzl condition met
+pipelinerun.tekton.dev/retry-stateful-retry-g682x condition met
+Warning: version difference between client (1.34) and server (1.31) exceeds the supported minor version skew of +/-1
+{
+  "persistentClaim": {
+    "recoveryRun": "retry-stateful-retry-9khzl",
+    "recoverySucceeded": true,
+    "recoveryTaskRuns": 3,
+    "warnings": [
+      "shared-workspace-across-closure"
+    ],
+    "sourceCommitResult": "045060ff0da8",
+    "substitutedCommitParam": "045060ff0da8",
+    "commitMatches": true,
+    "buildLog": "STATE-VERIFIED: commit 045060ff0da8 digest 761cec866844631990718f99bf732f8d3435615e24eecbe390b804f79daf41f1"
+  },
+  "volumeClaimTemplate": {
+    "recoveryRun": "retry-stateful-retry-g682x",
+    "warnings": [
+      "ephemeral-workspace-across-closure",
+      "shared-workspace-across-closure"
+    ],
+    "withoutConfirmation": "stopped-for-confirmation",
+    "recoverySucceeded": false,
+    "buildSucceeded": "False",
+    "buildLog": "STATE-MISSING: source.txt written by clone is not present"
+  },
+  "changedDefinition": "refuse: Pipeline definition changed since the source run"
+}

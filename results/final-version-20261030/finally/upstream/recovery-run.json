@@ -1,0 +1,271 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "audit=finally-upstream-source-audit",
+      "retry.tekton.dev/policy": "upstream",
+      "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"finally-upstream\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{\"build\":{\"blocksResume\":false,\"retryWith\":[\"prepare\"]},\"notify\":{\"blocksResume\":false,\"retryWith\":[\"build\"]}}}",
+      "retry.tekton.dev/policy-spec-sha256": "sha256:259269a1837d438b916f314c19c20c602f1b8926eb7929333617d9190029d1b1",
+      "retry.tekton.dev/source-pipeline": "finally-upstream",
+      "retry.tekton.dev/source-pipeline-run": "finally-upstream-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "5cca6ca7-1b86-4ed9-b188-8f89faa5b397"
+    },
+    "creationTimestamp": "2026-10-30T19:49:44Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "finally-upstream-recovery"
+    },
+    "name": "finally-upstream-recovery",
+    "namespace": "retry-value-finally-20261030",
+    "resourceVersion": "6380487",
+    "uid": "d961231a-cc69-477d-b94e-43ac5d48dacd"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "$(tasks.build.results.image)"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "prepare",
+          "taskSpec": {
+            "metadata": {},
+            "results": [
+              {
+                "name": "revision",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"%s\" \"$(context.taskRun.name)\" > \"$(results.revision.path)\"\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "build",
+          "params": [
+            {
+              "name": "revision",
+              "value": "$(tasks.prepare.results.revision)"
+            }
+          ],
+          "runAfter": [
+            "prepare"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "revision",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"image:%s\" \"$(params.revision)\" > \"$(results.image.path)\"\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-upstream-recovery-prepare",
+        "pipelineTaskName": "prepare"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-upstream-recovery-build",
+        "pipelineTaskName": "build"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-upstream-recovery-notify",
+        "pipelineTaskName": "notify"
+      }
+    ],
+    "completionTime": "2026-10-30T19:50:03Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T19:50:03Z",
+        "message": "Tasks Completed: 3 (Failed: 0, Cancelled 0), Skipped: 0",
+        "reason": "Succeeded",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "finallyStartTime": "2026-10-30T19:49:56Z",
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "$(tasks.build.results.image)"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "prepare",
+          "taskSpec": {
+            "metadata": {},
+            "results": [
+              {
+                "name": "revision",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"%s\" \"$(context.taskRun.name)\" > \"$(results.revision.path)\"\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "build",
+          "params": [
+            {
+              "name": "revision",
+              "value": "$(tasks.prepare.results.revision)"
+            }
+          ],
+          "runAfter": [
+            "prepare"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "revision",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\nprintf \"image:%s\" \"$(params.revision)\" > \"$(results.image.path)\"\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-30T19:49:44Z"
+  }
+}

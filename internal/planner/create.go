@@ -19,6 +19,8 @@ const (
 	annotationSourcePipeline   = "retry.tekton.dev/source-pipeline"
 	annotationPolicy           = "retry.tekton.dev/policy"
 	annotationPolicyGeneration = "retry.tekton.dev/policy-generation"
+	annotationPolicySpecSHA256 = "retry.tekton.dev/policy-spec-sha256"
+	annotationPolicySpec       = "retry.tekton.dev/policy-spec"
 	annotationInheritedRuns    = "retry.tekton.dev/inherited-taskruns"
 	annotationWarningsAccepted = "retry.tekton.dev/shared-state-warnings-accepted"
 	annotationWarningCodes     = "retry.tekton.dev/shared-state-warning-codes"
@@ -201,10 +203,12 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 
 	sourceMeta := asMap(sourceRun["metadata"])
 	annotations := map[string]any{
-		annotationSourceRun:      plan.SourceRun,
-		annotationSourceRunUID:   plan.SourceRunUID,
-		annotationSourcePipeline: plan.Pipeline,
-		annotationPolicy:         plan.Policy,
+		annotationSourceRun:        plan.SourceRun,
+		annotationSourceRunUID:     plan.SourceRunUID,
+		annotationSourcePipeline:   plan.Pipeline,
+		annotationPolicy:           plan.Policy,
+		annotationPolicySpecSHA256: plan.PolicySpecSHA256,
+		annotationPolicySpec:       string(plan.PolicySpec),
 	}
 	if anchor != "" {
 		annotations[annotationFinallyAnchor] = anchor
@@ -251,6 +255,7 @@ func CreateRecoveryRun(pipelinePath, runPath, policyPath, taskRunsPath, newerRun
 }
 
 func substituteResults(node map[string]any, inherited map[string]TaskPlan) error {
+	var substitutionErr error
 	var walk func(any) any
 	walk = func(value any) any {
 		switch typed := value.(type) {
@@ -262,6 +267,16 @@ func substituteResults(node map[string]any, inherited map[string]TaskPlan) error
 					return match
 				}
 				if result, ok := task.Results[parts[2]].(string); ok {
+					// Saved results are data. Pasting Tekton substitution syntax
+					// into a task definition can create dependencies or rebind
+					// that data to the recovery run's params/context. Refuse
+					// until task-level literal transport is implemented.
+					if strings.Contains(result, "$(") {
+						if substitutionErr == nil {
+							substitutionErr = fmt.Errorf("saved result %q of inherited task %q contains substitution syntax and cannot be inserted literally into a recovery task", parts[2], parts[1])
+						}
+						return match
+					}
 					return result
 				}
 				return match
@@ -278,6 +293,9 @@ func substituteResults(node map[string]any, inherited map[string]TaskPlan) error
 		return value
 	}
 	walk(node)
+	if substitutionErr != nil {
+		return substitutionErr
+	}
 	return rejectUnresolvedInheritedReferences(node, inherited)
 }
 

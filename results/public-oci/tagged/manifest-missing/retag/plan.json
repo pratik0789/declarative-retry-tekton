@@ -1,0 +1,63 @@
+{
+  "decision": "recover",
+  "metrics": {
+    "avoidancePercent": 50,
+    "continuingTasks": 0,
+    "inheritedTasks": 2,
+    "rerunTasks": 2,
+    "tasksAvoided": 2,
+    "totalTasks": 4
+  },
+  "pipeline": "public-oci-tagged",
+  "policy": "public-oci-retag",
+  "policyGeneration": 1,
+  "policySpec": {
+    "pipelineRef": "public-oci-tagged",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {
+      "promote": {
+        "blocksResume": false,
+        "retryWith": [
+          "retag"
+        ]
+      }
+    }
+  },
+  "policySpecSHA256": "sha256:70dc44f9cabc3dc37cc0f23be9f781d8e99a7229e9ef566b1b1151fdb7af9c17",
+  "sourceRun": "source-final-tagged",
+  "sourceRunUID": "7358c17e-bf48-4b31-acff-3aac9c3aee45",
+  "tasks": [
+    {
+      "action": "inherit",
+      "name": "build",
+      "reason": "successful result reused from source run",
+      "results": {
+        "IMAGE_DIGEST": "sha256:4898cf423428d46ab710940b7dca2daaa07226e6a98a31440c473bb134332549",
+        "IMAGE_URL": "registry-source:5000/application:build"
+      },
+      "sourceTaskRun": "source-final-tagged-build"
+    },
+    {
+      "action": "inherit",
+      "name": "clone",
+      "reason": "successful result reused from source run",
+      "results": {
+        "commit": "035e3ddc3589c1c64cb69c563b178f34b1cccc5e",
+        "committer-date": "1792593062",
+        "url": "git://git-source:9418/skaffold.git"
+      },
+      "sourceTaskRun": "source-final-tagged-clone"
+    },
+    {
+      "action": "rerun",
+      "name": "promote",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "action": "rerun",
+      "name": "retag",
+      "reason": "failed or selected task, or retryWith closure"
+    }
+  ]
+}

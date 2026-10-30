@@ -1,0 +1,110 @@
+pw-1 empty: success=False, oracle=False, TaskRuns=1
+pw-1 full: success=True, oracle=True, TaskRuns=5
+pw-1 closure: success=True, oracle=True, TaskRuns=4
+pw-2 empty: success=False, oracle=False, TaskRuns=1
+pw-2 full: success=True, oracle=True, TaskRuns=5
+pw-2 closure: success=True, oracle=True, TaskRuns=4
+pw-3 full: success=True, oracle=True, TaskRuns=5
+pw-3 empty: success=False, oracle=False, TaskRuns=1
+pw-3 closure: success=True, oracle=True, TaskRuns=4
+pw-4 full: success=True, oracle=True, TaskRuns=5
+pw-4 closure: success=True, oracle=True, TaskRuns=4
+pw-4 empty: success=False, oracle=False, TaskRuns=1
+pw-5 full: success=True, oracle=True, TaskRuns=5
+pw-5 empty: success=False, oracle=False, TaskRuns=1
+pw-5 closure: success=True, oracle=True, TaskRuns=4
+fi-1 closure: success=True, oracle=True, TaskRuns=4
+fi-1 empty: success=False, oracle=False, TaskRuns=3
+fi-1 full: success=True, oracle=True, TaskRuns=5
+fi-2 empty: success=False, oracle=False, TaskRuns=3
+fi-2 closure: success=True, oracle=True, TaskRuns=4
+fi-2 full: success=True, oracle=True, TaskRuns=5
+fi-3 closure: success=True, oracle=True, TaskRuns=4
+fi-3 full: success=True, oracle=True, TaskRuns=5
+fi-3 empty: success=False, oracle=False, TaskRuns=3
+fi-4 full: success=True, oracle=True, TaskRuns=5
+fi-4 empty: success=False, oracle=False, TaskRuns=3
+fi-4 closure: success=True, oracle=True, TaskRuns=4
+fi-5 closure: success=True, oracle=True, TaskRuns=4
+fi-5 full: success=True, oracle=True, TaskRuns=5
+fi-5 empty: success=False, oracle=False, TaskRuns=3
+{
+  "protocol": {
+    "repetitionsPerMechanism": 5,
+    "mechanisms": [
+      "partial-write",
+      "stale-build"
+    ],
+    "arms": [
+      "empty",
+      "closure",
+      "full"
+    ],
+    "orderSeed": 20261011,
+    "sourceSnapshot": "one failed source per triplet; exact bytes copied to three distinct PVCs",
+    "bindingOverride": "generated recovery manifest is preserved; only claimName and generated name are overridden for isolation",
+    "oracle": "native task assertions plus external SHA-256 over actual Workspace bytes and Tekton status",
+    "timing": "not a timing benchmark; status polling every 1 second",
+    "authoring": "fixtures, policies, and assertions authored with the prototype; no independent author study",
+    "retryWithDirection": "earlier or parallel tasks only, checked transitively for each policy root",
+    "definitionGuard": "exact saved/current specification comparison; native captures are never rewritten",
+    "taskContext": "TaskRun name injects source-only failures and refreshes stale-build input without resolving the saved PipelineSpec",
+    "staleBuildSelection": "operator selects prepare; failed gate declares retryWith [prepare, build]"
+  },
+  "triplets": 10,
+  "armsExecuted": 30,
+  "results": {
+    "partial-write": {
+      "empty": {
+        "succeeded": 0,
+        "consistentReceipts": 0,
+        "n": 5,
+        "taskRunsPerTrial": [
+          1
+        ]
+      },
+      "closure": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          4
+        ]
+      },
+      "full": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          5
+        ]
+      }
+    },
+    "stale-build": {
+      "empty": {
+        "succeeded": 0,
+        "consistentReceipts": 0,
+        "n": 5,
+        "taskRunsPerTrial": [
+          3
+        ]
+      },
+      "closure": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          4
+        ]
+      },
+      "full": {
+        "succeeded": 5,
+        "consistentReceipts": 5,
+        "n": 5,
+        "taskRunsPerTrial": [
+          5
+        ]
+      }
+    }
+  }
+}

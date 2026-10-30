@@ -1,0 +1,115 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "acquire=source-sign-acquire,publish=source-sign-publish,warmup=source-sign-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-sign",
+          "retry.tekton.dev/source-pipeline-run-uid": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e"
+        },
+        "creationTimestamp": "2026-10-30T06:47:04Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-fz6wk",
+          "tekton.dev/pipelineRun": "external-recovery-retry-fz6wk",
+          "tekton.dev/pipelineRunUID": "7dd09a03-c9b2-4881-be80-cf7e5ae80fc4",
+          "tekton.dev/pipelineTask": "sign"
+        },
+        "name": "external-recovery-retry-fz6wk-sign",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-fz6wk",
+            "uid": "7dd09a03-c9b2-4881-be80-cf7e5ae80fc4"
+          }
+        ],
+        "resourceVersion": "6203601",
+        "uid": "da08de4f-c9c4-41fc-9c54-8feb9161eaae"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:47:10Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:47:10Z",
+            "message": "\"step-execute\" exited with code 1: Error",
+            "reason": "Failed",
+            "status": "False",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-fz6wk-sign-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:47:04Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://8c49c0d807958c699b91b23f6015c445fd96d57ff37f4f32551ab6168b3bb3b1",
+              "exitCode": 1,
+              "finishedAt": "2026-10-30T06:47:09Z",
+              "reason": "Error",
+              "startedAt": "2026-10-30T06:47:09Z"
+            },
+            "terminationReason": "Error"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

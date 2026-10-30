@@ -1,0 +1,217 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: build=source-final-tagged-build,clone=source-final-tagged-clone
+    retry.tekton.dev/policy: public-oci-retag
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"public-oci-tagged","resumeWithin":"","retryOnlyLatest":false,"tasks":{"promote":{"blocksResume":false,"retryWith":["retag"]}}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:70dc44f9cabc3dc37cc0f23be9f781d8e99a7229e9ef566b1b1151fdb7af9c17
+    retry.tekton.dev/source-pipeline: public-oci-tagged
+    retry.tekton.dev/source-pipeline-run: source-final-tagged
+    retry.tekton.dev/source-pipeline-run-uid: 7358c17e-bf48-4b31-acff-3aac9c3aee45
+  generateName: public-oci-tagged-retry-
+  namespace: retry-public-oci-20261030
+spec:
+  pipelineSpec:
+    tasks:
+    - name: retag
+      params:
+      - name: srcImageURL
+        value: docker://registry-source:5000/application@sha256:4898cf423428d46ab710940b7dca2daaa07226e6a98a31440c473bb134332549
+      - name: destImageURL
+        value: docker://registry-source:5000/release:latest
+      - name: srcTLSverify
+        value: "false"
+      - name: destTLSverify
+        value: "false"
+      taskSpec:
+        description: |-
+          Skopeo is a command line tool for working with remote image registries.
+          Skopeo doesn’t require a daemon to be running while performing its operations. In particular, the handy skopeo command called copy will ease the whole image copy operation. The copy command will take care of copying the image from internal.registry to production.registry. If your production registry requires credentials to login in order to push the image, skopeo can handle that as well.
+        metadata: {}
+        params:
+        - default: ""
+          description: URL of the image to be copied to the destination registry
+          name: srcImageURL
+          type: string
+        - default: ""
+          description: URL of the image where the image from source should be copied
+            to
+          name: destImageURL
+          type: string
+        - default: "true"
+          description: Verify the TLS on the src registry endpoint
+          name: srcTLSverify
+          type: string
+        - default: "true"
+          description: Verify the TLS on the dest registry endpoint
+          name: destTLSverify
+          type: string
+        - default: system
+          description: How to handle multi-architecture images (system, all, or index-only)
+          name: multiArch
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          env:
+          - name: HOME
+            value: /tekton/home
+          image: quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b
+          name: skopeo-copy
+          script: |
+            # Function to copy multiple images.
+            #
+            copyimages() {
+              filename="$(workspaces.images-url.path)/url.txt"
+              while IFS= read -r line || [ -n "$line" ]
+              do
+                cmd=""
+                for url in $line
+                do
+                  # echo $url
+                  cmd="$cmd \
+                      $url"
+                done
+                read -ra sourceDest <<<"${cmd}"
+                skopeo copy --multi-arch="$(params.multiArch)" "${sourceDest[@]}" --src-tls-verify="$(params.srcTLSverify)" --dest-tls-verify="$(params.destTLSverify)"
+                echo "$cmd"
+              done < "$filename"
+            }
+            # Check that the multiArch parm is one of the supported methods
+            #
+            case "$(params.multiArch)" in all|system|index-only)
+                ;;
+              *)
+                echo "Unrecognized multiArch choice: $(params.multiArch)"
+                exit 1;;
+            esac
+            #
+            # If single image is to be copied then, it can be passed through
+            # params in the taskrun.
+            #
+            if [ "$(params.srcImageURL)" != "" ] && [ "$(params.destImageURL)" != "" ] ; then
+              skopeo copy --multi-arch="$(params.multiArch)" "$(params.srcImageURL)" "$(params.destImageURL)" --src-tls-verify="$(params.srcTLSverify)" --dest-tls-verify="$(params.destTLSverify)"
+            else
+              # If file is provided as a configmap in the workspace then multiple images can be copied.
+              #
+              copyimages
+            fi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+        workspaces:
+        - name: images-url
+      workspaces:
+      - name: images-url
+        workspace: copy-input
+    - name: promote
+      params:
+      - name: srcImageURL
+        value: docker://registry-source:5000/release:latest
+      - name: destImageURL
+        value: docker://registry-delivery:5000/delivery:latest
+      - name: srcTLSverify
+        value: "false"
+      - name: destTLSverify
+        value: "false"
+      runAfter:
+      - retag
+      taskSpec:
+        description: |-
+          Skopeo is a command line tool for working with remote image registries.
+          Skopeo doesn’t require a daemon to be running while performing its operations. In particular, the handy skopeo command called copy will ease the whole image copy operation. The copy command will take care of copying the image from internal.registry to production.registry. If your production registry requires credentials to login in order to push the image, skopeo can handle that as well.
+        metadata: {}
+        params:
+        - default: ""
+          description: URL of the image to be copied to the destination registry
+          name: srcImageURL
+          type: string
+        - default: ""
+          description: URL of the image where the image from source should be copied
+            to
+          name: destImageURL
+          type: string
+        - default: "true"
+          description: Verify the TLS on the src registry endpoint
+          name: srcTLSverify
+          type: string
+        - default: "true"
+          description: Verify the TLS on the dest registry endpoint
+          name: destTLSverify
+          type: string
+        - default: system
+          description: How to handle multi-architecture images (system, all, or index-only)
+          name: multiArch
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          env:
+          - name: HOME
+            value: /tekton/home
+          image: quay.io/skopeo/stable@sha256:ad1d2e25cf0234bb50476e753a8fc9debd4f0582cdd2ab6fd7bad9bacdfe3b9b
+          name: skopeo-copy
+          script: |
+            # Function to copy multiple images.
+            #
+            copyimages() {
+              filename="$(workspaces.images-url.path)/url.txt"
+              while IFS= read -r line || [ -n "$line" ]
+              do
+                cmd=""
+                for url in $line
+                do
+                  # echo $url
+                  cmd="$cmd \
+                      $url"
+                done
+                read -ra sourceDest <<<"${cmd}"
+                skopeo copy --multi-arch="$(params.multiArch)" "${sourceDest[@]}" --src-tls-verify="$(params.srcTLSverify)" --dest-tls-verify="$(params.destTLSverify)"
+                echo "$cmd"
+              done < "$filename"
+            }
+            # Check that the multiArch parm is one of the supported methods
+            #
+            case "$(params.multiArch)" in all|system|index-only)
+                ;;
+              *)
+                echo "Unrecognized multiArch choice: $(params.multiArch)"
+                exit 1;;
+            esac
+            #
+            # If single image is to be copied then, it can be passed through
+            # params in the taskrun.
+            #
+            if [ "$(params.srcImageURL)" != "" ] && [ "$(params.destImageURL)" != "" ] ; then
+              skopeo copy --multi-arch="$(params.multiArch)" "$(params.srcImageURL)" "$(params.destImageURL)" --src-tls-verify="$(params.srcTLSverify)" --dest-tls-verify="$(params.destTLSverify)"
+            else
+              # If file is provided as a configmap in the workspace then multiple images can be copied.
+              #
+              copyimages
+            fi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+        workspaces:
+        - name: images-url
+      workspaces:
+      - name: images-url
+        workspace: copy-input
+    workspaces:
+    - name: source
+    - name: copy-input
+  taskRunTemplate:
+    podTemplate:
+      securityContext:
+        fsGroup: 65532
+    serviceAccountName: default
+  timeouts:
+    pipeline: 20m0s
+  workspaces:
+  - name: source
+    persistentVolumeClaim:
+      claimName: source
+  - emptyDir: {}
+    name: copy-input

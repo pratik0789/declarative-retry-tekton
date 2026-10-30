@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"tekton.dev/v1","kind":"Pipeline","metadata":{"annotations":{},"name":"retry-fanin","namespace":"retry-value-ordering-20261030"},"spec":{"tasks":[{"name":"clone","taskSpec":{"steps":[{"image":"alpine:3.20","name":"run","script":"sleep 1"}]}},{"name":"build-a","runAfter":["clone"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"run","script":"sleep 4"}]}},{"name":"build-b","runAfter":["clone"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"run","script":"sleep 1"}]}},{"name":"package","runAfter":["build-a","build-b"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"run","script":"sleep 1"}]}},{"name":"publish","runAfter":["package"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"run","script":"sleep 1"}]}},{"name":"deploy","runAfter":["publish"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"run","script":"case \"$(context.taskRun.name)\" in\n  *-source-*) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"}]}}]}}
+  creationTimestamp: "2026-10-30T19:47:21Z"
+  generation: 1
+  name: retry-fanin
+  namespace: retry-value-ordering-20261030
+  resourceVersion: "6378865"
+  uid: 7f8663f9-efe5-441d-ab4e-91c4e04730ae
+spec:
+  tasks:
+  - name: clone
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+  - name: build-a
+    runAfter:
+    - clone
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 4
+  - name: build-b
+    runAfter:
+    - clone
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+  - name: package
+    runAfter:
+    - build-a
+    - build-b
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+  - name: publish
+    runAfter:
+    - package
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+  - name: deploy
+    runAfter:
+    - publish
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "$(context.taskRun.name)" in
+            *-source-*) echo "injected deploy failure"; exit 1 ;;
+          esac
+          echo deployed

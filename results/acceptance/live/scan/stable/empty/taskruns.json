@@ -1,0 +1,221 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "acquire=source-scan-acquire,publish=source-scan-publish,sign=source-scan-sign,warmup=source-scan-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-scan",
+          "retry.tekton.dev/source-pipeline-run-uid": "868f8412-4a59-4ec4-b657-42efbbe57bb6"
+        },
+        "creationTimestamp": "2026-10-30T06:49:59Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-vpn6s",
+          "tekton.dev/pipelineRun": "external-recovery-retry-vpn6s",
+          "tekton.dev/pipelineRunUID": "36495556-0ab5-472c-a609-4ad258f3ce03",
+          "tekton.dev/pipelineTask": "deploy"
+        },
+        "name": "external-recovery-retry-vpn6s-deploy",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-vpn6s",
+            "uid": "36495556-0ab5-472c-a609-4ad258f3ce03"
+          }
+        ],
+        "resourceVersion": "6205193",
+        "uid": "5c5d2733-0338-4f20-b41c-a97cd77cf1b3"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:50:04Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:50:04Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-vpn6s-deploy-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:49:59Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://d9090ea7e9c6472756a8ed10a1496d35b883d7388ae19c03fb1bd7528b66a0fe",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:50:04Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:50:04Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "acquire=source-scan-acquire,publish=source-scan-publish,sign=source-scan-sign,warmup=source-scan-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-scan",
+          "retry.tekton.dev/source-pipeline-run-uid": "868f8412-4a59-4ec4-b657-42efbbe57bb6"
+        },
+        "creationTimestamp": "2026-10-30T06:49:54Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-vpn6s",
+          "tekton.dev/pipelineRun": "external-recovery-retry-vpn6s",
+          "tekton.dev/pipelineRunUID": "36495556-0ab5-472c-a609-4ad258f3ce03",
+          "tekton.dev/pipelineTask": "scan"
+        },
+        "name": "external-recovery-retry-vpn6s-scan",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-vpn6s",
+            "uid": "36495556-0ab5-472c-a609-4ad258f3ce03"
+          }
+        ],
+        "resourceVersion": "6205147",
+        "uid": "6f258073-2134-452e-8b98-6127ed880fdc"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:49:59Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:49:59Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-vpn6s-scan-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:49:54Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://d2d6a5a5130223860395f2b86ccf0a1590f5d93fe28520dac9e7529ec71e8b29",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:49:58Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:49:58Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

@@ -7,7 +7,7 @@ set -euo pipefail
 
 cluster="${CLUSTER:-retry-paper}"
 context="kind-${cluster}"
-namespace="retry-ordering"
+namespace="${NAMESPACE:-retry-ordering}"
 artifact_dir="${ARTIFACT_DIR:-artifacts/ordering}"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "${tmp_dir}"' EXIT
@@ -15,15 +15,25 @@ mkdir -p "${artifact_dir}"
 k() { kubectl --context "${context}" -n "${namespace}" "$@"; }
 
 go build -o "${tmp_dir}/retryctl" ./cmd/retryctl
-kubectl --context "${context}" delete namespace "${namespace}" --ignore-not-found --wait=true
+if kubectl --context "${context}" get namespace "${namespace}" >/dev/null 2>&1; then
+  echo "Namespace ${namespace} already exists; use a fresh NAMESPACE." >&2
+  exit 2
+fi
 kubectl --context "${context}" create namespace "${namespace}"
-k apply -f integration/ordering.yaml -f integration/ordering-fanin.yaml
+sha256sum "${tmp_dir}/retryctl" > "${artifact_dir}/retryctl-sha256.txt"
+go version > "${artifact_dir}/go-version.txt"
+git rev-parse HEAD > "${artifact_dir}/parent-commit.txt"
+for input in ordering ordering-fanin; do
+  sed "s/namespace: retry-ordering/namespace: ${namespace}/" "integration/${input}.yaml" > "${artifact_dir}/${input}-input.yaml"
+done
+k apply -f "${artifact_dir}/ordering-input.yaml" -f "${artifact_dir}/ordering-fanin-input.yaml"
 k wait --for=condition=Succeeded=False --timeout=5m pipelinerun/retry-ordering-source pipelinerun/retry-fanin-source
 
 export_source() {
   k get "pipeline/$1" -o yaml > "${tmp_dir}/$1-pipeline.yaml"
   k get "pipelinerun/$1-source" -o yaml > "${tmp_dir}/$1-run.yaml"
   k get taskrun -l "tekton.dev/pipelineRun=$1-source" -o yaml > "${tmp_dir}/$1-taskruns.yaml"
+  cp "${tmp_dir}/$1-pipeline.yaml" "${tmp_dir}/$1-run.yaml" "${tmp_dir}/$1-taskruns.yaml" "${artifact_dir}/"
 }
 plan_decision() {
   "${tmp_dir}/retryctl" plan --pipeline "${tmp_dir}/$1-pipeline.yaml" --run "${tmp_dir}/$1-run.yaml" \
@@ -38,6 +48,7 @@ recover() {
   name="$(k create -f "${artifact_dir}/$1-recovery.yaml" -o name)"
   k wait --for=condition=Succeeded=True --timeout=5m "${name}" >/dev/null
   k get taskrun -l "tekton.dev/pipelineRun=${name#*/}" -o json > "${artifact_dir}/$1-recovery-taskruns.json"
+  k get "${name}" -o json > "${artifact_dir}/$1-recovery-run.json"
 }
 
 export_source retry-ordering
@@ -66,3 +77,8 @@ summary = {
 json.dump(summary, open(f"{d}/summary.json", "w"), indent=2)
 print(json.dumps(summary, indent=2))
 PY
+
+k get pipelinerun -o json > "${artifact_dir}/all-pipelineruns.json"
+k get taskrun -o json > "${artifact_dir}/all-taskruns.json"
+kubectl --context "${context}" version -o yaml > "${artifact_dir}/kubernetes-version.yaml"
+kubectl --context "${context}" get configmap pipelines-info -n tekton-pipelines -o yaml > "${artifact_dir}/tekton-version.yaml"

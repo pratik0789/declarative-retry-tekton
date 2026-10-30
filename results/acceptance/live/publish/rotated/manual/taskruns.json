@@ -1,0 +1,539 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:42:09Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRun": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRunUID": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe",
+          "tekton.dev/pipelineTask": "acquire"
+        },
+        "name": "external-recovery-retry-kv5p2-acquire",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-kv5p2",
+            "uid": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe"
+          }
+        ],
+        "resourceVersion": "6200922",
+        "uid": "d1a4fb7f-b9a7-4ec9-b925-3b2df20c6f78"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:42:15Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:42:15Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-kv5p2-acquire-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:42:09Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://f7be194f6841a5cc3ed0c1d8c16b8b3728d328bb1ee357abb42c4f671a8e2aa4",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:42:14Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:42:14Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:42:32Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRun": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRunUID": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe",
+          "tekton.dev/pipelineTask": "deploy"
+        },
+        "name": "external-recovery-retry-kv5p2-deploy",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-kv5p2",
+            "uid": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe"
+          }
+        ],
+        "resourceVersion": "6201132",
+        "uid": "f5bb26f3-cd27-48cd-b7bc-61a973951ad9"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:42:36Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:42:36Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-kv5p2-deploy-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:42:32Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://65a5711894142fe4c60f909a6a68fcf553e67961c8bdbb6771b63cadb5abf63f",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:42:35Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:42:35Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:42:15Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRun": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRunUID": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe",
+          "tekton.dev/pipelineTask": "publish"
+        },
+        "name": "external-recovery-retry-kv5p2-publish",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-kv5p2",
+            "uid": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe"
+          }
+        ],
+        "resourceVersion": "6200983",
+        "uid": "8e43f9a4-997d-48d9-8638-4c0c2ae21dae"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:42:22Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:42:22Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-kv5p2-publish-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:42:15Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://290681bb3165dd4ce468044687f625deeae5351d041a05dbbdbf5fd5dd92dd48",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:42:21Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:42:21Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:42:27Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRun": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRunUID": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe",
+          "tekton.dev/pipelineTask": "scan"
+        },
+        "name": "external-recovery-retry-kv5p2-scan",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-kv5p2",
+            "uid": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe"
+          }
+        ],
+        "resourceVersion": "6201088",
+        "uid": "225f4b7d-cecb-4140-ac1a-faa049763d23"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:42:32Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:42:32Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-kv5p2-scan-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:42:27Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://4398f0f9da22331bd720a8bab1e64d8407814d160a35c0cb220d6eea2aef842f",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:42:31Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:42:31Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-publish-warmup",
+          "retry.tekton.dev/policy": "empty",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-publish",
+          "retry.tekton.dev/source-pipeline-run-uid": "78a8b93c-b4b8-44d3-a30a-bc27900f34ae"
+        },
+        "creationTimestamp": "2026-10-30T06:42:22Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRun": "external-recovery-retry-kv5p2",
+          "tekton.dev/pipelineRunUID": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe",
+          "tekton.dev/pipelineTask": "sign"
+        },
+        "name": "external-recovery-retry-kv5p2-sign",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-kv5p2",
+            "uid": "c9a09ad7-a0ec-441a-a4b2-659e53a61bfe"
+          }
+        ],
+        "resourceVersion": "6201042",
+        "uid": "25ed6b78-7d79-40ad-b40b-5985c318ddfc"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:42:27Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:42:27Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-kv5p2-sign-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:42:22Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://19d1ec12520a28c67a0e91be3256eb4fd62611ba3e185580f6508f31ef7961ac",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:42:26Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:42:26Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

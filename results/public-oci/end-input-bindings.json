@@ -1,0 +1,234 @@
+{
+  "base_images": {
+    "golang": {
+      "body_sha256": "379e743b6384edf62a3cbb48f103fc347f7173569812a72a9e4d2682c0ea9e18",
+      "config_sha256": "c37a56a6d65476eabfb50e74421f16f415093e2d1bdd7f83e8bbb4b1a3eb2109"
+    },
+    "alpine": {
+      "body_sha256": "35457f5897db0c4fe5852c4e1228795d8f1ef605e90d45a797569fff04515cfa",
+      "config_sha256": "b92841763c5c2140a20eeb2a44e94ebb0e80fd51d9d6b5895ea72fa999525d68"
+    }
+  },
+  "git_head": "035e3ddc3589c1c64cb69c563b178f34b1cccc5e",
+  "git_pods": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "creationTimestamp": "2026-10-30T07:48:31Z",
+          "generateName": "git-source-5d4bbf86bb-",
+          "labels": {
+            "app": "paper-git-source",
+            "pod-template-hash": "5d4bbf86bb"
+          },
+          "name": "git-source-5d4bbf86bb-rj69g",
+          "namespace": "retry-public-oci-20261030",
+          "ownerReferences": [
+            {
+              "apiVersion": "apps/v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "ReplicaSet",
+              "name": "git-source-5d4bbf86bb",
+              "uid": "68c8f985-3976-4591-9a70-a1dfb3032428"
+            }
+          ],
+          "resourceVersion": "6216416",
+          "uid": "ac41003b-7748-4230-af53-642b9e0e72c1"
+        },
+        "spec": {
+          "containers": [
+            {
+              "command": [
+                "git",
+                "daemon",
+                "--reuseaddr",
+                "--base-path=/git",
+                "--export-all",
+                "--listen=0.0.0.0",
+                "--port=9418",
+                "/git"
+              ],
+              "image": "ghcr.io/tektoncd-catalog/git-clone@sha256:b7fe6c370322586feb555c807f3fae7ca5d62c20ebbcca987114e69366151957",
+              "imagePullPolicy": "IfNotPresent",
+              "name": "git",
+              "resources": {},
+              "securityContext": {
+                "runAsNonRoot": true,
+                "runAsUser": 65532
+              },
+              "terminationMessagePath": "/dev/termination-log",
+              "terminationMessagePolicy": "File",
+              "volumeMounts": [
+                {
+                  "mountPath": "/git",
+                  "name": "data"
+                },
+                {
+                  "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                  "name": "kube-api-access-jg4x7",
+                  "readOnly": true
+                }
+              ]
+            }
+          ],
+          "dnsPolicy": "ClusterFirst",
+          "enableServiceLinks": true,
+          "nodeName": "retry-paper-control-plane",
+          "preemptionPolicy": "PreemptLowerPriority",
+          "priority": 0,
+          "restartPolicy": "Always",
+          "schedulerName": "default-scheduler",
+          "securityContext": {
+            "fsGroup": 65532
+          },
+          "serviceAccount": "default",
+          "serviceAccountName": "default",
+          "terminationGracePeriodSeconds": 30,
+          "tolerations": [
+            {
+              "effect": "NoExecute",
+              "key": "node.kubernetes.io/not-ready",
+              "operator": "Exists",
+              "tolerationSeconds": 300
+            },
+            {
+              "effect": "NoExecute",
+              "key": "node.kubernetes.io/unreachable",
+              "operator": "Exists",
+              "tolerationSeconds": 300
+            }
+          ],
+          "volumes": [
+            {
+              "emptyDir": {},
+              "name": "data"
+            },
+            {
+              "name": "kube-api-access-jg4x7",
+              "projected": {
+                "defaultMode": 420,
+                "sources": [
+                  {
+                    "serviceAccountToken": {
+                      "expirationSeconds": 3607,
+                      "path": "token"
+                    }
+                  },
+                  {
+                    "configMap": {
+                      "items": [
+                        {
+                          "key": "ca.crt",
+                          "path": "ca.crt"
+                        }
+                      ],
+                      "name": "kube-root-ca.crt"
+                    }
+                  },
+                  {
+                    "downwardAPI": {
+                      "items": [
+                        {
+                          "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.namespace"
+                          },
+                          "path": "namespace"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-10-30T07:48:43Z",
+              "status": "True",
+              "type": "PodReadyToStartContainers"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-10-30T07:48:31Z",
+              "status": "True",
+              "type": "Initialized"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-10-30T07:48:43Z",
+              "status": "True",
+              "type": "Ready"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-10-30T07:48:43Z",
+              "status": "True",
+              "type": "ContainersReady"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-10-30T07:48:31Z",
+              "status": "True",
+              "type": "PodScheduled"
+            }
+          ],
+          "containerStatuses": [
+            {
+              "containerID": "containerd://f5e77fb95f85c2a7202624ca929ac98899c79007e54a7effb53d7a351a35c75c",
+              "image": "sha256:8c2b0ccf5238444fec5f1b3f781dd085d8f0c851c0e9335087e16ae22123c80e",
+              "imageID": "ghcr.io/tektoncd-catalog/git-clone@sha256:b7fe6c370322586feb555c807f3fae7ca5d62c20ebbcca987114e69366151957",
+              "lastState": {},
+              "name": "git",
+              "ready": true,
+              "restartCount": 0,
+              "started": true,
+              "state": {
+                "running": {
+                  "startedAt": "2026-10-30T07:48:42Z"
+                }
+              },
+              "volumeMounts": [
+                {
+                  "mountPath": "/git",
+                  "name": "data"
+                },
+                {
+                  "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                  "name": "kube-api-access-jg4x7",
+                  "readOnly": true,
+                  "recursiveReadOnly": "Disabled"
+                }
+              ]
+            }
+          ],
+          "hostIP": "172.18.0.2",
+          "hostIPs": [
+            {
+              "ip": "172.18.0.2"
+            }
+          ],
+          "phase": "Running",
+          "podIP": "10.244.0.45",
+          "podIPs": [
+            {
+              "ip": "10.244.0.45"
+            }
+          ],
+          "qosClass": "BestEffort",
+          "startTime": "2026-10-30T07:48:31Z"
+        }
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  }
+}

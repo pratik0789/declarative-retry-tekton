@@ -1,0 +1,213 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"tekton.dev/v1\",\"kind\":\"PipelineRun\",\"metadata\":{\"annotations\":{},\"name\":\"active-source\",\"namespace\":\"retry-acceptance-20261030\"},\"spec\":{\"pipelineRef\":{\"name\":\"active-source-probe\"}}}\n",
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-30T06:53:12Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "finally",
+          "tekton.dev/pipeline": "active-source-probe",
+          "tekton.dev/pipelineRun": "active-source",
+          "tekton.dev/pipelineRunUID": "4d28db8f-6a40-468c-9362-9d0a1200e878",
+          "tekton.dev/pipelineTask": "cleanup"
+        },
+        "name": "active-source-cleanup",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "active-source",
+            "uid": "4d28db8f-6a40-468c-9362-9d0a1200e878"
+          }
+        ],
+        "resourceVersion": "6206749",
+        "uid": "0d959d60-413d-463e-b57d-1a1fdb092ce0"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "wait",
+              "script": "sleep 25"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:53:42Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:53:42Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "active-source-cleanup-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:53:12Z",
+        "steps": [
+          {
+            "container": "step-wait",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "wait",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://aea965dfa41df4c51db83f5ccf464b344c7e81f1d08fc52878caa7516c767588",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:53:41Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:53:16Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "wait",
+              "script": "sleep 25"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"tekton.dev/v1\",\"kind\":\"PipelineRun\",\"metadata\":{\"annotations\":{},\"name\":\"active-source\",\"namespace\":\"retry-acceptance-20261030\"},\"spec\":{\"pipelineRef\":{\"name\":\"active-source-probe\"}}}\n",
+          "pipeline.tekton.dev/release": "fcba522"
+        },
+        "creationTimestamp": "2026-10-30T06:53:07Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "active-source-probe",
+          "tekton.dev/pipelineRun": "active-source",
+          "tekton.dev/pipelineRunUID": "4d28db8f-6a40-468c-9362-9d0a1200e878",
+          "tekton.dev/pipelineTask": "fail"
+        },
+        "name": "active-source-fail",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "active-source",
+            "uid": "4d28db8f-6a40-468c-9362-9d0a1200e878"
+          }
+        ],
+        "resourceVersion": "6206628",
+        "uid": "2a679bad-7af1-452d-9add-97405a29d589"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "fail",
+              "script": "exit 1"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:53:12Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:53:12Z",
+            "message": "\"step-fail\" exited with code 1: Error",
+            "reason": "Failed",
+            "status": "False",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "active-source-fail-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:53:07Z",
+        "steps": [
+          {
+            "container": "step-fail",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "fail",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://a15cc1d265ce3a1fecd01ab857fc1aebac3fff2d413e6712c144af67ce1d6be2",
+              "exitCode": 1,
+              "finishedAt": "2026-10-30T06:53:11Z",
+              "reason": "Error",
+              "startedAt": "2026-10-30T06:53:11Z"
+            },
+            "terminationReason": "Error"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "fail",
+              "script": "exit 1"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

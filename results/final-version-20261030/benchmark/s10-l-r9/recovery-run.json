@@ -1,0 +1,105 @@
+{
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+        "annotations": {
+            "retry.tekton.dev/inherited-taskruns": "t01=bench-s10-l-r9-source-t01,t02=bench-s10-l-r9-source-t02,t03=bench-s10-l-r9-source-t03,t04=bench-s10-l-r9-source-t04,t05=bench-s10-l-r9-source-t05,t06=bench-s10-l-r9-source-t06,t07=bench-s10-l-r9-source-t07,t08=bench-s10-l-r9-source-t08,t09=bench-s10-l-r9-source-t09",
+            "retry.tekton.dev/policy": "policy-s10-l-r9",
+            "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"bench-s10-l-r9\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+            "retry.tekton.dev/policy-spec-sha256": "sha256:70109d6ed0bf131789c5ac85a8c8d224e0997c41aab10d7715c16741bf0d33d2",
+            "retry.tekton.dev/source-pipeline": "bench-s10-l-r9",
+            "retry.tekton.dev/source-pipeline-run": "bench-s10-l-r9-source",
+            "retry.tekton.dev/source-pipeline-run-uid": "228a4146-1135-4409-8c59-c0c866849997"
+        },
+        "creationTimestamp": "2026-10-30T17:07:37Z",
+        "generateName": "bench-s10-l-r9-retry-",
+        "generation": 1,
+        "labels": {
+            "tekton.dev/pipeline": "bench-s10-l-r9-retry-dv829"
+        },
+        "name": "bench-s10-l-r9-retry-dv829",
+        "namespace": "retry-value-benchmark-20261030",
+        "resourceVersion": "6351808",
+        "uid": "fdb95f47-20b8-4bde-a105-e409f1944bdf"
+    },
+    "spec": {
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t10",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s10-l-r9-source\"-*) exit 1;; esac\necho t10\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "taskRunTemplate": {
+            "serviceAccountName": "default"
+        },
+        "timeouts": {
+            "pipeline": "1h0m0s"
+        }
+    },
+    "status": {
+        "childReferences": [
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s10-l-r9-retry-dv829-t10",
+                "pipelineTaskName": "t10"
+            }
+        ],
+        "completionTime": "2026-10-30T17:07:44Z",
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-10-30T17:07:44Z",
+                "message": "Tasks Completed: 1 (Failed: 0, Cancelled 0), Skipped: 0",
+                "reason": "Succeeded",
+                "status": "True",
+                "type": "Succeeded"
+            }
+        ],
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t10",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s10-l-r9-source\"-*) exit 1;; esac\necho t10\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "provenance": {
+            "featureFlags": {
+                "awaitSidecarReadiness": true,
+                "coschedule": "workspaces",
+                "enableAPIFields": "beta",
+                "enableProvenanceInStatus": true,
+                "enforceNonfalsifiability": "none",
+                "maxResultSize": 4096,
+                "resultExtractionMethod": "termination-message",
+                "runningInEnvWithInjectedSidecars": true,
+                "verificationNoMatchPolicy": "ignore"
+            }
+        },
+        "startTime": "2026-10-30T17:07:37Z"
+    }
+}

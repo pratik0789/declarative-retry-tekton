@@ -1,0 +1,71 @@
+{
+  "decision": "recover",
+  "metrics": {
+    "avoidancePercent": 25,
+    "continuingTasks": 0,
+    "inheritedTasks": 1,
+    "rerunTasks": 3,
+    "tasksAvoided": 1,
+    "totalTasks": 4
+  },
+  "pipeline": "public-oci-tagged",
+  "policy": "public-oci-rebuild",
+  "policyGeneration": 1,
+  "policySpec": {
+    "pipelineRef": "public-oci-tagged",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {
+      "promote": {
+        "blocksResume": false,
+        "retryWith": [
+          "build",
+          "retag"
+        ]
+      }
+    }
+  },
+  "policySpecSHA256": "sha256:3d5e4a691f19e4edb8fb5e53faba8cfe08ca0d744c01362a872871d26cef798e",
+  "sourceRun": "source-final-tagged",
+  "sourceRunUID": "7358c17e-bf48-4b31-acff-3aac9c3aee45",
+  "tasks": [
+    {
+      "action": "rerun",
+      "name": "build",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "action": "inherit",
+      "name": "clone",
+      "reason": "successful result reused from source run",
+      "results": {
+        "commit": "035e3ddc3589c1c64cb69c563b178f34b1cccc5e",
+        "committer-date": "1792593062",
+        "url": "git://git-source:9418/skaffold.git"
+      },
+      "sourceTaskRun": "source-final-tagged-clone"
+    },
+    {
+      "action": "rerun",
+      "name": "promote",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "action": "rerun",
+      "name": "retag",
+      "reason": "failed or selected task, or retryWith closure"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "shared-workspace-across-closure",
+      "message": "writable workspace \"source\" is shared by rerun and reused tasks",
+      "stateKind": "workspace",
+      "stateName": "source",
+      "tasks": [
+        "build",
+        "clone"
+      ]
+    }
+  ]
+}

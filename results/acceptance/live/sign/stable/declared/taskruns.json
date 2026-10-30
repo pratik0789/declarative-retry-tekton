@@ -1,0 +1,544 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-sign-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-sign",
+          "retry.tekton.dev/source-pipeline-run-uid": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e"
+        },
+        "creationTimestamp": "2026-10-30T06:44:55Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRun": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRunUID": "6dfd83b8-a032-4127-b199-5896ac81deda",
+          "tekton.dev/pipelineTask": "acquire"
+        },
+        "name": "external-recovery-retry-rmxgs-acquire",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-rmxgs",
+            "uid": "6dfd83b8-a032-4127-b199-5896ac81deda"
+          }
+        ],
+        "resourceVersion": "6202499",
+        "uid": "74c673ae-99a4-4f10-80f9-bcc5623cea44"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:45:07Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:45:07Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-rmxgs-acquire-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:44:55Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://c9ee021c49dfac1021409496e1a81d984d633dea767b211dcde9a7949b33bf99",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:45:04Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:45:00Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-sign-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-sign",
+          "retry.tekton.dev/source-pipeline-run-uid": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e"
+        },
+        "creationTimestamp": "2026-10-30T06:45:26Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRun": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRunUID": "6dfd83b8-a032-4127-b199-5896ac81deda",
+          "tekton.dev/pipelineTask": "deploy"
+        },
+        "name": "external-recovery-retry-rmxgs-deploy",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-rmxgs",
+            "uid": "6dfd83b8-a032-4127-b199-5896ac81deda"
+          }
+        ],
+        "resourceVersion": "6202717",
+        "uid": "dd6720a1-0d83-43a3-ab3e-421207c562a7"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:45:33Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:45:33Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-rmxgs-deploy-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:45:26Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://e7f88b7e9d628b9ef6e76a9ccab871b63c7cc3a2cc5b82317e8a48af7f5d1402",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:45:32Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:45:32Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-sign-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-sign",
+          "retry.tekton.dev/source-pipeline-run-uid": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e"
+        },
+        "creationTimestamp": "2026-10-30T06:45:07Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRun": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRunUID": "6dfd83b8-a032-4127-b199-5896ac81deda",
+          "tekton.dev/pipelineTask": "publish"
+        },
+        "name": "external-recovery-retry-rmxgs-publish",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-rmxgs",
+            "uid": "6dfd83b8-a032-4127-b199-5896ac81deda"
+          }
+        ],
+        "resourceVersion": "6202546",
+        "uid": "cb6076ff-b248-44a9-9631-d143e623482d"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:45:15Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:45:15Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-rmxgs-publish-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:45:07Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://0db2384fce3ee12cb2d6313a343e2f6880d8365a4950951059e61ea277d29eee",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:45:14Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:45:14Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-sign-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-sign",
+          "retry.tekton.dev/source-pipeline-run-uid": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e"
+        },
+        "creationTimestamp": "2026-10-30T06:45:21Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRun": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRunUID": "6dfd83b8-a032-4127-b199-5896ac81deda",
+          "tekton.dev/pipelineTask": "scan"
+        },
+        "name": "external-recovery-retry-rmxgs-scan",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-rmxgs",
+            "uid": "6dfd83b8-a032-4127-b199-5896ac81deda"
+          }
+        ],
+        "resourceVersion": "6202657",
+        "uid": "61982168-d091-4cf0-a4dc-069466198abd"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:45:26Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:45:26Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-rmxgs-scan-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:45:21Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://03c6c39a60979cdeae67935ceec2d64ca71f7dd745a982186414e1915e3c4e74",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:45:25Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:45:25Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "annotations": {
+          "pipeline.tekton.dev/release": "fcba522",
+          "retry.tekton.dev/inherited-taskruns": "warmup=source-sign-warmup",
+          "retry.tekton.dev/policy": "external-contract",
+          "retry.tekton.dev/policy-generation": "1",
+          "retry.tekton.dev/source-pipeline": "external-recovery",
+          "retry.tekton.dev/source-pipeline-run": "source-sign",
+          "retry.tekton.dev/source-pipeline-run-uid": "18a52ca0-2b94-42e1-b6a0-0e09cc04c64e"
+        },
+        "creationTimestamp": "2026-10-30T06:45:15Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "tekton-pipelines",
+          "tekton.dev/memberOf": "tasks",
+          "tekton.dev/pipeline": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRun": "external-recovery-retry-rmxgs",
+          "tekton.dev/pipelineRunUID": "6dfd83b8-a032-4127-b199-5896ac81deda",
+          "tekton.dev/pipelineTask": "sign"
+        },
+        "name": "external-recovery-retry-rmxgs-sign",
+        "namespace": "retry-acceptance-20261030",
+        "ownerReferences": [
+          {
+            "apiVersion": "tekton.dev/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "PipelineRun",
+            "name": "external-recovery-retry-rmxgs",
+            "uid": "6dfd83b8-a032-4127-b199-5896ac81deda"
+          }
+        ],
+        "resourceVersion": "6202612",
+        "uid": "c1f95a3d-0241-4d41-96c2-e3daaa415c79"
+      },
+      "spec": {
+        "serviceAccountName": "default",
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        },
+        "timeout": "1h0m0s"
+      },
+      "status": {
+        "artifacts": {},
+        "completionTime": "2026-10-30T06:45:21Z",
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-30T06:45:21Z",
+            "message": "All Steps have completed executing",
+            "reason": "Succeeded",
+            "status": "True",
+            "type": "Succeeded"
+          }
+        ],
+        "podName": "external-recovery-retry-rmxgs-sign-pod",
+        "provenance": {
+          "featureFlags": {
+            "awaitSidecarReadiness": true,
+            "coschedule": "workspaces",
+            "enableAPIFields": "beta",
+            "enableProvenanceInStatus": true,
+            "enforceNonfalsifiability": "none",
+            "maxResultSize": 4096,
+            "resultExtractionMethod": "termination-message",
+            "runningInEnvWithInjectedSidecars": true,
+            "verificationNoMatchPolicy": "ignore"
+          }
+        },
+        "startTime": "2026-10-30T06:45:15Z",
+        "steps": [
+          {
+            "container": "step-execute",
+            "imageID": "docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
+            "name": "execute",
+            "provenance": {},
+            "terminated": {
+              "containerID": "containerd://421a35b20fb4403034a3443153be3824bf982be8d049a914880c7d87c4f9ccf3",
+              "exitCode": 0,
+              "finishedAt": "2026-10-30T06:45:20Z",
+              "reason": "Completed",
+              "startedAt": "2026-10-30T06:45:20Z"
+            },
+            "terminationReason": "Completed"
+          }
+        ],
+        "taskSpec": {
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

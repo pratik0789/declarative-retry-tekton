@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: produce=produce-run
+    retry.tekton.dev/policy: empty
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"literal","resumeWithin":"","retryOnlyLatest":false,"tasks":{}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:03fc4ba2ccb418a129034ea2b6a0c750661cdc82289708415a6a64d1aab41bff
+    retry.tekton.dev/source-pipeline: literal
+    retry.tekton.dev/source-pipeline-run: source
+    retry.tekton.dev/source-pipeline-run-uid: source-id
+  generateName: literal-retry-
+spec:
+  pipelineSpec:
+    tasks:
+    - name: consume
+      params:
+      - name: msg
+        value: $(tasks.ghost.results.value)
+      taskSpec:
+        params:
+        - name: msg
+          type: string
+        steps:
+        - env:
+          - name: MSG
+            value: $(params.msg)
+          image: alpine:3.20
+          name: s
+          script: printf "%s" "$MSG"

@@ -1,0 +1,145 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "acquire=source-scan-acquire,publish=source-scan-publish,sign=source-scan-sign,warmup=source-scan-warmup",
+      "retry.tekton.dev/policy": "empty",
+      "retry.tekton.dev/source-pipeline": "external-recovery",
+      "retry.tekton.dev/source-pipeline-run": "source-scan",
+      "retry.tekton.dev/source-pipeline-run-uid": "868f8412-4a59-4ec4-b657-42efbbe57bb6"
+    },
+    "creationTimestamp": "2026-10-30T06:52:59Z",
+    "generateName": "external-recovery-retry-",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "external-recovery-retry-j8dlw"
+    },
+    "name": "external-recovery-retry-j8dlw",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6206565",
+    "uid": "7258dd61-6b12-486a-bf92-15fff6c8ed1e"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "scan",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "external-recovery-retry-j8dlw-scan",
+        "pipelineTaskName": "scan"
+      }
+    ],
+    "completionTime": "2026-10-30T06:53:05Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T06:53:05Z",
+        "message": "Tasks Completed: 1 (Failed: 1, Cancelled 0), Skipped: 1",
+        "reason": "Failed",
+        "status": "False",
+        "type": "Succeeded"
+      }
+    ],
+    "pipelineSpec": {
+      "tasks": [
+        {
+          "name": "scan",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "runAfter": [
+            "scan"
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "execute",
+                "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "skippedTasks": [
+      {
+        "name": "deploy",
+        "reason": "PipelineRun was stopping"
+      }
+    ],
+    "startTime": "2026-10-30T06:52:59Z"
+  }
+}

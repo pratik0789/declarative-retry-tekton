@@ -1,0 +1,41 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: clone=delivery-1-clone
+    retry.tekton.dev/policy: delivery-safe-retry
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"delivery","resumeWithin":"","retryOnlyLatest":false,"tasks":{"scan":{"blocksResume":false,"retryWith":["build"]}}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:0572df6340c197f09a26b9cbc976e04d67c534af3c37a1f3edd5149fc00248b9
+    retry.tekton.dev/source-pipeline: delivery
+    retry.tekton.dev/source-pipeline-run: delivery-1
+    retry.tekton.dev/source-pipeline-run-uid: 11111111-1111-1111-1111-111111111111
+  generateName: delivery-retry-
+spec:
+  pipelineSpec:
+    tasks:
+    - name: build
+      taskSpec:
+        steps:
+        - image: alpine:3.20
+          name: build
+          script: |
+            echo built
+    - name: scan
+      runAfter:
+      - build
+      taskSpec:
+        steps:
+        - image: alpine:3.20
+          name: scan
+          script: |
+            echo scanned
+    - name: deploy
+      runAfter:
+      - scan
+      taskSpec:
+        steps:
+        - image: alpine:3.20
+          name: deploy
+          script: |
+            echo deployed

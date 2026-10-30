@@ -1,0 +1,167 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"bench-s10-e-r2-source","namespace":"retry-value-benchmark-20261030"},"spec":{"pipelineRef":{"name":"bench-s10-e-r2"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T16:01:48Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: bench-s10-e-r2
+      tekton.dev/pipelineRun: bench-s10-e-r2-source
+      tekton.dev/pipelineRunUID: d6a639c6-bec4-48b5-b3b1-8bfbaae3e90d
+      tekton.dev/pipelineTask: t01
+    name: bench-s10-e-r2-source-t01
+    namespace: retry-value-benchmark-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: bench-s10-e-r2-source
+      uid: d6a639c6-bec4-48b5-b3b1-8bfbaae3e90d
+    resourceVersion: "6316797"
+    uid: ffaa5205-6fb5-41d0-a332-2701cb9bdde5
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t01
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T16:01:55Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T16:01:55Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: bench-s10-e-r2-source-t01-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T16:01:48Z"
+    steps:
+    - container: step-work
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: work
+      provenance: {}
+      terminated:
+        containerID: containerd://d503ce06350f96659bda3633cb22b990fc6786562eaf5c7af7a5aa89f5c62dd1
+        exitCode: 0
+        finishedAt: "2026-10-30T16:01:54Z"
+        reason: Completed
+        startedAt: "2026-10-30T16:01:54Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t01
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"bench-s10-e-r2-source","namespace":"retry-value-benchmark-20261030"},"spec":{"pipelineRef":{"name":"bench-s10-e-r2"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T16:01:55Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: bench-s10-e-r2
+      tekton.dev/pipelineRun: bench-s10-e-r2-source
+      tekton.dev/pipelineRunUID: d6a639c6-bec4-48b5-b3b1-8bfbaae3e90d
+      tekton.dev/pipelineTask: t02
+    name: bench-s10-e-r2-source-t02
+    namespace: retry-value-benchmark-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: bench-s10-e-r2-source
+      uid: d6a639c6-bec4-48b5-b3b1-8bfbaae3e90d
+    resourceVersion: "6316862"
+    uid: 1219aa81-bab3-484a-b615-decc342ad78b
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          case "$(context.taskRun.name)" in "bench-s10-e-r2-source"-*) exit 1;; esac
+          echo t02
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T16:02:01Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T16:02:01Z"
+      message: '"step-work" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: bench-s10-e-r2-source-t02-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T16:01:55Z"
+    steps:
+    - container: step-work
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: work
+      provenance: {}
+      terminated:
+        containerID: containerd://8b76bcb558b86c8002833317896f02487ad69501fc24ba2da824e885ad170939
+        exitCode: 1
+        finishedAt: "2026-10-30T16:02:01Z"
+        reason: Error
+        startedAt: "2026-10-30T16:02:00Z"
+      terminationReason: Error
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          case "bench-s10-e-r2-source-t02" in "bench-s10-e-r2-source"-*) exit 1;; esac
+          echo t02
+kind: List
+metadata:
+  resourceVersion: ""

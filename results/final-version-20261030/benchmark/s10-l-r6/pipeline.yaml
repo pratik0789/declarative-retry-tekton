@@ -1,0 +1,143 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"tekton.dev/v1","kind":"Pipeline","metadata":{"annotations":{},"name":"bench-s10-l-r6","namespace":"retry-value-benchmark-20261030"},"spec":{"tasks":[{"name":"t01","taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t01\n"}]}},{"name":"t02","runAfter":["t01"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t02\n"}]}},{"name":"t03","runAfter":["t02"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t03\n"}]}},{"name":"t04","runAfter":["t03"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t04\n"}]}},{"name":"t05","runAfter":["t04"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t05\n"}]}},{"name":"t06","runAfter":["t05"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t06\n"}]}},{"name":"t07","runAfter":["t06"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t07\n"}]}},{"name":"t08","runAfter":["t07"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t08\n"}]}},{"name":"t09","runAfter":["t08"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\necho t09\n"}]}},{"name":"t10","runAfter":["t09"],"taskSpec":{"steps":[{"image":"alpine:3.20","name":"work","script":"sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s10-l-r6-source\"-*) exit 1;; esac\necho t10\n"}]}}]}}
+  creationTimestamp: "2026-10-30T16:58:04Z"
+  generation: 1
+  name: bench-s10-l-r6
+  namespace: retry-value-benchmark-20261030
+  resourceVersion: "6346718"
+  uid: 1e7b45fa-94e1-463c-9160-b46ac1874561
+spec:
+  tasks:
+  - name: t01
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t01
+  - name: t02
+    runAfter:
+    - t01
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t02
+  - name: t03
+    runAfter:
+    - t02
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t03
+  - name: t04
+    runAfter:
+    - t03
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t04
+  - name: t05
+    runAfter:
+    - t04
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t05
+  - name: t06
+    runAfter:
+    - t05
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t06
+  - name: t07
+    runAfter:
+    - t06
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t07
+  - name: t08
+    runAfter:
+    - t07
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t08
+  - name: t09
+    runAfter:
+    - t08
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          echo t09
+  - name: t10
+    runAfter:
+    - t09
+    taskSpec:
+      metadata: {}
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: work
+        script: |
+          sleep 0.2
+          case "$(context.taskRun.name)" in "bench-s10-l-r6-source"-*) exit 1;; esac
+          echo t10

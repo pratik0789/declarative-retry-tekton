@@ -1,0 +1,190 @@
+{
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+        "annotations": {
+            "retry.tekton.dev/inherited-taskruns": "clone=retry-ordering-source-clone,migrate=retry-ordering-source-migrate",
+            "retry.tekton.dev/policy": "retry-ordering-policy",
+            "retry.tekton.dev/policy-generation": "1",
+            "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"retry-ordering\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{\"scan\":{\"blocksResume\":false,\"retryWith\":[\"build\"]}}}",
+            "retry.tekton.dev/policy-spec-sha256": "sha256:d78f131a4de6ec2006f260031294ee1e68c80301e18d33a783fc3bfa2848ca8f",
+            "retry.tekton.dev/source-pipeline": "retry-ordering",
+            "retry.tekton.dev/source-pipeline-run": "retry-ordering-source",
+            "retry.tekton.dev/source-pipeline-run-uid": "69e2d932-45b3-4088-9644-c9dfeefa5fb4"
+        },
+        "creationTimestamp": "2026-10-30T19:48:05Z",
+        "generateName": "retry-ordering-retry-",
+        "generation": 1,
+        "labels": {
+            "tekton.dev/pipeline": "retry-ordering-retry-5ngds"
+        },
+        "name": "retry-ordering-retry-5ngds",
+        "namespace": "retry-value-ordering-20261030",
+        "resourceVersion": "6379634",
+        "uid": "84c631a5-5883-407c-8556-138b38def482"
+    },
+    "spec": {
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "build",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "run",
+                                "script": "sleep 3"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "scan",
+                    "runAfter": [
+                        "build"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "run",
+                                "script": "sleep 3"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "deploy",
+                    "runAfter": [
+                        "scan"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "run",
+                                "script": "case \"$(context.taskRun.name)\" in\n  *-source-*) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "taskRunTemplate": {
+            "serviceAccountName": "default"
+        },
+        "timeouts": {
+            "pipeline": "1h0m0s"
+        }
+    },
+    "status": {
+        "childReferences": [
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "retry-ordering-retry-5ngds-build",
+                "pipelineTaskName": "build"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "retry-ordering-retry-5ngds-scan",
+                "pipelineTaskName": "scan"
+            },
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "retry-ordering-retry-5ngds-deploy",
+                "pipelineTaskName": "deploy"
+            }
+        ],
+        "completionTime": "2026-10-30T19:48:33Z",
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-10-30T19:48:33Z",
+                "message": "Tasks Completed: 3 (Failed: 0, Cancelled 0), Skipped: 0",
+                "reason": "Succeeded",
+                "status": "True",
+                "type": "Succeeded"
+            }
+        ],
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "build",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "run",
+                                "script": "sleep 3"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "scan",
+                    "runAfter": [
+                        "build"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "run",
+                                "script": "sleep 3"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "deploy",
+                    "runAfter": [
+                        "scan"
+                    ],
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "run",
+                                "script": "case \"$(context.taskRun.name)\" in\n  *-source-*) echo \"injected deploy failure\"; exit 1 ;;\nesac\necho deployed\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "provenance": {
+            "featureFlags": {
+                "awaitSidecarReadiness": true,
+                "coschedule": "workspaces",
+                "enableAPIFields": "beta",
+                "enableProvenanceInStatus": true,
+                "enforceNonfalsifiability": "none",
+                "maxResultSize": 4096,
+                "resultExtractionMethod": "termination-message",
+                "runningInEnvWithInjectedSidecars": true,
+                "verificationNoMatchPolicy": "ignore"
+            }
+        },
+        "startTime": "2026-10-30T19:48:05Z"
+    }
+}
