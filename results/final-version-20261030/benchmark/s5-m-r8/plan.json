@@ -1,0 +1,51 @@
+{
+  "sourceRun": "bench-s5-m-r8-source",
+  "sourceRunUID": "8fda460f-7a08-450d-a3c2-2314e5475c02",
+  "pipeline": "bench-s5-m-r8",
+  "policy": "policy-s5-m-r8",
+  "policySpecSHA256": "sha256:594e378886f6adacf8c0935499e3abea5cc4d535239684eaaab538bdc34fb003",
+  "policySpec": {
+    "pipelineRef": "bench-s5-m-r8",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {}
+  },
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "t01",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "bench-s5-m-r8-source-t01"
+    },
+    {
+      "name": "t02",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "bench-s5-m-r8-source-t02"
+    },
+    {
+      "name": "t03",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "t04",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    },
+    {
+      "name": "t05",
+      "action": "continue",
+      "reason": "task was not reached in source run"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 5,
+    "rerunTasks": 1,
+    "inheritedTasks": 2,
+    "continuingTasks": 2,
+    "tasksAvoided": 2,
+    "avoidancePercent": 40
+  }
+}

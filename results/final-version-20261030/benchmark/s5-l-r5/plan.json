@@ -1,0 +1,53 @@
+{
+  "sourceRun": "bench-s5-l-r5-source",
+  "sourceRunUID": "407a6b3b-1a5b-419c-b57a-57a7423a9e3c",
+  "pipeline": "bench-s5-l-r5",
+  "policy": "policy-s5-l-r5",
+  "policySpecSHA256": "sha256:f8ff7d9cbb156ae7219d6b8767a936b3eb340837e2f007d40c562725799ad13e",
+  "policySpec": {
+    "pipelineRef": "bench-s5-l-r5",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {}
+  },
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "t01",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "bench-s5-l-r5-source-t01"
+    },
+    {
+      "name": "t02",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "bench-s5-l-r5-source-t02"
+    },
+    {
+      "name": "t03",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "bench-s5-l-r5-source-t03"
+    },
+    {
+      "name": "t04",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "bench-s5-l-r5-source-t04"
+    },
+    {
+      "name": "t05",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 5,
+    "rerunTasks": 1,
+    "inheritedTasks": 4,
+    "continuingTasks": 0,
+    "tasksAvoided": 4,
+    "avoidancePercent": 80
+  }
+}

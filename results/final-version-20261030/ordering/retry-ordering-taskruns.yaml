@@ -1,0 +1,393 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-ordering-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-ordering"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:29Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-ordering
+      tekton.dev/pipelineRun: retry-ordering-source
+      tekton.dev/pipelineRunUID: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+      tekton.dev/pipelineTask: build
+    name: retry-ordering-source-build
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-ordering-source
+      uid: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+    resourceVersion: "6379106"
+    uid: cac60f0d-2306-44c1-bc59-44ed5d4a653a
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 3
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:39Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:39Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-ordering-source-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:29Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://ca394de0548a9a75cc7bac072b949f9bb87716e0e22ff70c9533cc563ee36ae0
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:39Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:36Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 3
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-ordering-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-ordering"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:21Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-ordering
+      tekton.dev/pipelineRun: retry-ordering-source
+      tekton.dev/pipelineRunUID: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+      tekton.dev/pipelineTask: clone
+    name: retry-ordering-source-clone
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-ordering-source
+      uid: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+    resourceVersion: "6378967"
+    uid: eb5faf4e-d24b-438a-8411-1f3c3756c627
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:29Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:29Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-ordering-source-clone-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:21Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://7f577cabae496d35bd9f98dd971abd4439c8ebb0cbef8bce9387434f0572b7d3
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:28Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:27Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-ordering-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-ordering"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:57Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-ordering
+      tekton.dev/pipelineRun: retry-ordering-source
+      tekton.dev/pipelineRunUID: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+      tekton.dev/pipelineTask: deploy
+    name: retry-ordering-source-deploy
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-ordering-source
+      uid: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+    resourceVersion: "6379432"
+    uid: 2b19c189-44e7-4827-a106-7c624ce5e52d
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "$(context.taskRun.name)" in
+            *-source-*) echo "injected deploy failure"; exit 1 ;;
+          esac
+          echo deployed
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:48:05Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:48:05Z"
+      message: '"step-run" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: retry-ordering-source-deploy-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:57Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://0524dee09c37090352c9c64a0850ee1323252d5087d348c2fa323350bc01d27f
+        exitCode: 1
+        finishedAt: "2026-10-30T19:48:04Z"
+        reason: Error
+        startedAt: "2026-10-30T19:48:04Z"
+      terminationReason: Error
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-ordering-source-deploy" in
+            *-source-*) echo "injected deploy failure"; exit 1 ;;
+          esac
+          echo deployed
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-ordering-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-ordering"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:49Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-ordering
+      tekton.dev/pipelineRun: retry-ordering-source
+      tekton.dev/pipelineRunUID: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+      tekton.dev/pipelineTask: migrate
+    name: retry-ordering-source-migrate
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-ordering-source
+      uid: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+    resourceVersion: "6379347"
+    uid: 1c44ae3e-e2f4-451d-bc20-97d38f262bd3
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:57Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:57Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-ordering-source-migrate-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:49Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://094e2cd317bd3ba545c00d45b964cdec7422b0fe0d91eceaefe1d2d1b260b001
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:56Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:55Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 1
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-ordering-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-ordering"}}}
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-10-30T19:47:39Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-ordering
+      tekton.dev/pipelineRun: retry-ordering-source
+      tekton.dev/pipelineRunUID: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+      tekton.dev/pipelineTask: scan
+    name: retry-ordering-source-scan
+    namespace: retry-value-ordering-20261030
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-ordering-source
+      uid: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+    resourceVersion: "6379239"
+    uid: 8b701c45-9129-4487-aecd-cd33ff559ad8
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 3
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-10-30T19:47:49Z"
+    conditions:
+    - lastTransitionTime: "2026-10-30T19:47:49Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-ordering-source-scan-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-10-30T19:47:39Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://2c0fb4683646a12910c78134b32ad187a0dc0f8c94a850c166346bb0afbd6022
+        exitCode: 0
+        finishedAt: "2026-10-30T19:47:47Z"
+        reason: Completed
+        startedAt: "2026-10-30T19:47:44Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: sleep 3
+kind: List
+metadata:
+  resourceVersion: ""

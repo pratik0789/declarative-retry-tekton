@@ -1,6 +1,6 @@
 # Declarative Retry for Tekton
 
-Research prototype for planning safe, declarative recovery of failed Tekton
+Research prototype for applying author-declared recovery policies to failed Tekton
 `PipelineRun`s. The prototype is external to Tekton and does not represent an
 existing Tekton API.
 
@@ -43,6 +43,23 @@ needed by a failed deploy. `clone` cannot name a later build or scan. An operato
 can still select successful tasks explicitly with `--tasks`; if refreshing
 clone invalidates a completed build and scan, the operator must select them too.
 Tasks that never ran continue normally.
+
+
+An optional companion checks reused work that lies between tasks scheduled to
+execute again:
+
+```bash
+/usr/bin/python3 hack/check_reuse_convexity.py --pipeline pipeline.yaml --plan plan.json
+```
+
+For example, rebuilding an artifact and rerunning deployment while inheriting a
+scan between them triggers `non-convex-reuse`, even without a result or Workspace
+reference. This checker uses execution ancestry and ordinary/final phase order.
+It does not run automatically in `retryctl`, change selections, refuse recovery,
+or prove that an external effect is invalid. Authors must select invalidated
+completed work themselves. Parallel hidden effects remain outside this check.
+The result-free unit example and an offline public-OCI capture example are in
+`hack/test_reuse_convexity.py` and `results/final-version-20261030/reuse-order/`.
 
 Run the reproducible fixture evaluation:
 
@@ -96,8 +113,24 @@ as well. Like other inferred findings, these never change or refuse the
 author's closure; `blocksResume` refuses only when that task is the one that
 failed. Generation fails only when a reference
 to an inherited task cannot be expressed in a valid PipelineRun (a missing or
-non-string result, or a status reference). Annotations record the source
+non-string result, a status reference, or saved string data containing `$(`
+that would become live substitution syntax in a retained task definition).
+The last case is conservatively refused rather than escaped; `plan` can still
+describe a candidate selection that `create` cannot safely generate. Pipeline
+output publication uses the base64 helper and preserves such strings as data.
+The offline counterexample and correction are retained in
+`results/acceptance/literal-results-20261031/`. Annotations record the source
 run, policy name and generation, and the source TaskRun of each inherited task.
+Plans also retain `policySpec` and `policySpecSHA256`. Generated runs retain the
+same normalized supported policy specification as compact JSON in
+`retry.tekton.dev/policy-spec`, plus its SHA-256 digest in
+`retry.tekton.dev/policy-spec-sha256`. The digest covers the exact UTF-8 annotation
+bytes and has prefix `sha256:`. It excludes metadata and unsupported fields;
+JSON object keys are sorted by Go's `encoding/json`, and array order is retained.
+The snapshot records the effective rules, including defaults, used for the decision.
+An honest rules edit changes the digest even when name/generation stay fixed.
+These annotations support historical reconstruction; they are not authenticated
+and do not prove semantic safety or bind every source input.
 
 Recovery requires the complete current Pipeline specification to match the
 copy saved in the failed PipelineRun. Changed scripts, variable references,

@@ -1,6 +1,7 @@
 package planner
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -102,6 +103,12 @@ func BuildWithNewerRuns(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 
 func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []PipelineRun, selected []string, now time.Time) (Plan, error) {
 	plan := Plan{SourceRun: r.Metadata.Name, SourceRunUID: r.Metadata.UID, Pipeline: p.Metadata.Name, Policy: policy.Metadata.Name, PolicyGeneration: policy.Metadata.Generation, Decision: "recover"}
+	snapshot, err := json.Marshal(toAny(policy.Spec))
+	if err != nil {
+		return Plan{}, fmt.Errorf("serialize policy specification: %w", err)
+	}
+	plan.PolicySpec = snapshot
+	plan.PolicySpecSHA256 = fmt.Sprintf("sha256:%x", sha256.Sum256(snapshot))
 	refuse := func(reason string) (Plan, error) {
 		plan.Decision = "refuse"
 		plan.RefusalReason = reason
@@ -115,6 +122,18 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	}
 	if policy.Spec.PipelineRef != p.Metadata.Name {
 		return refuse("policy references a different Pipeline")
+	}
+	terminalFailure := false
+	for _, condition := range r.Status.Conditions {
+		if condition.Type == "Succeeded" {
+			if !strings.EqualFold(condition.Status, "False") {
+				return refuse("source PipelineRun must have terminal Succeeded=False status")
+			}
+			terminalFailure = true
+		}
+	}
+	if !terminalFailure {
+		return refuse("source PipelineRun must have terminal Succeeded=False status")
 	}
 	// Without a completion time, the creation time gives an earlier, more conservative window start.
 	windowStart := r.Metadata.CreationTimestamp
@@ -205,6 +224,11 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			failed[child.PipelineTask] = true
 		}
 	}
+	for name, child := range states {
+		if !strings.EqualFold(child.Status, "Succeeded") && !strings.EqualFold(child.Status, "Failed") {
+			return refuse(fmt.Sprintf("source TaskRun for %q is missing terminal status; supply a complete coherent TaskRun snapshot", name))
+		}
+	}
 	if len(failed) == 0 {
 		return refuse("source PipelineRun has no failed tasks")
 	}
@@ -271,7 +295,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		}
 		plan.Tasks = append(plan.Tasks, taskPlan)
 	}
-	plan.Warnings = append(plan.Warnings, sharedResultWarnings(tasks, rerun, states)...)
+	plan.Warnings = append(plan.Warnings, sharedResultWarnings(tasks, current, rerun, states)...)
 	plan.Warnings = append(plan.Warnings, sharedWorkspaceWarnings(p, r, rerun, states)...)
 	plan.Warnings = append(plan.Warnings, ephemeralWorkspaceWarnings(p, r, rerun, states)...)
 	for name := range rerun {
@@ -548,16 +572,32 @@ func ephemeralWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool
 	return warnings
 }
 
-func sharedResultWarnings(tasks map[string]PipelineTask, rerun map[string]bool, states map[string]ChildReference) []Warning {
+func sharedResultWarnings(tasks map[string]PipelineTask, definition any, rerun map[string]bool, states map[string]ChildReference) []Warning {
 	var warnings []Warning
+	definitions := map[string]any{}
+	for _, field := range []string{"tasks", "finally"} {
+		for _, raw := range asList(asMap(definition)[field]) {
+			task := asMap(raw)
+			name, _ := task["name"].(string)
+			definitions[name] = task
+		}
+	}
 	for consumer, task := range tasks {
 		child, ran := states[consumer]
 		if !ran || !strings.EqualFold(child.Status, "Succeeded") || rerun[consumer] {
 			continue
 		}
-		encoded, _ := json.Marshal(task.Params)
+		raw := definitions[consumer]
+		if raw == nil {
+			raw = task
+		}
+		encoded, _ := json.Marshal(raw)
+		producers := map[string]bool{}
+		for _, match := range resultReference.FindAllStringSubmatch(string(encoded), -1) {
+			producers[match[1]] = true
+		}
 		for producer := range rerun {
-			if strings.Contains(string(encoded), "$(tasks."+producer+".results.") {
+			if producers[producer] {
 				warnings = append(warnings, Warning{
 					Code:      "shared-result-across-closure",
 					Message:   fmt.Sprintf("task %q would be reused after consuming a result from rerun task %q", consumer, producer),

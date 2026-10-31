@@ -1,0 +1,106 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"tekton.dev/v1\",\"kind\":\"PipelineRun\",\"metadata\":{\"annotations\":{},\"name\":\"active-source\",\"namespace\":\"retry-acceptance-20261030\"},\"spec\":{\"pipelineRef\":{\"name\":\"active-source-probe\"}}}\n"
+    },
+    "creationTimestamp": "2026-10-30T06:53:07Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "active-source-probe"
+    },
+    "name": "active-source",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6206751",
+    "uid": "4d28db8f-6a40-468c-9362-9d0a1200e878"
+  },
+  "spec": {
+    "pipelineRef": {
+      "name": "active-source-probe"
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "active-source-fail",
+        "pipelineTaskName": "fail"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "active-source-cleanup",
+        "pipelineTaskName": "cleanup"
+      }
+    ],
+    "completionTime": "2026-10-30T06:53:42Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T06:53:42Z",
+        "message": "Tasks Completed: 2 (Failed: 1, Cancelled 0), Skipped: 0",
+        "reason": "Failed",
+        "status": "False",
+        "type": "Succeeded"
+      }
+    ],
+    "finallyStartTime": "2026-10-30T06:53:12Z",
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "cleanup",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "wait",
+                "script": "sleep 25"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "fail",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "fail",
+                "script": "exit 1"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "startTime": "2026-10-30T06:53:07Z"
+  }
+}

@@ -1,0 +1,209 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/finally-anchor": "retryctl-finally-anchor",
+      "retry.tekton.dev/inherited-taskruns": "audit=finally-only-source-audit,build=finally-only-source-build,prepare=finally-only-source-prepare",
+      "retry.tekton.dev/policy": "only",
+      "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"finally-only\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+      "retry.tekton.dev/policy-spec-sha256": "sha256:f8560ef701d5e4936b5b49f1ace9ea0779afd85b1c4ec77973b3f5e9d6c570dc",
+      "retry.tekton.dev/source-pipeline": "finally-only",
+      "retry.tekton.dev/source-pipeline-run": "finally-only-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "1c7f1908-8493-4db3-b2f3-e181bb84455d"
+    },
+    "creationTimestamp": "2026-10-30T19:49:15Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "finally-only-recovery"
+    },
+    "name": "finally-only-recovery",
+    "namespace": "retry-value-finally-20261030",
+    "resourceVersion": "6380081",
+    "uid": "451a2a64-b09c-44a4-87de-ad69db578d7f"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "image:finally-only-source-prepare"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "retryctl-finally-anchor",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "skipped",
+                "script": "exit 0"
+              }
+            ]
+          },
+          "when": [
+            {
+              "input": "false",
+              "operator": "in",
+              "values": [
+                "true"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-only-recovery-notify",
+        "pipelineTaskName": "notify"
+      }
+    ],
+    "completionTime": "2026-10-30T19:49:22Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T19:49:22Z",
+        "message": "Tasks Completed: 1 (Failed: 0, Cancelled 0), Skipped: 1",
+        "reason": "Completed",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "finallyStartTime": "2026-10-30T19:49:15Z",
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "image:finally-only-source-prepare"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "retryctl-finally-anchor",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "skipped",
+                "script": "exit 0"
+              }
+            ]
+          },
+          "when": [
+            {
+              "input": "false",
+              "operator": "in",
+              "values": [
+                "true"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "skippedTasks": [
+      {
+        "name": "retryctl-finally-anchor",
+        "reason": "When Expressions evaluated to false",
+        "whenExpressions": [
+          {
+            "input": "false",
+            "operator": "in",
+            "values": [
+              "true"
+            ]
+          }
+        ]
+      }
+    ],
+    "startTime": "2026-10-30T19:49:15Z"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "creationTimestamp": "2026-10-30T19:50:35Z",
+    "generation": 1,
+    "name": "finally-export",
+    "namespace": "retry-value-final-export-20261030",
+    "resourceVersion": "6380844",
+    "uid": "9bcab809-5e21-4834-bc76-36627324a31e"
+  },
+  "spec": {
+    "finally": [
+      {
+        "name": "audit",
+        "taskSpec": {
+          "metadata": {},
+          "results": [
+            {
+              "name": "note",
+              "type": "string"
+            }
+          ],
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"%s\" checked > \"$(results.note.path)\"\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "notify",
+        "params": [
+          {
+            "name": "image",
+            "value": "$(tasks.build.results.image)"
+          }
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "params": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "results": [
+            {
+              "name": "receipt",
+              "type": "string"
+            }
+          ],
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo injected-failure; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\n"
+            }
+          ]
+        }
+      }
+    ],
+    "results": [
+      {
+        "description": "",
+        "name": "audit-note",
+        "value": "$(finally.audit.results.note)"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "build",
+        "taskSpec": {
+          "metadata": {},
+          "results": [
+            {
+              "name": "image",
+              "type": "string"
+            }
+          ],
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "run",
+              "script": "set -eu\nprintf \"%s\" source-image > \"$(results.image.path)\"\n"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

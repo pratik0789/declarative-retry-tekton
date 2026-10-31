@@ -3,12 +3,13 @@ set -euo pipefail
 
 cluster="${CLUSTER:-retry-paper}"
 context="kind-${cluster}"
-namespace="retry-benchmark"
+namespace="${NAMESPACE:-retry-benchmark}"
 sizes="${SIZES:-5 10}"
 positions="${POSITIONS:-early middle late}"
-repetitions="${REPETITIONS:-3}"
+repetitions="${REPETITIONS:-10}"
 repetition_start="${REPETITION_START:-1}"
 task_sleep="${TASK_SLEEP:-0.2}"
+order_seed="${ORDER_SEED:-20261030}"
 output_dir="${OUTPUT_DIR:-artifacts/benchmark}"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "${tmp_dir}"' EXIT
@@ -16,10 +17,34 @@ mkdir -p "${output_dir}"
 results="${output_dir}/trials.csv"
 
 go build -o "${tmp_dir}/retryctl" ./cmd/retryctl
-kubectl --context "${context}" delete namespace "${namespace}" --ignore-not-found --wait=true
+if kubectl --context "${context}" get namespace "${namespace}" >/dev/null 2>&1; then
+  echo "Namespace ${namespace} already exists; use a fresh NAMESPACE to preserve earlier evidence." >&2
+  exit 2
+fi
 kubectl --context "${context}" create namespace "${namespace}"
+sha256sum "${tmp_dir}/retryctl" > "${output_dir}/retryctl-sha256.txt"
+go version > "${output_dir}/go-version.txt"
+git rev-parse HEAD > "${output_dir}/parent-commit.txt"
 kubectl --context "${context}" run image-warmup -n "${namespace}" --image=alpine:3.20 --restart=Never --command -- true
 kubectl --context "${context}" wait -n "${namespace}" --for=jsonpath='{.status.phase}'=Succeeded --timeout=2m pod/image-warmup
+
+/usr/bin/python3 - "${sizes}" "${positions}" "${repetition_start}" "${repetitions}" "${order_seed}" "${output_dir}" "${task_sleep}" <<'PYORDER'
+import json, random, sys
+from pathlib import Path
+sizes, positions, start, count, seed, dest, sleep = sys.argv[1:]
+rng = random.Random(int(seed))
+orders = {}
+for size in sizes.split():
+    for position in positions.split():
+        sequence = ['baseline-first'] * (int(count)//2) + ['recovery-first'] * (int(count)//2)
+        if int(count)%2: sequence.append(rng.choice(['baseline-first','recovery-first']))
+        rng.shuffle(sequence)
+        for repetition, order in zip(range(int(start), int(start)+int(count)), sequence):
+            orders[f's{size}-{position[0]}-r{repetition}'] = order
+root = Path(dest)
+(root/'arm-order.json').write_text(json.dumps({'seed':int(seed),'method':'Within each size/position, balanced arm orders shuffled by Python random.Random before execution','orders':orders},indent=2)+'\n')
+(root/'protocol.md').write_text(f'Current implementation timing replication. Synthetic serial tasks; {sleep}-second work. {count} paired repetitions for each size/position. Sizes: {sizes}; positions: {positions}; first repetition: {start}. Arm orders balanced and shuffled before timing outcomes, seed {seed}. No concurrent native experiment. Wall durations include create/wait commands and exclude prior manifest generation; controller timestamps retained separately. Descriptive local overhead result, not operator effort or realistic long-task speedup. Failed/incomplete pairs retained.\n')
+PYORDER
 
 echo 'size,position,failureTask,repetition,baselineMs,recoveryMs,baselineTasks,recoveryTasks,tasksAvoided,taskAvoidancePercent,timeReductionPercent' > "${results}"
 
@@ -95,22 +120,42 @@ for size in ${sizes}; do
       kubectl --context "${context}" get taskrun -n "${namespace}" -l "tekton.dev/pipelineRun=${source_name}" -o yaml > "${taskruns_file}"
 
       baseline_name="${pipeline_name}-full"
-      baseline_start="$(date +%s%3N)"
-      printf 'apiVersion: tekton.dev/v1\nkind: PipelineRun\nmetadata:\n  name: %s\nspec:\n  pipelineRef:\n    name: %s\n' "${baseline_name}" "${pipeline_name}" | kubectl --context "${context}" create -n "${namespace}" -f -
-      kubectl --context "${context}" wait -n "${namespace}" --for=condition=Succeeded=True --timeout=10m "pipelinerun/${baseline_name}"
-      baseline_end="$(date +%s%3N)"
-
       "${tmp_dir}/retryctl" create --pipeline "${tmp_dir}/${case_id}-live-pipeline.yaml" --run "${run_file}" --policy "${policy_file}" --taskruns "${taskruns_file}" > "${recovery_file}"
-      recovery_start="$(date +%s%3N)"
-      recovery_resource="$(kubectl --context "${context}" create -n "${namespace}" -f "${recovery_file}" -o name)"
-      kubectl --context "${context}" wait -n "${namespace}" --for=condition=Succeeded=True --timeout=10m "${recovery_resource}"
-      recovery_end="$(date +%s%3N)"
-      recovery_name="${recovery_resource#*/}"
+      arm_order="$(/usr/bin/python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["orders"][sys.argv[2]])' "${output_dir}/arm-order.json" "${case_id}")"
+      if [ "${arm_order}" = baseline-first ]; then arms="baseline recovery"; else arms="recovery baseline"; fi
+      for arm in ${arms}; do
+        arm_start="$(date +%s%3N)"
+        if [ "${arm}" = baseline ]; then
+          printf 'apiVersion: tekton.dev/v1\nkind: PipelineRun\nmetadata:\n  name: %s\nspec:\n  pipelineRef:\n    name: %s\n' "${baseline_name}" "${pipeline_name}" | kubectl --context "${context}" create -n "${namespace}" -f -
+          arm_resource="pipelinerun/${baseline_name}"
+        else
+          recovery_resource="$(kubectl --context "${context}" create -n "${namespace}" -f "${recovery_file}" -o name)"
+          recovery_name="${recovery_resource#*/}"
+          arm_resource="${recovery_resource}"
+        fi
+        kubectl --context "${context}" wait -n "${namespace}" --for=condition=Succeeded=True --timeout=10m "${arm_resource}"
+        arm_end="$(date +%s%3N)"
+        if [ "${arm}" = baseline ]; then baseline_ms=$((arm_end - arm_start)); else recovery_ms=$((arm_end - arm_start)); fi
+      done
+
+      case_dir="${output_dir}/${case_id}"
+      mkdir -p "${case_dir}"
+      cp "${tmp_dir}/${case_id}-live-pipeline.yaml" "${case_dir}/pipeline.yaml"
+      cp "${policy_file}" "${case_dir}/policy.yaml"
+      cp "${run_file}" "${case_dir}/source-run.yaml"
+      cp "${taskruns_file}" "${case_dir}/source-taskruns.yaml"
+      cp "${recovery_file}" "${case_dir}/recovery.yaml"
+      "${tmp_dir}/retryctl" plan --pipeline "${case_dir}/pipeline.yaml" --run "${case_dir}/source-run.yaml" \
+        --policy "${case_dir}/policy.yaml" --taskruns "${case_dir}/source-taskruns.yaml" > "${case_dir}/plan.json"
+      for run_name in "${baseline_name}" "${recovery_name}"; do
+        kind=baseline
+        if [ "${run_name}" = "${recovery_name}" ]; then kind=recovery; fi
+        kubectl --context "${context}" get pipelinerun "${run_name}" -n "${namespace}" -o json > "${case_dir}/${kind}-run.json"
+        kubectl --context "${context}" get taskrun -n "${namespace}" -l "tekton.dev/pipelineRun=${run_name}" -o json > "${case_dir}/${kind}-taskruns.json"
+      done
 
       baseline_tasks="$(kubectl --context "${context}" get taskrun -n "${namespace}" -l "tekton.dev/pipelineRun=${baseline_name}" --no-headers | wc -l | tr -d ' ')"
       recovery_tasks="$(kubectl --context "${context}" get taskrun -n "${namespace}" -l "tekton.dev/pipelineRun=${recovery_name}" --no-headers | wc -l | tr -d ' ')"
-      baseline_ms=$((baseline_end - baseline_start))
-      recovery_ms=$((recovery_end - recovery_start))
       avoided=$((baseline_tasks - recovery_tasks))
       task_percent="$(awk -v a="${avoided}" -v b="${baseline_tasks}" 'BEGIN { printf "%.2f", 100*a/b }')"
       time_percent="$(awk -v r="${recovery_ms}" -v b="${baseline_ms}" 'BEGIN { printf "%.2f", 100*(b-r)/b }')"
@@ -122,3 +167,5 @@ done
 awk -f benchmark/summarize.awk "${results}" | tee "${output_dir}/summary.csv"
 kubectl --context "${context}" version -o yaml > "${output_dir}/kubernetes-version.yaml"
 kubectl --context "${context}" get configmap pipelines-info -n tekton-pipelines -o yaml > "${output_dir}/tekton-version.yaml"
+kubectl --context "${context}" get pipelinerun -n "${namespace}" -o json > "${output_dir}/all-pipelineruns.json"
+kubectl --context "${context}" get taskrun -n "${namespace}" -o json > "${output_dir}/all-taskruns.json"

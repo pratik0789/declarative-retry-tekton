@@ -1,0 +1,245 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/finally-anchor": "retryctl-finally-anchor",
+      "retry.tekton.dev/inherited-taskruns": "build=finally-parallel-source-build,prepare=finally-parallel-source-prepare",
+      "retry.tekton.dev/policy": "parallel",
+      "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"finally-parallel\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{\"notify\":{\"blocksResume\":false,\"retryWith\":[\"audit\"]}}}",
+      "retry.tekton.dev/policy-spec-sha256": "sha256:7f99783d8461734540a723f5c81a44cdcdddeba32914104258b387a23cdeed41",
+      "retry.tekton.dev/source-pipeline": "finally-parallel",
+      "retry.tekton.dev/source-pipeline-run": "finally-parallel-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "33b61305-befb-4c1d-9ab3-1864789d0d5a"
+    },
+    "creationTimestamp": "2026-10-30T19:50:26Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "finally-parallel-recovery"
+    },
+    "name": "finally-parallel-recovery",
+    "namespace": "retry-value-finally-20261030",
+    "resourceVersion": "6380829",
+    "uid": "70635637-192f-45ca-86a1-bd113eb66359"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "image:finally-parallel-source-prepare"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "audit",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\necho AUDITED\n"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "retryctl-finally-anchor",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "skipped",
+                "script": "exit 0"
+              }
+            ]
+          },
+          "when": [
+            {
+              "input": "false",
+              "operator": "in",
+              "values": [
+                "true"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-parallel-recovery-notify",
+        "pipelineTaskName": "notify"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-parallel-recovery-audit",
+        "pipelineTaskName": "audit"
+      }
+    ],
+    "completionTime": "2026-10-30T19:50:33Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T19:50:33Z",
+        "message": "Tasks Completed: 2 (Failed: 0, Cancelled 0), Skipped: 1",
+        "reason": "Completed",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "finallyStartTime": "2026-10-30T19:50:26Z",
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "image:finally-parallel-source-prepare"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-NOTIFICATION-FAILURE; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\necho NOTIFIED\n"
+              }
+            ]
+          }
+        },
+        {
+          "name": "audit",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\necho AUDITED\n"
+              }
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "name": "retryctl-finally-anchor",
+          "taskSpec": {
+            "metadata": {},
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "skipped",
+                "script": "exit 0"
+              }
+            ]
+          },
+          "when": [
+            {
+              "input": "false",
+              "operator": "in",
+              "values": [
+                "true"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "skippedTasks": [
+      {
+        "name": "retryctl-finally-anchor",
+        "reason": "When Expressions evaluated to false",
+        "whenExpressions": [
+          {
+            "input": "false",
+            "operator": "in",
+            "values": [
+              "true"
+            ]
+          }
+        ]
+      }
+    ],
+    "startTime": "2026-10-30T19:50:26Z"
+  }
+}

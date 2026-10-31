@@ -7,6 +7,7 @@ spec:
     - name: source
       persistentVolumeClaim: {claimName: source}
 status:
+  conditions: [{type: Succeeded, status: "False", reason: Failed}]
   pipelineSpec: {"finally":[{"name":"cleanup","workspaces":[{"name":"src","workspace":"source"}]}],"tasks":[{"name":"prepare","workspaces":[{"name":"src","workspace":"source"}]},{"name":"fail","runAfter":["prepare"]}],"workspaces":[{"name":"source"}]}
   childReferences:
     - {name: prepare-run, pipelineTaskName: prepare, status: Succeeded}

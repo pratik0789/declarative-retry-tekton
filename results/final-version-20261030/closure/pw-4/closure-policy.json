@@ -1,0 +1,18 @@
+{
+  "apiVersion": "retry.tekton.dev/v1alpha1",
+  "kind": "PipelineRetryPolicy",
+  "metadata": {
+    "name": "pw-4-closure-policy",
+    "generation": 1
+  },
+  "spec": {
+    "pipelineRef": "pw-4",
+    "tasks": {
+      "mutate": {
+        "retryWith": [
+          "prepare"
+        ]
+      }
+    }
+  }
+}

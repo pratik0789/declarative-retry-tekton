@@ -1,0 +1,101 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: observe=fi-5-source-observe
+    retry.tekton.dev/policy: fi-5-closure-policy
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"fi-5","resumeWithin":"","retryOnlyLatest":false,"tasks":{"gate":{"blocksResume":false,"retryWith":["prepare","build"]}}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:d1031ec96554bb7b0ca12c1cbc36ee4d5a030d3a63bfb8a0a213291e16ccceed
+    retry.tekton.dev/source-pipeline: fi-5
+    retry.tekton.dev/source-pipeline-run: fi-5-source
+    retry.tekton.dev/source-pipeline-run-uid: d92653cf-3f6e-4e85-83f7-511003c18e34
+  generateName: fi-5-retry-
+  namespace: retry-value-closure-20261030
+spec:
+  pipelineSpec:
+    tasks:
+    - name: prepare
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            printf "input:$(context.taskRun.name):695603ff201a8586" > $(workspaces.data.path)/source.txt
+            rm -f $(workspaces.data.path)/receipt.txt
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    - name: build
+      runAfter:
+      - prepare
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1 | tr -d "\n" > $(workspaces.data.path)/artifact-input.sha
+            printf "built:" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    - name: gate
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            case "$(context.taskRun.name)" in *-source-*) echo INJECTED-GATE-FAILURE; exit 1;; esac
+            echo GATE-PASSED
+    - name: publish
+      runAfter:
+      - gate
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            actual=`sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1`
+            recorded=`cat $(workspaces.data.path)/artifact-input.sha`
+            if [ "$actual" != "$recorded" ]; then echo STALE-ARTIFACT; exit 1; fi
+            if [ "`cat $(workspaces.data.path)/artifact.txt`" != "built:$actual" ]; then echo BAD-ARTIFACT; exit 1; fi
+            artifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d" " -f1`
+            printf "%s %s" "$actual" "$artifact" > $(workspaces.data.path)/receipt.txt
+            echo ORACLE-CONSISTENT
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    workspaces:
+    - name: shared
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: fi-5-source

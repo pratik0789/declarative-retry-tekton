@@ -1,0 +1,90 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: observe=pw-2-source-observe,prepare=pw-2-source-prepare
+    retry.tekton.dev/policy: pw-2-empty-policy
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"pw-2","resumeWithin":"","retryOnlyLatest":false,"tasks":{}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:c1a0de815fa334dadecde6cd87ee550112bfcf6975f0875ae09b84fc31d0db07
+    retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+    retry.tekton.dev/shared-state-warnings-accepted: "true"
+    retry.tekton.dev/source-pipeline: pw-2
+    retry.tekton.dev/source-pipeline-run: pw-2-source
+    retry.tekton.dev/source-pipeline-run-uid: 32475910-72f4-40be-bcf7-5789a8ebbb40
+  generateName: pw-2-retry-
+  namespace: retry-value-closure-20261030
+spec:
+  pipelineSpec:
+    tasks:
+    - name: mutate
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            case "$(context.taskRun.name)" in *-source-*) printf "dirty:e89e11aa6d218e9f" > $(workspaces.data.path)/source.txt; echo INJECTED-PARTIAL-WRITE; exit 1;; esac
+            if [ "`cat $(workspaces.data.path)/source.txt`" != "clean:e89e11aa6d218e9f" ]; then echo DIRTY-INPUT; exit 1; fi
+            sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1 | tr -d "\n" > $(workspaces.data.path)/artifact-input.sha
+            printf "built:" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    - name: verify
+      runAfter:
+      - mutate
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            echo VERIFIED-STAGE
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    - name: publish
+      runAfter:
+      - verify
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            actual=`sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1`
+            recorded=`cat $(workspaces.data.path)/artifact-input.sha`
+            if [ "$actual" != "$recorded" ]; then echo STALE-ARTIFACT; exit 1; fi
+            if [ "`cat $(workspaces.data.path)/artifact.txt`" != "built:$actual" ]; then echo BAD-ARTIFACT; exit 1; fi
+            artifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d" " -f1`
+            printf "%s %s" "$actual" "$artifact" > $(workspaces.data.path)/receipt.txt
+            echo ORACLE-CONSISTENT
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    workspaces:
+    - name: shared
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: pw-2-source

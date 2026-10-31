@@ -1,0 +1,226 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "PipelineRun",
+  "metadata": {
+    "annotations": {
+      "retry.tekton.dev/inherited-taskruns": "audit=finally-export-source-audit,build=finally-export-source-build",
+      "retry.tekton.dev/policy": "finally-export",
+      "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"finally-export\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+      "retry.tekton.dev/policy-spec-sha256": "sha256:8c2340e93be5989fc407b933c2008d2ad5f4ef99ba7b3f96b2468be019e22357",
+      "retry.tekton.dev/result-publishers": "retryctl-reused-results",
+      "retry.tekton.dev/source-pipeline": "finally-export",
+      "retry.tekton.dev/source-pipeline-run": "finally-export-source",
+      "retry.tekton.dev/source-pipeline-run-uid": "d4ca12d4-fe08-4a99-bb71-3133b18ee24b"
+    },
+    "creationTimestamp": "2026-10-30T19:50:49Z",
+    "generation": 1,
+    "labels": {
+      "tekton.dev/pipeline": "finally-export-recovery"
+    },
+    "name": "finally-export-recovery",
+    "namespace": "retry-value-final-export-20261030",
+    "resourceVersion": "6381120",
+    "uid": "667479fc-b6e3-46de-9267-44c7facca9c2"
+  },
+  "spec": {
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "source-image"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo injected-failure; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\n"
+              }
+            ]
+          }
+        }
+      ],
+      "results": [
+        {
+          "description": "",
+          "name": "audit-note",
+          "value": "$(tasks.retryctl-reused-results.results.value-0)"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "retryctl-reused-results",
+          "taskSpec": {
+            "metadata": {},
+            "results": [
+              {
+                "name": "value-0",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "env": [
+                  {
+                    "name": "RETRYCTL_VALUE_0",
+                    "value": "Y2hlY2tlZA=="
+                  }
+                ],
+                "image": "alpine:3.20",
+                "name": "publish",
+                "script": "set -eu\nprintf '%s' \"$RETRYCTL_VALUE_0\" | base64 -d > \"$(results.value-0.path)\"\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "taskRunTemplate": {
+      "serviceAccountName": "default"
+    },
+    "timeouts": {
+      "pipeline": "1h0m0s"
+    }
+  },
+  "status": {
+    "childReferences": [
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-export-recovery-retryctl-reused-results",
+        "pipelineTaskName": "retryctl-reused-results"
+      },
+      {
+        "apiVersion": "tekton.dev/v1",
+        "kind": "TaskRun",
+        "name": "finally-export-recovery-notify",
+        "pipelineTaskName": "notify"
+      }
+    ],
+    "completionTime": "2026-10-30T19:51:02Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T19:51:02Z",
+        "message": "Tasks Completed: 2 (Failed: 0, Cancelled 0), Skipped: 0",
+        "reason": "Succeeded",
+        "status": "True",
+        "type": "Succeeded"
+      }
+    ],
+    "finallyStartTime": "2026-10-30T19:50:56Z",
+    "pipelineSpec": {
+      "finally": [
+        {
+          "name": "notify",
+          "params": [
+            {
+              "name": "image",
+              "value": "source-image"
+            }
+          ],
+          "taskSpec": {
+            "metadata": {},
+            "params": [
+              {
+                "name": "image",
+                "type": "string"
+              }
+            ],
+            "results": [
+              {
+                "name": "receipt",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "image": "alpine:3.20",
+                "name": "run",
+                "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo injected-failure; exit 1;; esac\nprintf \"%s\" \"$(params.image)\" > \"$(results.receipt.path)\"\n"
+              }
+            ]
+          }
+        }
+      ],
+      "results": [
+        {
+          "description": "",
+          "name": "audit-note",
+          "value": "$(tasks.retryctl-reused-results.results.value-0)"
+        }
+      ],
+      "tasks": [
+        {
+          "name": "retryctl-reused-results",
+          "taskSpec": {
+            "metadata": {},
+            "results": [
+              {
+                "name": "value-0",
+                "type": "string"
+              }
+            ],
+            "spec": null,
+            "steps": [
+              {
+                "computeResources": {},
+                "env": [
+                  {
+                    "name": "RETRYCTL_VALUE_0",
+                    "value": "Y2hlY2tlZA=="
+                  }
+                ],
+                "image": "alpine:3.20",
+                "name": "publish",
+                "script": "set -eu\nprintf '%s' \"$RETRYCTL_VALUE_0\" | base64 -d > \"$(results.value-0.path)\"\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "featureFlags": {
+        "awaitSidecarReadiness": true,
+        "coschedule": "workspaces",
+        "enableAPIFields": "beta",
+        "enableProvenanceInStatus": true,
+        "enforceNonfalsifiability": "none",
+        "maxResultSize": 4096,
+        "resultExtractionMethod": "termination-message",
+        "runningInEnvWithInjectedSidecars": true,
+        "verificationNoMatchPolicy": "ignore"
+      }
+    },
+    "results": [
+      {
+        "name": "audit-note",
+        "value": "checked"
+      }
+    ],
+    "startTime": "2026-10-30T19:50:49Z"
+  }
+}

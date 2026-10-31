@@ -1,0 +1,125 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: Pipeline
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"tekton.dev/v1","kind":"Pipeline","metadata":{"annotations":{},"name":"retry-stateful","namespace":"retry-value-stateful-20261030-3"},"spec":{"tasks":[{"name":"clone","taskSpec":{"results":[{"name":"commit"},{"name":"digest"}],"steps":[{"image":"alpine:3.20","name":"run","script":"set -eu\nhead -c 64 /dev/urandom | od -An -tx1 | tr -d ' \\n' \u003e \"$(workspaces.src.path)/source.txt\"\nhead -c 6 /dev/urandom | od -An -tx1 | tr -d ' \\n' \u003e \"$(results.commit.path)\"\nsha256sum \"$(workspaces.src.path)/source.txt\" | cut -d' ' -f1 | tr -d '\\n' \u003e \"$(results.digest.path)\"\n"}],"workspaces":[{"name":"src"}]},"workspaces":[{"name":"src","workspace":"shared"}]},{"name":"build","params":[{"name":"commit","value":"$(tasks.clone.results.commit)"},{"name":"digest","value":"$(tasks.clone.results.digest)"}],"runAfter":["clone"],"taskSpec":{"params":[{"name":"commit"},{"name":"digest"}],"results":[{"name":"image"}],"steps":[{"image":"alpine:3.20","name":"run","script":"set -eu\nsource_file=\"$(workspaces.src.path)/source.txt\"\nif [ ! -f \"$source_file\" ]; then\n  echo \"STATE-MISSING: source.txt written by clone is not present\"\n  exit 1\nfi\nactual=`sha256sum \"$source_file\" | cut -d' ' -f1`\nif [ \"$actual\" != \"$(params.digest)\" ]; then\n  echo \"STATE-MISMATCH: expected $(params.digest), found $actual\"\n  exit 1\nfi\necho \"STATE-VERIFIED: commit $(params.commit) digest $actual\"\nprintf 'img-%s' \"$(params.commit)\" \u003e \"$(results.image.path)\"\n"}],"workspaces":[{"name":"src"}]},"workspaces":[{"name":"src","workspace":"shared"}]},{"name":"scan","params":[{"name":"image","value":"$(tasks.build.results.image)"}],"runAfter":["build"],"taskSpec":{"params":[{"name":"image"}],"steps":[{"image":"alpine:3.20","name":"run","script":"case \"$(context.taskRun.name)\" in\n  *-source-*) echo \"injected scan failure\"; exit 1 ;;\nesac\necho \"scanned $(params.image)\"\n"}]}},{"name":"deploy","params":[{"name":"image","value":"$(tasks.build.results.image)"}],"runAfter":["scan"],"taskSpec":{"params":[{"name":"image"}],"steps":[{"image":"alpine:3.20","name":"run","script":"echo \"deployed $(params.image)\"\n"}]}}],"workspaces":[{"name":"shared"}]}}
+    creationTimestamp: "2026-10-30T15:14:22Z"
+    generation: 2
+    name: retry-stateful
+    namespace: retry-value-stateful-20261030-3
+    resourceVersion: "6292296"
+    uid: 4a3510f4-9caa-4588-bc0b-3e1e3a7e249b
+  spec:
+    tasks:
+    - name: clone
+      taskSpec:
+        metadata: {}
+        results:
+        - name: commit
+          type: string
+        - name: digest
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(workspaces.src.path)/source.txt"
+            head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+            sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: build
+      params:
+      - name: commit
+        value: $(tasks.clone.results.commit)
+      - name: digest
+        value: $(tasks.clone.results.digest)
+      runAfter:
+      - clone
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        - name: digest
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            source_file="$(workspaces.src.path)/source.txt"
+            if [ ! -f "$source_file" ]; then
+              echo "STATE-MISSING: source.txt written by clone is not present"
+              exit 1
+            fi
+            actual=`sha256sum "$source_file" | cut -d' ' -f1`
+            if [ "$actual" != "$(params.digest)" ]; then
+              echo "STATE-MISMATCH: expected $(params.digest), found $actual"
+              exit 1
+            fi
+            echo "STATE-VERIFIED: commit $(params.commit) digest $actual"
+            printf 'img-%s' "$(params.commit)" > "$(results.image.path)"
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: scan
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(context.taskRun.name)" in
+              *-source-*) echo "injected scan failure"; exit 1 ;;
+            esac
+            echo "scanned $(params.image)"
+    - name: deploy
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo "deployed v2 $(params.image)"
+    workspaces:
+    - name: shared
+kind: List
+metadata:
+  resourceVersion: ""

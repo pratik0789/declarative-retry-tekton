@@ -1,0 +1,121 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "name": "fi-1"
+  },
+  "spec": {
+    "workspaces": [
+      {
+        "name": "shared"
+      }
+    ],
+    "tasks": [
+      {
+        "name": "observe",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\necho OBSERVED\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "prepare",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\nprintf \"input:$(context.taskRun.name):86437f26cc91a457\" > $(workspaces.data.path)/source.txt\nrm -f $(workspaces.data.path)/receipt.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "runAfter": [
+          "observe"
+        ],
+        "workspaces": [
+          {
+            "name": "data",
+            "workspace": "shared"
+          }
+        ]
+      },
+      {
+        "name": "build",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\nsha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1 | tr -d \"\\n\" > $(workspaces.data.path)/artifact-input.sha\nprintf \"built:\" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "runAfter": [
+          "prepare"
+        ],
+        "workspaces": [
+          {
+            "name": "data",
+            "workspace": "shared"
+          }
+        ]
+      },
+      {
+        "name": "gate",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\ncase \"$(context.taskRun.name)\" in *-source-*) echo INJECTED-GATE-FAILURE; exit 1;; esac\necho GATE-PASSED\n"
+            }
+          ]
+        },
+        "runAfter": [
+          "build"
+        ]
+      },
+      {
+        "name": "publish",
+        "taskSpec": {
+          "steps": [
+            {
+              "name": "run",
+              "image": "alpine:3.20",
+              "script": "set -eu\nactual=`sha256sum $(workspaces.data.path)/source.txt | cut -d\" \" -f1`\nrecorded=`cat $(workspaces.data.path)/artifact-input.sha`\nif [ \"$actual\" != \"$recorded\" ]; then echo STALE-ARTIFACT; exit 1; fi\nif [ \"`cat $(workspaces.data.path)/artifact.txt`\" != \"built:$actual\" ]; then echo BAD-ARTIFACT; exit 1; fi\nartifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d\" \" -f1`\nprintf \"%s %s\" \"$actual\" \"$artifact\" > $(workspaces.data.path)/receipt.txt\necho ORACLE-CONSISTENT\n"
+            }
+          ],
+          "workspaces": [
+            {
+              "name": "data"
+            }
+          ]
+        },
+        "runAfter": [
+          "gate"
+        ],
+        "workspaces": [
+          {
+            "name": "data",
+            "workspace": "shared"
+          }
+        ]
+      }
+    ]
+  }
+}

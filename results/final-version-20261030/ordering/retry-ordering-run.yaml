@@ -1,0 +1,121 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"retry-ordering-source","namespace":"retry-value-ordering-20261030"},"spec":{"pipelineRef":{"name":"retry-ordering"}}}
+  creationTimestamp: "2026-10-30T19:47:21Z"
+  generation: 1
+  labels:
+    tekton.dev/pipeline: retry-ordering
+  name: retry-ordering-source
+  namespace: retry-value-ordering-20261030
+  resourceVersion: "6379434"
+  uid: 69e2d932-45b3-4088-9644-c9dfeefa5fb4
+spec:
+  pipelineRef:
+    name: retry-ordering
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+status:
+  childReferences:
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-ordering-source-clone
+    pipelineTaskName: clone
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-ordering-source-build
+    pipelineTaskName: build
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-ordering-source-scan
+    pipelineTaskName: scan
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-ordering-source-migrate
+    pipelineTaskName: migrate
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-ordering-source-deploy
+    pipelineTaskName: deploy
+  completionTime: "2026-10-30T19:48:05Z"
+  conditions:
+  - lastTransitionTime: "2026-10-30T19:48:05Z"
+    message: 'Tasks Completed: 5 (Failed: 1, Cancelled 0), Skipped: 0'
+    reason: Failed
+    status: "False"
+    type: Succeeded
+  pipelineSpec:
+    tasks:
+    - name: clone
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: sleep 1
+    - name: build
+      runAfter:
+      - clone
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: sleep 3
+    - name: scan
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: sleep 3
+    - name: migrate
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: sleep 1
+    - name: deploy
+      runAfter:
+      - migrate
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(context.taskRun.name)" in
+              *-source-*) echo "injected deploy failure"; exit 1 ;;
+            esac
+            echo deployed
+  provenance:
+    featureFlags:
+      awaitSidecarReadiness: true
+      coschedule: workspaces
+      enableAPIFields: beta
+      enableProvenanceInStatus: true
+      enforceNonfalsifiability: none
+      maxResultSize: 4096
+      resultExtractionMethod: termination-message
+      runningInEnvWithInjectedSidecars: true
+      verificationNoMatchPolicy: ignore
+  startTime: "2026-10-30T19:47:21Z"

@@ -1,0 +1,47 @@
+{
+  "sourceRun": "finally-export-source",
+  "sourceRunUID": "d4ca12d4-fe08-4a99-bb71-3133b18ee24b",
+  "pipeline": "finally-export",
+  "policy": "finally-export",
+  "policySpecSHA256": "sha256:8c2340e93be5989fc407b933c2008d2ad5f4ef99ba7b3f96b2468be019e22357",
+  "policySpec": {
+    "pipelineRef": "finally-export",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {}
+  },
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "audit",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "finally-export-source-audit",
+      "results": {
+        "note": "checked"
+      }
+    },
+    {
+      "name": "build",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "finally-export-source-build",
+      "results": {
+        "image": "source-image"
+      }
+    },
+    {
+      "name": "notify",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 3,
+    "rerunTasks": 1,
+    "inheritedTasks": 2,
+    "continuingTasks": 0,
+    "tasksAvoided": 2,
+    "avoidancePercent": 66.66666666666667
+  }
+}

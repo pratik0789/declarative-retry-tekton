@@ -1,0 +1,105 @@
+{
+    "apiVersion": "tekton.dev/v1",
+    "kind": "PipelineRun",
+    "metadata": {
+        "annotations": {
+            "retry.tekton.dev/inherited-taskruns": "t01=bench-s5-l-r4-source-t01,t02=bench-s5-l-r4-source-t02,t03=bench-s5-l-r4-source-t03,t04=bench-s5-l-r4-source-t04",
+            "retry.tekton.dev/policy": "policy-s5-l-r4",
+            "retry.tekton.dev/policy-spec": "{\"pipelineRef\":\"bench-s5-l-r4\",\"resumeWithin\":\"\",\"retryOnlyLatest\":false,\"tasks\":{}}",
+            "retry.tekton.dev/policy-spec-sha256": "sha256:5e9dd0e557448b0f9c3a80c732be6a11cd5288d92dbb18c7bc482be07aa6b74f",
+            "retry.tekton.dev/source-pipeline": "bench-s5-l-r4",
+            "retry.tekton.dev/source-pipeline-run": "bench-s5-l-r4-source",
+            "retry.tekton.dev/source-pipeline-run-uid": "9d5a82dd-4c82-4c5c-926a-d7221fa7393c"
+        },
+        "creationTimestamp": "2026-10-30T15:51:29Z",
+        "generateName": "bench-s5-l-r4-retry-",
+        "generation": 1,
+        "labels": {
+            "tekton.dev/pipeline": "bench-s5-l-r4-retry-cd6hv"
+        },
+        "name": "bench-s5-l-r4-retry-cd6hv",
+        "namespace": "retry-value-benchmark-20261030",
+        "resourceVersion": "6311279",
+        "uid": "add95ccc-f17a-4dfd-8189-6fc857e06f1c"
+    },
+    "spec": {
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t05",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-l-r4-source\"-*) exit 1;; esac\necho t05\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "taskRunTemplate": {
+            "serviceAccountName": "default"
+        },
+        "timeouts": {
+            "pipeline": "1h0m0s"
+        }
+    },
+    "status": {
+        "childReferences": [
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "TaskRun",
+                "name": "bench-s5-l-r4-retry-cd6hv-t05",
+                "pipelineTaskName": "t05"
+            }
+        ],
+        "completionTime": "2026-10-30T15:51:35Z",
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-10-30T15:51:35Z",
+                "message": "Tasks Completed: 1 (Failed: 0, Cancelled 0), Skipped: 0",
+                "reason": "Succeeded",
+                "status": "True",
+                "type": "Succeeded"
+            }
+        ],
+        "pipelineSpec": {
+            "tasks": [
+                {
+                    "name": "t05",
+                    "taskSpec": {
+                        "metadata": {},
+                        "spec": null,
+                        "steps": [
+                            {
+                                "computeResources": {},
+                                "image": "alpine:3.20",
+                                "name": "work",
+                                "script": "sleep 0.2\ncase \"$(context.taskRun.name)\" in \"bench-s5-l-r4-source\"-*) exit 1;; esac\necho t05\n"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "provenance": {
+            "featureFlags": {
+                "awaitSidecarReadiness": true,
+                "coschedule": "workspaces",
+                "enableAPIFields": "beta",
+                "enableProvenanceInStatus": true,
+                "enforceNonfalsifiability": "none",
+                "maxResultSize": 4096,
+                "resultExtractionMethod": "termination-message",
+                "runningInEnvWithInjectedSidecars": true,
+                "verificationNoMatchPolicy": "ignore"
+            }
+        },
+        "startTime": "2026-10-30T15:51:29Z"
+    }
+}

@@ -1,0 +1,124 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "annotations": {
+      "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"tekton.dev/v1\",\"kind\":\"Pipeline\",\"metadata\":{\"annotations\":{},\"name\":\"external-recovery\",\"namespace\":\"retry-acceptance-20261030\"},\"spec\":{\"tasks\":[{\"name\":\"warmup\",\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"execute\",\"script\":\"#!/bin/sh\\nset -eu\\necho warmed\\n\"}]}},{\"name\":\"acquire\",\"runAfter\":[\"warmup\"],\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"execute\",\"script\":\"#!/bin/sh\\nset -eu\\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\\n\"}]}},{\"name\":\"publish\",\"runAfter\":[\"acquire\"],\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"execute\",\"script\":\"#!/bin/sh\\nset -eu\\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\\n\"}]}},{\"name\":\"sign\",\"runAfter\":[\"publish\"],\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"execute\",\"script\":\"#!/bin/sh\\nset -eu\\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\\n\"}]}},{\"name\":\"scan\",\"runAfter\":[\"sign\"],\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"execute\",\"script\":\"#!/bin/sh\\nset -eu\\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\\n\"}]}},{\"name\":\"deploy\",\"runAfter\":[\"scan\"],\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"execute\",\"script\":\"#!/bin/sh\\nset -eu\\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\\n\"}]}}]}}\n"
+    },
+    "creationTimestamp": "2026-10-30T06:39:44Z",
+    "generation": 1,
+    "name": "external-recovery",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6199523",
+    "uid": "ff52c695-9993-40d9-bc48-0a5c7185291e"
+  },
+  "spec": {
+    "tasks": [
+      {
+        "name": "warmup",
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\necho warmed\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "acquire",
+        "runAfter": [
+          "warmup"
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/acquire\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "publish",
+        "runAfter": [
+          "acquire"
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/publish\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "sign",
+        "runAfter": [
+          "publish"
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/sign\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "scan",
+        "runAfter": [
+          "sign"
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/scan\n"
+            }
+          ]
+        }
+      },
+      {
+        "name": "deploy",
+        "runAfter": [
+          "scan"
+        ],
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "execute",
+              "script": "#!/bin/sh\nset -eu\nwget -q -O- --post-data='{}' http://oracle:8000/execute/deploy\n"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

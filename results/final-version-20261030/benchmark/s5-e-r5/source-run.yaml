@@ -1,0 +1,123 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"tekton.dev/v1","kind":"PipelineRun","metadata":{"annotations":{},"name":"bench-s5-e-r5-source","namespace":"retry-value-benchmark-20261030"},"spec":{"pipelineRef":{"name":"bench-s5-e-r5"}}}
+  creationTimestamp: "2026-10-30T15:28:47Z"
+  generation: 1
+  labels:
+    tekton.dev/pipeline: bench-s5-e-r5
+  name: bench-s5-e-r5-source
+  namespace: retry-value-benchmark-20261030
+  resourceVersion: "6298826"
+  uid: dc1fb4b4-e3f0-444d-a279-b651bec06b04
+spec:
+  pipelineRef:
+    name: bench-s5-e-r5
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+status:
+  childReferences:
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: bench-s5-e-r5-source-t01
+    pipelineTaskName: t01
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: bench-s5-e-r5-source-t02
+    pipelineTaskName: t02
+  completionTime: "2026-10-30T15:28:58Z"
+  conditions:
+  - lastTransitionTime: "2026-10-30T15:28:58Z"
+    message: 'Tasks Completed: 2 (Failed: 1, Cancelled 0), Skipped: 3'
+    reason: Failed
+    status: "False"
+    type: Succeeded
+  pipelineSpec:
+    tasks:
+    - name: t01
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t01
+    - name: t02
+      runAfter:
+      - t01
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            case "$(context.taskRun.name)" in "bench-s5-e-r5-source"-*) exit 1;; esac
+            echo t02
+    - name: t03
+      runAfter:
+      - t02
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t03
+    - name: t04
+      runAfter:
+      - t03
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t04
+    - name: t05
+      runAfter:
+      - t04
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: work
+          script: |
+            sleep 0.2
+            echo t05
+  provenance:
+    featureFlags:
+      awaitSidecarReadiness: true
+      coschedule: workspaces
+      enableAPIFields: beta
+      enableProvenanceInStatus: true
+      enforceNonfalsifiability: none
+      maxResultSize: 4096
+      resultExtractionMethod: termination-message
+      runningInEnvWithInjectedSidecars: true
+      verificationNoMatchPolicy: ignore
+  skippedTasks:
+  - name: t03
+    reason: PipelineRun was stopping
+  - name: t04
+    reason: PipelineRun was stopping
+  - name: t05
+    reason: PipelineRun was stopping
+  startTime: "2026-10-30T15:28:47Z"

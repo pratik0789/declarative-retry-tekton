@@ -1,0 +1,58 @@
+{
+  "sourceRun": "finally-upstream-source",
+  "sourceRunUID": "5cca6ca7-1b86-4ed9-b188-8f89faa5b397",
+  "pipeline": "finally-upstream",
+  "policy": "upstream",
+  "policySpecSHA256": "sha256:259269a1837d438b916f314c19c20c602f1b8926eb7929333617d9190029d1b1",
+  "policySpec": {
+    "pipelineRef": "finally-upstream",
+    "resumeWithin": "",
+    "retryOnlyLatest": false,
+    "tasks": {
+      "build": {
+        "blocksResume": false,
+        "retryWith": [
+          "prepare"
+        ]
+      },
+      "notify": {
+        "blocksResume": false,
+        "retryWith": [
+          "build"
+        ]
+      }
+    }
+  },
+  "decision": "recover",
+  "tasks": [
+    {
+      "name": "audit",
+      "action": "inherit",
+      "reason": "successful result reused from source run",
+      "sourceTaskRun": "finally-upstream-source-audit"
+    },
+    {
+      "name": "build",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "notify",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    },
+    {
+      "name": "prepare",
+      "action": "rerun",
+      "reason": "failed or selected task, or retryWith closure"
+    }
+  ],
+  "metrics": {
+    "totalTasks": 4,
+    "rerunTasks": 3,
+    "inheritedTasks": 1,
+    "continuingTasks": 0,
+    "tasksAvoided": 1,
+    "avoidancePercent": 25
+  }
+}

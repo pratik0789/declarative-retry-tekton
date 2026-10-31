@@ -116,6 +116,7 @@ func Replay(pipelinePath, policyPath, binding, completedModel string, secretWork
 	for _, failedTask := range pipeline.allTasks() {
 		var run PipelineRun
 		run.Metadata.Name = "replay-" + failedTask.Name
+		run.Status.Conditions = []Condition{{Type: "Succeeded", Status: "False"}}
 		run.Spec.PipelineRef.Name = pipeline.Metadata.Name
 		run.Spec.Workspaces = workspaces
 		run.recordedDefinition = pipeline.definition

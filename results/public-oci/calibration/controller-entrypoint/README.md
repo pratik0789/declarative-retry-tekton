@@ -1,0 +1,2 @@
+# Controller-entrypoint calibration
+The first source cloned successfully; build PodCreationFailed because the controller could not reach public gcr.io to discover the pinned image entrypoint. No image build or recovery arm executed. The evaluated profile resolves the same pinned entrypoint explicitly; scripts/args/image are unchanged. The live failed calibration remains source-tagged, distinct from source-evaluated-tagged.

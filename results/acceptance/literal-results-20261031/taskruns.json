@@ -1,0 +1,50 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "name": "produce-run",
+        "labels": {
+          "tekton.dev/pipelineTask": "produce",
+          "tekton.dev/pipelineRun": "source"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "type": "Succeeded",
+            "status": "True"
+          }
+        ],
+        "results": [
+          {
+            "name": "out",
+            "value": "$(tasks.ghost.results.value)"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "tekton.dev/v1",
+      "kind": "TaskRun",
+      "metadata": {
+        "name": "consume-run",
+        "labels": {
+          "tekton.dev/pipelineTask": "consume",
+          "tekton.dev/pipelineRun": "source"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "type": "Succeeded",
+            "status": "False"
+          }
+        ]
+      }
+    }
+  ]
+}

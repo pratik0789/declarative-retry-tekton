@@ -3,7 +3,7 @@ set -euo pipefail
 
 cluster="${CLUSTER:-retry-paper}"
 context="kind-${cluster}"
-namespace="retry-stateful"
+namespace="${NAMESPACE:-retry-stateful}"
 artifact_dir="${ARTIFACT_DIR:-artifacts/stateful}"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "${tmp_dir}"' EXIT
@@ -11,9 +11,16 @@ mkdir -p "${artifact_dir}"
 k() { kubectl --context "${context}" -n "${namespace}" "$@"; }
 
 go build -o "${tmp_dir}/retryctl" ./cmd/retryctl
-kubectl --context "${context}" delete namespace "${namespace}" --ignore-not-found --wait=true
+if kubectl --context "${context}" get namespace "${namespace}" >/dev/null 2>&1; then
+  echo "Namespace ${namespace} already exists; use a fresh NAMESPACE to preserve earlier evidence." >&2
+  exit 2
+fi
 kubectl --context "${context}" create namespace "${namespace}"
-k apply -f integration/stateful.yaml
+sed "s/namespace: retry-stateful/namespace: ${namespace}/" integration/stateful.yaml > "${artifact_dir}/input.yaml"
+k apply -f "${artifact_dir}/input.yaml"
+sha256sum "${tmp_dir}/retryctl" > "${artifact_dir}/retryctl-sha256.txt"
+go version > "${artifact_dir}/go-version.txt"
+git rev-parse HEAD > "${artifact_dir}/parent-commit.txt"
 k wait --for=condition=Succeeded=False --timeout=5m pipelinerun/retry-stateful-pvc-source pipelinerun/retry-stateful-vct-source
 k get pipeline/retry-stateful -o yaml > "${tmp_dir}/pipeline.yaml"
 
@@ -71,6 +78,10 @@ changed_decision="$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1]));
 
 k get pipelinerun -o yaml > "${artifact_dir}/pipelineruns.yaml"
 k get taskrun -o yaml > "${artifact_dir}/taskruns.yaml"
+k get pipeline -o yaml > "${artifact_dir}/pipelines.yaml"
+k get pod -o json > "${artifact_dir}/pods.json"
+kubectl --context "${context}" version -o yaml > "${artifact_dir}/kubernetes-version.yaml"
+kubectl --context "${context}" get configmap pipelines-info -n tekton-pipelines -o yaml > "${artifact_dir}/tekton-version.yaml"
 
 SOURCE_COMMIT="${source_commit}" RECOVERY_COMMIT="${recovery_commit}" PVC_WARNINGS="${pvc_warnings}" \
 PVC_RECOVERY="${pvc_recovery}" PVC_TASKRUNS="${pvc_taskruns}" PVC_BUILD_LOG="${pvc_build_log}" \

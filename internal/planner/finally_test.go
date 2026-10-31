@@ -134,6 +134,28 @@ func TestPipelineResultPublishersGroupByProducerAndAvoidNameCollisions(t *testin
 	}
 }
 
+func TestPipelineResultPublisherPreservesSubstitutionSyntaxAsData(t *testing.T) {
+	value := "$(tasks.ghost.results.value)"
+	node := map[string]any{"results": []any{
+		map[string]any{"name": "saved", "value": "$(tasks.produce.results.value)"},
+	}}
+	publishers, err := publishInheritedPipelineResults(node, map[string]TaskPlan{
+		"produce": {Results: map[string]any{"value": value}},
+	}, map[string][]string{"produce": nil})
+	if err != nil || len(publishers) != 1 {
+		t.Fatalf("opaque output publication failed: %v %v", publishers, err)
+	}
+	step := asMap(asList(asMap(asMap(publishers[0])["taskSpec"])["steps"])[0])
+	encoded := asMap(asList(step["env"])[0])["value"].(string)
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil || string(decoded) != value {
+		t.Fatalf("saved bytes changed: %q %v", decoded, err)
+	}
+	if got := asMap(asList(node["results"])[0])["value"]; got != "$(tasks.retryctl-reused-results.results.value-0)" {
+		t.Fatalf("output must reference the real publisher, got %v", got)
+	}
+}
+
 func TestFinallyRecoveryGeneration(t *testing.T) {
 	root := "../../testdata/finally-recovery"
 	tests := []struct {

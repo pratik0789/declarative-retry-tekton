@@ -1,0 +1,51 @@
+{
+  "apiVersion": "tekton.dev/v1",
+  "kind": "Pipeline",
+  "metadata": {
+    "annotations": {
+      "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"tekton.dev/v1\",\"kind\":\"Pipeline\",\"metadata\":{\"annotations\":{},\"name\":\"active-source-probe\",\"namespace\":\"retry-acceptance-20261030\"},\"spec\":{\"finally\":[{\"name\":\"cleanup\",\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"wait\",\"script\":\"sleep 25\"}]}}],\"tasks\":[{\"name\":\"fail\",\"taskSpec\":{\"steps\":[{\"image\":\"alpine:3.20\",\"name\":\"fail\",\"script\":\"exit 1\"}]}}]}}\n"
+    },
+    "creationTimestamp": "2026-10-30T06:53:07Z",
+    "generation": 1,
+    "name": "active-source-probe",
+    "namespace": "retry-acceptance-20261030",
+    "resourceVersion": "6206583",
+    "uid": "cbf034c1-2444-4bf1-97ec-39341462eb6d"
+  },
+  "spec": {
+    "finally": [
+      {
+        "name": "cleanup",
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "wait",
+              "script": "sleep 25"
+            }
+          ]
+        }
+      }
+    ],
+    "tasks": [
+      {
+        "name": "fail",
+        "taskSpec": {
+          "metadata": {},
+          "spec": null,
+          "steps": [
+            {
+              "computeResources": {},
+              "image": "alpine:3.20",
+              "name": "fail",
+              "script": "exit 1"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

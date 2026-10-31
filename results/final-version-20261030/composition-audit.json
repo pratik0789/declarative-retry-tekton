@@ -1,0 +1,62 @@
+{
+  "checks": [
+    {
+      "case": "retry-ordering",
+      "nativeSuccess": true,
+      "children": [
+        "build",
+        "deploy",
+        "scan"
+      ],
+      "orderingVerified": true
+    },
+    {
+      "case": "retry-fanin",
+      "nativeSuccess": true,
+      "children": [
+        "build-a",
+        "deploy"
+      ],
+      "orderingVerified": true
+    },
+    {
+      "case": "finally-only",
+      "nativeSuccess": true,
+      "children": [
+        "notify"
+      ]
+    },
+    {
+      "case": "finally-upstream",
+      "nativeSuccess": true,
+      "children": [
+        "build",
+        "notify",
+        "prepare"
+      ]
+    },
+    {
+      "case": "finally-parallel",
+      "nativeSuccess": true,
+      "children": [
+        "audit",
+        "notify"
+      ]
+    },
+    {
+      "case": "finally-export",
+      "nativeSuccess": true,
+      "children": [
+        "notify",
+        "retryctl-reused-results"
+      ],
+      "pipelineResults": [
+        {
+          "name": "audit-note",
+          "value": "checked"
+        }
+      ]
+    }
+  ],
+  "scope": "Raw native terminal conditions, TaskRun identities and ordering; fixture semantics remain author declared."
+}

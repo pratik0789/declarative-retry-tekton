@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: build-b=retry-fanin-source-build-b,clone=retry-fanin-source-clone,package=retry-fanin-source-package,publish=retry-fanin-source-publish
+    retry.tekton.dev/policy: retry-fanin-policy
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"retry-fanin","resumeWithin":"","retryOnlyLatest":true,"tasks":{}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:d53e8d5f52e634b9c5119b33fc9e2c8e14184116f95bf744319c45404e7acd33
+    retry.tekton.dev/source-pipeline: retry-fanin
+    retry.tekton.dev/source-pipeline-run: retry-fanin-source
+    retry.tekton.dev/source-pipeline-run-uid: 8ef7465f-268e-4abb-9c69-3e43cd9b3447
+  generateName: retry-fanin-retry-
+  namespace: retry-value-ordering-20261030
+spec:
+  pipelineSpec:
+    tasks:
+    - name: build-a
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: sleep 4
+    - name: deploy
+      runAfter:
+      - build-a
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(context.taskRun.name)" in
+              *-source-*) echo "injected deploy failure"; exit 1 ;;
+            esac
+            echo deployed
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s

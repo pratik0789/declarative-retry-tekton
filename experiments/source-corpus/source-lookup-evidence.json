@@ -1,0 +1,137 @@
+[
+  {
+    "label": "fbc binding",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/pipelines/managed/fbc-release/fbc-release.yaml",
+    "source_lines": [
+      639,
+      648
+    ],
+    "source_quote": "        - name: resource\n          value: $(params.release)\n        - name: resultsDirPath\n          value: $(tasks.collect-data.results.resultsDir)\n        - name: ociStorage\n          value: $(params.ociStorage)\n        - name: resultArtifacts\n          value:\n            - \"$(tasks.add-fbc-contribution-to-index-image.results.sourceDataArtifact)=$(params.dataDir)\"\n            - \"$(tasks.extract-index-image.results.sourceDataArtifact)=$(params.dataDir)\""
+  },
+  {
+    "label": "producer result interface",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/tasks/managed/add-fbc-contribution/add-fbc-contribution.yaml",
+    "source_lines": [
+      105,
+      107
+    ],
+    "source_quote": "    - name: sourceDataArtifact\n      type: string\n      description: Produced trusted data artifact"
+  },
+  {
+    "label": "producer creation result path",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/tasks/managed/add-fbc-contribution/add-fbc-contribution.yaml",
+    "source_lines": [
+      218,
+      224
+    ],
+    "source_quote": "      params:\n        - name: ociStorage\n          value: $(params.ociStorage)\n        - name: workDir\n          value: $(params.dataDir)\n        - name: sourceDataArtifact\n          value: $(results.sourceDataArtifact.path)"
+  },
+  {
+    "label": "status input interface",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/tasks/managed/update-cr-status/update-cr-status.yaml",
+    "source_lines": [
+      10,
+      11
+    ],
+    "source_quote": "  description: |-\n    A tekton task that updates the passed CR status with the contents stored in the files in the resultsDir."
+  },
+  {
+    "label": "results directory interface",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/tasks/managed/update-cr-status/update-cr-status.yaml",
+    "source_lines": [
+      24,
+      27
+    ],
+    "source_quote": "    - name: resultsDirPath\n      description: |\n        Path to the directory containing the result files in the data workspace which will be added to the\n        resource's status"
+  },
+  {
+    "label": "array input interface",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/tasks/managed/update-cr-status/update-cr-status.yaml",
+    "source_lines": [
+      46,
+      49
+    ],
+    "source_quote": "    - name: resultArtifacts\n      type: array\n      description: Array of artifacts to use to obtain results\n      default: []"
+  },
+  {
+    "label": "array invocation binding",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/tasks/managed/update-cr-status/update-cr-status.yaml",
+    "source_lines": [
+      99,
+      119
+    ],
+    "source_quote": "    - name: use-trusted-artifact-array\n      computeResources:\n        limits:\n          memory: 128Mi\n        requests:\n          memory: 128Mi\n          cpu: 20m\n      ref:\n        resolver: \"git\"\n        params:\n          - name: url\n            value: $(params.taskGitUrl)\n          - name: revision\n            value: $(params.taskGitRevision)\n          - name: pathInRepo\n            value: stepactions/use-trusted-artifact-array/use-trusted-artifact-array.yaml\n      params:\n        - name: sourceDataArtifacts\n          value: $(params.resultArtifacts)\n        - name: caCertPath\n          value: $(params.caCertPath)"
+  },
+  {
+    "label": "opaque status module",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/tasks/managed/update-cr-status/update-cr-status.yaml",
+    "source_lines": [
+      128,
+      139
+    ],
+    "source_quote": "      env:\n        - name: \"PARAM_DATA_DIR\"\n          value: \"$(params.dataDir)\"\n        - name: \"PARAM_RESULTS_DIR_PATH\"\n          value: \"$(params.resultsDirPath)\"\n        - name: \"PARAM_RESOURCE\"\n          value: \"$(params.resource)\"\n        - name: \"PARAM_RESOURCE_TYPE\"\n          value: \"$(params.resourceType)\"\n        - name: \"PARAM_STATUS_KEY\"\n          value: \"$(params.statusKey)\"\n      command: [\"python3\", \"-m\", \"release_service_utils.tasks.managed.update_cr_status\"]"
+  },
+  {
+    "label": "array extraction description",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/stepactions/use-trusted-artifact-array/use-trusted-artifact-array.yaml",
+    "source_lines": [
+      7,
+      8
+    ],
+    "source_quote": "  description: >-\n    This stepaction extracts an array of Trusted Artifacts into a folder."
+  },
+  {
+    "label": "array extractor entrypoint args",
+    "source_file": "source/konflux-ci/release-service-catalog/f067a17b8ebd91229e1b8bbb17bcd2e76f611dbb/stepactions/use-trusted-artifact-array/use-trusted-artifact-array.yaml",
+    "source_lines": [
+      16,
+      27
+    ],
+    "source_quote": "  params:\n    - name: sourceDataArtifacts\n      type: array\n      description: Array of artifacts to extract\n      default: []\n    - name: caCertPath\n      type: string\n      default: \"/mnt/trusted-ca/ca-bundle.crt\"\n      description: Path to CA certificate bundle for TLS verification with self-hosted certificates\n  args:\n    - use\n    - \"$(params.sourceDataArtifacts[*])\""
+  },
+  {
+    "label": "shared image binding",
+    "source_file": "source/tektoncd/catalog/112374ce1262b133a77300bd8133445722605e04/pipeline/build-push-gke-deploy/0.1/build-push-gke-deploy.yaml",
+    "source_lines": [
+      49,
+      78
+    ],
+    "source_quote": "    - name: kaniko\n      taskRef:\n        name: kaniko\n      params:\n        - name: CONTEXT\n          value: '$(params.pathToContext)'\n        - name: IMAGE\n          value: '$(params.imageUrl):$(params.imageTag)'\n      workspaces:\n        - name: source\n          workspace: source\n    - name: gke-deploy\n      taskRef:\n        name: gke-deploy\n      runAfter:\n        - kaniko\n      params:\n        - name: ARGS\n          value:\n            - 'run'\n            - '--image=$(params.imageUrl):$(params.imageTag)'\n            - '--filename=$(workspaces.source.path)/$(params.pathToKubernetesConfigs)'\n            - '--cluster=$(params.clusterName)'\n            - '--location=$(params.clusterLocation)'\n            - '--project=$(params.clusterProject)'\n            - '--output=/var/tmp/gke-deploy'\n\n      workspaces:\n        - name: source\n          workspace: source"
+  },
+  {
+    "label": "pipeline intended build/push/deploy",
+    "source_file": "source/tektoncd/catalog/112374ce1262b133a77300bd8133445722605e04/pipeline/build-push-gke-deploy/0.1/build-push-gke-deploy.yaml",
+    "source_lines": [
+      13,
+      18
+    ],
+    "source_quote": "  description: >-\n    This Pipeline builds, pushes, and deploys your application to a Google Kubernetes\n    Engine cluster using gke-deploy.\n  workspaces:\n    - name: source\n      description: The workspace containing the source code which is to be build, pushed and deployed"
+  },
+  {
+    "label": "kaniko destination interface",
+    "source_file": "source/tektoncd/catalog/112374ce1262b133a77300bd8133445722605e04/task/kaniko/0.2/kaniko.yaml",
+    "source_lines": [
+      43,
+      56
+    ],
+    "source_quote": "  - name: build-and-push\n    workingDir: $(workspaces.source.path)\n    image: $(params.BUILDER_IMAGE)\n    # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential\n    # https://github.com/tektoncd/pipeline/pull/706\n    env:\n    - name: DOCKER_CONFIG\n      value: /tekton/home/.docker\n    args:\n    - $(params.EXTRA_ARGS)\n    - --dockerfile=$(params.DOCKERFILE)\n    - --context=$(workspaces.source.path)/$(params.CONTEXT)  # The user does not need to care the workspace and the source.\n    - --destination=$(params.IMAGE)\n    - --oci-layout-path=$(workspaces.source.path)/$(params.CONTEXT)/image-digest"
+  },
+  {
+    "label": "deployment interface",
+    "source_file": "source/tektoncd/catalog/112374ce1262b133a77300bd8133445722605e04/task/gke-deploy/0.1/gke-deploy.yaml",
+    "source_lines": [
+      14,
+      16
+    ],
+    "source_quote": "  description: >-\n    This Task deploys an application to a Google Kubernetes Engine\n    cluster using gke-deploy"
+  },
+  {
+    "label": "deployment invocation",
+    "source_file": "source/tektoncd/catalog/112374ce1262b133a77300bd8133445722605e04/task/gke-deploy/0.1/gke-deploy.yaml",
+    "source_lines": [
+      25,
+      30
+    ],
+    "source_quote": "  steps:\n  - name: gke-deploy\n    image: gcr.io/cloud-builders/gke-deploy@sha256:6d18a1efabf8a7ea7f2169c93f3e01fc5b8247b12099618c496ab097aaae341f\n    command: [\"/gke-deploy\"]\n    workingDir: $(workspaces.source.path)\n    args: [\"$(params.ARGS)\"]"
+  }
+]
