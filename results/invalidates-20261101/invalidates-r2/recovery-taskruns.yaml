@@ -1,0 +1,394 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-682a5f2ad8
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: observe=sb-source-observe
+      retry.tekton.dev/policy: stale-build-invalidates
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/policy-spec: '{"pipelineRef":"stale-build","resumeWithin":"","retryOnlyLatest":false,"tasks":{"prepare":{"blocksResume":false,"invalidates":["build"],"retryWith":null}}}'
+      retry.tekton.dev/policy-spec-sha256: sha256:5ca929efe65ae2e79919761cfc4d9a0b3b1ab47dec369a3bdb600f4f6c30da24
+      retry.tekton.dev/source-pipeline: stale-build
+      retry.tekton.dev/source-pipeline-run: sb-source
+      retry.tekton.dev/source-pipeline-run-uid: fbf37b7f-28b9-42df-b61d-ab723ccd184e
+    creationTimestamp: "2026-11-01T19:59:11Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build-retry-wtzh9
+      tekton.dev/pipelineRun: stale-build-retry-wtzh9
+      tekton.dev/pipelineRunUID: 50e0881d-dead-4bba-818f-5744b230c5c1
+      tekton.dev/pipelineTask: build
+    name: stale-build-retry-wtzh9-build
+    namespace: retry-inv2-invalidates-20261101-r2
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: stale-build-retry-wtzh9
+      uid: 50e0881d-dead-4bba-818f-5744b230c5c1
+    resourceVersion: "6867446"
+    uid: 34bd7679-cd1d-4d2a-b6cf-80df5a2032b6
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1 | tr -d "\n" > $(workspaces.data.path)/artifact-input.sha
+          printf "built:" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt
+      workspaces:
+      - name: data
+    timeout: 1h0m0s
+    workspaces:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:59:18Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:59:18Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: stale-build-retry-wtzh9-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:59:11Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://0acf8b7318908ac7a75639bb39635ea2a6aef77caf73245243aeb9190fbfa057
+        exitCode: 0
+        finishedAt: "2026-11-01T19:59:17Z"
+        reason: Completed
+        startedAt: "2026-11-01T19:59:17Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          sha256sum /workspace/data/source.txt | cut -d" " -f1 | tr -d "\n" > /workspace/data/artifact-input.sha
+          printf "built:" > /workspace/data/artifact.txt; cat /workspace/data/artifact-input.sha >> /workspace/data/artifact.txt
+      workspaces:
+      - name: data
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: observe=sb-source-observe
+      retry.tekton.dev/policy: stale-build-invalidates
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/policy-spec: '{"pipelineRef":"stale-build","resumeWithin":"","retryOnlyLatest":false,"tasks":{"prepare":{"blocksResume":false,"invalidates":["build"],"retryWith":null}}}'
+      retry.tekton.dev/policy-spec-sha256: sha256:5ca929efe65ae2e79919761cfc4d9a0b3b1ab47dec369a3bdb600f4f6c30da24
+      retry.tekton.dev/source-pipeline: stale-build
+      retry.tekton.dev/source-pipeline-run: sb-source
+      retry.tekton.dev/source-pipeline-run-uid: fbf37b7f-28b9-42df-b61d-ab723ccd184e
+    creationTimestamp: "2026-11-01T19:59:18Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build-retry-wtzh9
+      tekton.dev/pipelineRun: stale-build-retry-wtzh9
+      tekton.dev/pipelineRunUID: 50e0881d-dead-4bba-818f-5744b230c5c1
+      tekton.dev/pipelineTask: gate
+    name: stale-build-retry-wtzh9-gate
+    namespace: retry-inv2-invalidates-20261101-r2
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: stale-build-retry-wtzh9
+      uid: 50e0881d-dead-4bba-818f-5744b230c5c1
+    resourceVersion: "6867512"
+    uid: bc7fbb74-cf89-417a-b4f4-994968b483b2
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          case "$(context.taskRun.name)" in *-source-*) echo INJECTED-GATE-FAILURE; exit 1;; esac
+          echo GATE-PASSED
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:59:26Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:59:26Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: stale-build-retry-wtzh9-gate-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:59:18Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://3406f480da20b98b8b0ea994b49feeb76a4160aa07a2aef64fd946db931469ea
+        exitCode: 0
+        finishedAt: "2026-11-01T19:59:25Z"
+        reason: Completed
+        startedAt: "2026-11-01T19:59:25Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          case "stale-build-retry-wtzh9-gate" in *-source-*) echo INJECTED-GATE-FAILURE; exit 1;; esac
+          echo GATE-PASSED
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-682a5f2ad8
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: observe=sb-source-observe
+      retry.tekton.dev/policy: stale-build-invalidates
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/policy-spec: '{"pipelineRef":"stale-build","resumeWithin":"","retryOnlyLatest":false,"tasks":{"prepare":{"blocksResume":false,"invalidates":["build"],"retryWith":null}}}'
+      retry.tekton.dev/policy-spec-sha256: sha256:5ca929efe65ae2e79919761cfc4d9a0b3b1ab47dec369a3bdb600f4f6c30da24
+      retry.tekton.dev/source-pipeline: stale-build
+      retry.tekton.dev/source-pipeline-run: sb-source
+      retry.tekton.dev/source-pipeline-run-uid: fbf37b7f-28b9-42df-b61d-ab723ccd184e
+    creationTimestamp: "2026-11-01T19:59:03Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build-retry-wtzh9
+      tekton.dev/pipelineRun: stale-build-retry-wtzh9
+      tekton.dev/pipelineRunUID: 50e0881d-dead-4bba-818f-5744b230c5c1
+      tekton.dev/pipelineTask: prepare
+    name: stale-build-retry-wtzh9-prepare
+    namespace: retry-inv2-invalidates-20261101-r2
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: stale-build-retry-wtzh9
+      uid: 50e0881d-dead-4bba-818f-5744b230c5c1
+    resourceVersion: "6867380"
+    uid: 2f039b1d-f975-4e7c-a206-1628e317c35e
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          printf "input:$(context.taskRun.name):86437f26cc91a457" > $(workspaces.data.path)/source.txt
+          rm -f $(workspaces.data.path)/receipt.txt
+      workspaces:
+      - name: data
+    timeout: 1h0m0s
+    workspaces:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:59:11Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:59:11Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: stale-build-retry-wtzh9-prepare-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:59:03Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://3788858885f95e8129e7d4267c22cc4c6832e145ae323d29147d9ffbafe6f5c2
+        exitCode: 0
+        finishedAt: "2026-11-01T19:59:10Z"
+        reason: Completed
+        startedAt: "2026-11-01T19:59:10Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          printf "input:stale-build-retry-wtzh9-prepare:86437f26cc91a457" > /workspace/data/source.txt
+          rm -f /workspace/data/receipt.txt
+      workspaces:
+      - name: data
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-682a5f2ad8
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: observe=sb-source-observe
+      retry.tekton.dev/policy: stale-build-invalidates
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/policy-spec: '{"pipelineRef":"stale-build","resumeWithin":"","retryOnlyLatest":false,"tasks":{"prepare":{"blocksResume":false,"invalidates":["build"],"retryWith":null}}}'
+      retry.tekton.dev/policy-spec-sha256: sha256:5ca929efe65ae2e79919761cfc4d9a0b3b1ab47dec369a3bdb600f4f6c30da24
+      retry.tekton.dev/source-pipeline: stale-build
+      retry.tekton.dev/source-pipeline-run: sb-source
+      retry.tekton.dev/source-pipeline-run-uid: fbf37b7f-28b9-42df-b61d-ab723ccd184e
+    creationTimestamp: "2026-11-01T19:59:26Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build-retry-wtzh9
+      tekton.dev/pipelineRun: stale-build-retry-wtzh9
+      tekton.dev/pipelineRunUID: 50e0881d-dead-4bba-818f-5744b230c5c1
+      tekton.dev/pipelineTask: publish
+    name: stale-build-retry-wtzh9-publish
+    namespace: retry-inv2-invalidates-20261101-r2
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: stale-build-retry-wtzh9
+      uid: 50e0881d-dead-4bba-818f-5744b230c5c1
+    resourceVersion: "6867568"
+    uid: e4442bf7-23e7-451b-b8f7-88bd7c6d4bae
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          actual=`sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1`
+          recorded=`cat $(workspaces.data.path)/artifact-input.sha`
+          if [ "$actual" != "$recorded" ]; then echo STALE-ARTIFACT; exit 1; fi
+          if [ "`cat $(workspaces.data.path)/artifact.txt`" != "built:$actual" ]; then echo BAD-ARTIFACT; exit 1; fi
+          artifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d" " -f1`
+          printf "%s %s" "$actual" "$artifact" > $(workspaces.data.path)/receipt.txt
+          echo ORACLE-CONSISTENT
+      workspaces:
+      - name: data
+    timeout: 1h0m0s
+    workspaces:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:59:33Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:59:33Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: stale-build-retry-wtzh9-publish-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:59:26Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://c1368f94fa36e0279b2e4f3ad6faf92a3a60979cb109753c47f675133ee12947
+        exitCode: 0
+        finishedAt: "2026-11-01T19:59:32Z"
+        reason: Completed
+        startedAt: "2026-11-01T19:59:32Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          actual=`sha256sum /workspace/data/source.txt | cut -d" " -f1`
+          recorded=`cat /workspace/data/artifact-input.sha`
+          if [ "$actual" != "$recorded" ]; then echo STALE-ARTIFACT; exit 1; fi
+          if [ "`cat /workspace/data/artifact.txt`" != "built:$actual" ]; then echo BAD-ARTIFACT; exit 1; fi
+          artifact=`sha256sum /workspace/data/artifact.txt | cut -d" " -f1`
+          printf "%s %s" "$actual" "$artifact" > /workspace/data/receipt.txt
+          echo ORACLE-CONSISTENT
+      workspaces:
+      - name: data
+kind: List
+metadata:
+  resourceVersion: ""

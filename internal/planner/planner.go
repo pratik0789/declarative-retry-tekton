@@ -117,7 +117,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	if p.Metadata.Name == "" || r.Metadata.Name == "" || policy.Metadata.Name == "" {
 		return Plan{}, fmt.Errorf("resources must have metadata.name")
 	}
-	if r.Spec.PipelineRef.Name != p.Metadata.Name {
+	if runPipelineName(r, p.Metadata.Name) != p.Metadata.Name {
 		return refuse("PipelineRun references a different Pipeline")
 	}
 	if policy.Spec.PipelineRef != p.Metadata.Name {
@@ -153,6 +153,9 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		if newerRuns == nil {
 			return refuse("retryOnlyLatest requires the PipelineRuns to compare against (--newer-runs)")
 		}
+		if r.Spec.PipelineRef.Name == "" && r.inlineDefinition != nil {
+			return refuse("retryOnlyLatest cannot identify newer runs of an embedded Pipeline")
+		}
 		sourceValues := effectiveParameters(r)
 		for _, name := range policy.Spec.TargetParameters {
 			if value, ok := sourceValues[name]; !ok || value == nil {
@@ -163,7 +166,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			if failedRecoveryOf(candidate, r) {
 				continue
 			}
-			samePipeline := candidate.Spec.PipelineRef.Name == p.Metadata.Name || candidate.Metadata.Annotations[annotationSourcePipeline] == p.Metadata.Name
+			samePipeline := runPipelineName(candidate, "") == p.Metadata.Name || candidate.Metadata.Annotations[annotationSourcePipeline] == p.Metadata.Name
 			if !samePipeline || !candidate.Metadata.CreationTimestamp.After(r.Metadata.CreationTimestamp) {
 				continue
 			}
@@ -203,7 +206,8 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	}
 	sort.Strings(ruleNames)
 	for _, name := range ruleNames {
-		for _, referenced := range append([]string{name}, policy.Spec.Tasks[name].RetryWith...) {
+		references := append(append([]string{name}, policy.Spec.Tasks[name].RetryWith...), policy.Spec.Tasks[name].Invalidates...)
+		for _, referenced := range references {
 			if _, ok := tasks[referenced]; !ok {
 				return refuse(fmt.Sprintf("policy references unknown task %q", referenced))
 			}
@@ -214,6 +218,9 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		return refuse(err.Error())
 	}
 	if err := validateRetryDirections(upstream, policy.Spec.Tasks); err != nil {
+		return refuse(err.Error())
+	}
+	if err := validateInvalidations(upstream, policy.Spec.Tasks); err != nil {
 		return refuse(err.Error())
 	}
 	states := map[string]ChildReference{}
@@ -257,7 +264,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			return nil
 		}
 		rerun[name] = true
-		for _, dependency := range policy.Spec.Tasks[name].RetryWith {
+		for _, dependency := range append(append([]string(nil), policy.Spec.Tasks[name].RetryWith...), policy.Spec.Tasks[name].Invalidates...) {
 			if err := visit(dependency); err != nil {
 				return err
 			}
@@ -279,7 +286,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 		taskPlan := TaskPlan{Name: name}
 		switch {
 		case rerun[name]:
-			taskPlan.Action, taskPlan.Reason = "rerun", "failed or selected task, or retryWith closure"
+			taskPlan.Action, taskPlan.Reason = "rerun", "failed or selected task, or retryWith/invalidates closure"
 		case !ran:
 			taskPlan.Action, taskPlan.Reason = "continue", "task was not reached in source run"
 		case strings.EqualFold(child.Status, "Succeeded"):
@@ -669,4 +676,21 @@ func sharedWorkspaceWarnings(p Pipeline, r PipelineRun, rerun map[string]bool, s
 		}
 	}
 	return warnings
+}
+
+// A run that references its Pipeline through a remote resolver carries no
+// pipelineRef name; Tekton labels it with the resolved Pipeline's name. A run
+// with an embedded pipelineSpec has neither, so its identity rests on the exact
+// definition comparison. Embedded recovery runs created by this tool stay refused.
+func runPipelineName(r PipelineRun, embeddedName string) string {
+	if r.Spec.PipelineRef.Name != "" {
+		return r.Spec.PipelineRef.Name
+	}
+	if r.Metadata.Annotations[annotationSourceRun] != "" {
+		return ""
+	}
+	if r.inlineDefinition != nil {
+		return embeddedName
+	}
+	return r.Metadata.Labels["tekton.dev/pipeline"]
 }

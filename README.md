@@ -143,7 +143,23 @@ and after applying the source run's own values for exactly those variables.
 Array and object parameters are not substituted; a Pipeline that expands them
 still cannot establish an exact match and is refused. Live evidence for a
 parameterized Pipeline is in `results/params-guard-20261101/`
-(`hack/params_guard.sh`). `PipelineRun.metadata.generation` is the run's own version,
+(`hack/params_guard.sh`).
+
+A run that references its Pipeline through a remote resolver has no `pipelineRef.name`;
+retryctl uses the `tekton.dev/pipeline` label Tekton sets on it. A run with an embedded
+`pipelineSpec` is matched by the exact definition comparison alone, and `retryOnlyLatest`
+refuses for such runs. Embedded recovery runs created by retryctl stay refused. Live
+evidence: `results/identity-20261101/` (`hack/identity_live.sh`, cluster resolver and
+embedded spec).
+
+`invalidates` names completed later tasks that must rerun whenever the declaring task
+reruns, e.g. `prepare: {invalidates: [build]}`; only execution descendants may be named.
+The closure follows `retryWith` and `invalidates` together. Live evidence:
+`results/invalidates-20261101/` (`hack/invalidates_live.sh`).
+
+`internal/planner/konflux_release_study_test.go` and `results/konflux-release-20261101/`
+apply the retry-safety labels Konflux maintainers proposed for ten release tasks to the
+managed release Pipelines of konflux-ci/release-service-catalog (offline plans). `PipelineRun.metadata.generation` is the run's own version,
 not the referenced Pipeline's version, and is not used for this comparison.
 A future controller could capture the Pipeline's UID and generation when a run
 starts; this prototype does not assume that historical runs contain them.

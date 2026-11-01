@@ -1,0 +1,153 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  creationTimestamp: "2026-11-01T20:00:23Z"
+  generation: 1
+  labels:
+    tekton.dev/pipeline: stale-build
+  name: sb-source
+  namespace: retry-inv2-invalidates-20261101-r3
+  resourceVersion: "6868352"
+  uid: 57896114-1a46-44d0-8300-0f04940f6670
+spec:
+  pipelineRef:
+    name: stale-build
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: data
+status:
+  childReferences:
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: sb-source-observe
+    pipelineTaskName: observe
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: sb-source-prepare
+    pipelineTaskName: prepare
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: sb-source-build
+    pipelineTaskName: build
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: sb-source-gate
+    pipelineTaskName: gate
+  completionTime: "2026-11-01T20:00:53Z"
+  conditions:
+  - lastTransitionTime: "2026-11-01T20:00:53Z"
+    message: 'Tasks Completed: 4 (Failed: 1, Cancelled 0), Skipped: 1'
+    reason: Failed
+    status: "False"
+    type: Succeeded
+  pipelineSpec:
+    tasks:
+    - name: observe
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            echo OBSERVED
+    - name: prepare
+      runAfter:
+      - observe
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            printf "input:$(context.taskRun.name):86437f26cc91a457" > $(workspaces.data.path)/source.txt
+            rm -f $(workspaces.data.path)/receipt.txt
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    - name: build
+      runAfter:
+      - prepare
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1 | tr -d "\n" > $(workspaces.data.path)/artifact-input.sha
+            printf "built:" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    - name: gate
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            case "$(context.taskRun.name)" in *-source-*) echo INJECTED-GATE-FAILURE; exit 1;; esac
+            echo GATE-PASSED
+    - name: publish
+      runAfter:
+      - gate
+      taskSpec:
+        metadata: {}
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            actual=`sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1`
+            recorded=`cat $(workspaces.data.path)/artifact-input.sha`
+            if [ "$actual" != "$recorded" ]; then echo STALE-ARTIFACT; exit 1; fi
+            if [ "`cat $(workspaces.data.path)/artifact.txt`" != "built:$actual" ]; then echo BAD-ARTIFACT; exit 1; fi
+            artifact=`sha256sum $(workspaces.data.path)/artifact.txt | cut -d" " -f1`
+            printf "%s %s" "$actual" "$artifact" > $(workspaces.data.path)/receipt.txt
+            echo ORACLE-CONSISTENT
+        workspaces:
+        - name: data
+      workspaces:
+      - name: data
+        workspace: shared
+    workspaces:
+    - name: shared
+  provenance:
+    featureFlags:
+      awaitSidecarReadiness: true
+      coschedule: workspaces
+      enableAPIFields: beta
+      enableProvenanceInStatus: true
+      enforceNonfalsifiability: none
+      maxResultSize: 4096
+      resultExtractionMethod: termination-message
+      runningInEnvWithInjectedSidecars: true
+      verificationNoMatchPolicy: ignore
+  skippedTasks:
+  - name: publish
+    reason: PipelineRun was stopping
+  startTime: "2026-11-01T20:00:23Z"

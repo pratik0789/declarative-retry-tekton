@@ -1,0 +1,18 @@
+{
+ "apiVersion": "retry.tekton.dev/v1alpha1",
+ "kind": "PipelineRetryPolicy",
+ "metadata": {
+  "name": "stale-build-invalidates",
+  "generation": 1
+ },
+ "spec": {
+  "pipelineRef": "stale-build",
+  "tasks": {
+   "prepare": {
+    "invalidates": [
+     "build"
+    ]
+   }
+  }
+ }
+}

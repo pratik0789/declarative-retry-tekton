@@ -1,0 +1,344 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-d1d4e203fb
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-11-01T19:49:51Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-params
+      tekton.dev/pipelineRun: resolver-source
+      tekton.dev/pipelineRunUID: c263deb2-5f00-4b09-baef-585324baf4a3
+      tekton.dev/pipelineTask: build
+    name: resolver-source-build
+    namespace: retry-identity-20261101-s2
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: resolver-source
+      uid: c263deb2-5f00-4b09-baef-585324baf4a3
+    resourceVersion: "6863071"
+    uid: 3f50aa5a-0c87-4f47-8405-3b34b15f4ae5
+  spec:
+    params:
+    - name: commit
+      value: a1debffc63f3
+    - name: digest
+      value: 3894481ba3b03fced7418965bfc67329f6dceb73a4e8160586bedbac17663fee
+    - name: tag
+      value: v1.4.2-stable
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      - name: tag
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          f="$(workspaces.src.path)/source.txt"
+          [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+          actual=`sha256sum "$f" | cut -d' ' -f1`
+          [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+          head -n1 "$f" | grep -qx "release=v1.4.2" || { echo "RELEASE-MISMATCH"; exit 1; }
+          echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+          printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: retry-params-pvc
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:49:58Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:49:58Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: resolver-source-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: image
+      type: string
+      value: img-a1debffc63f3-v1.4.2-stable
+    startTime: "2026-11-01T19:49:51Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://909a35c032d9aa4dc08e424ab9b6348e737608f7b8e83b26f4f6f339152d4fb5
+        exitCode: 0
+        finishedAt: "2026-11-01T19:49:56Z"
+        message: '[{"key":"image","value":"img-a1debffc63f3-v1.4.2-stable","type":1}]'
+        reason: Completed
+        startedAt: "2026-11-01T19:49:56Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      - name: tag
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          f="/workspace/src/source.txt"
+          [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+          actual=`sha256sum "$f" | cut -d' ' -f1`
+          [ "$actual" = "3894481ba3b03fced7418965bfc67329f6dceb73a4e8160586bedbac17663fee" ] || { echo "STATE-MISMATCH"; exit 1; }
+          head -n1 "$f" | grep -qx "release=v1.4.2" || { echo "RELEASE-MISMATCH"; exit 1; }
+          echo "STATE-VERIFIED commit a1debffc63f3 tag v1.4.2-stable"
+          printf 'img-%s-%s' "a1debffc63f3" "v1.4.2-stable" > "/tekton/results/image"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-d1d4e203fb
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-11-01T19:49:41Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-params
+      tekton.dev/pipelineRun: resolver-source
+      tekton.dev/pipelineRunUID: c263deb2-5f00-4b09-baef-585324baf4a3
+      tekton.dev/pipelineTask: clone
+    name: resolver-source-clone
+    namespace: retry-identity-20261101-s2
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: resolver-source
+      uid: c263deb2-5f00-4b09-baef-585324baf4a3
+    resourceVersion: "6863006"
+    uid: a185e1e3-10b6-42be-9989-f37d46214f84
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      results:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          printf 'release=%s\n' "v1.4.2" > "$(workspaces.src.path)/source.txt"
+          head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' >> "$(workspaces.src.path)/source.txt"
+          head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+          sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: retry-params-pvc
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:49:51Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:49:51Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: resolver-source-clone-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: commit
+      type: string
+      value: a1debffc63f3
+    - name: digest
+      type: string
+      value: 3894481ba3b03fced7418965bfc67329f6dceb73a4e8160586bedbac17663fee
+    startTime: "2026-11-01T19:49:41Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://31d9e850158e7c35d1f5bdf223dc0b7b73b4c73c67827aa4b24882a81ca46d82
+        exitCode: 0
+        finishedAt: "2026-11-01T19:49:50Z"
+        message: '[{"key":"commit","value":"a1debffc63f3","type":1},{"key":"digest","value":"3894481ba3b03fced7418965bfc67329f6dceb73a4e8160586bedbac17663fee","type":1}]'
+        reason: Completed
+        startedAt: "2026-11-01T19:49:50Z"
+      terminationReason: Completed
+    taskSpec:
+      results:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          printf 'release=%s\n' "v1.4.2" > "/workspace/src/source.txt"
+          head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' >> "/workspace/src/source.txt"
+          head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "/tekton/results/commit"
+          sha256sum "/workspace/src/source.txt" | cut -d' ' -f1 | tr -d '\n' > "/tekton/results/digest"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-11-01T19:49:58Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-params
+      tekton.dev/pipelineRun: resolver-source
+      tekton.dev/pipelineRunUID: c263deb2-5f00-4b09-baef-585324baf4a3
+      tekton.dev/pipelineTask: scan
+    name: resolver-source-scan
+    namespace: retry-identity-20261101-s2
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: resolver-source
+      uid: c263deb2-5f00-4b09-baef-585324baf4a3
+    resourceVersion: "6863129"
+    uid: 23a4b62a-a73d-4462-bac8-f33c9a4ec164
+  spec:
+    params:
+    - name: image
+      value: img-a1debffc63f3-v1.4.2-stable
+    - name: run
+      value: resolver-source
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      - name: run
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "$(params.run)" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned $(params.image)"
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:50:04Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:50:04Z"
+      message: '"step-run" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: resolver-source-scan-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:49:58Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://45f4d299bc7621dee05a33c7aa81b6b568eccf4126328198b5a8e4f6b7777ed8
+        exitCode: 1
+        finishedAt: "2026-11-01T19:50:03Z"
+        reason: Error
+        startedAt: "2026-11-01T19:50:03Z"
+      terminationReason: Error
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      - name: run
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "resolver-source" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned img-a1debffc63f3-v1.4.2-stable"
+kind: List
+metadata:
+  resourceVersion: ""

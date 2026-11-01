@@ -1,0 +1,341 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-2928915f4e
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-11-01T19:56:52Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build
+      tekton.dev/pipelineRun: sb-source
+      tekton.dev/pipelineRunUID: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+      tekton.dev/pipelineTask: build
+    name: sb-source-build
+    namespace: retry-inv2-invalidates-20261101-r1
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: sb-source
+      uid: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+    resourceVersion: "6866139"
+    uid: 74f4d27f-b3eb-479b-a5b0-12a530218cc5
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          sha256sum $(workspaces.data.path)/source.txt | cut -d" " -f1 | tr -d "\n" > $(workspaces.data.path)/artifact-input.sha
+          printf "built:" > $(workspaces.data.path)/artifact.txt; cat $(workspaces.data.path)/artifact-input.sha >> $(workspaces.data.path)/artifact.txt
+      workspaces:
+      - name: data
+    timeout: 1h0m0s
+    workspaces:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:56:59Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:56:59Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: sb-source-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:56:52Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://6f4514d4d92e2c062ea59585ca297b2ec6287400c7fbc352b78b86a216abd6df
+        exitCode: 0
+        finishedAt: "2026-11-01T19:56:58Z"
+        reason: Completed
+        startedAt: "2026-11-01T19:56:58Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          sha256sum /workspace/data/source.txt | cut -d" " -f1 | tr -d "\n" > /workspace/data/artifact-input.sha
+          printf "built:" > /workspace/data/artifact.txt; cat /workspace/data/artifact-input.sha >> /workspace/data/artifact.txt
+      workspaces:
+      - name: data
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-11-01T19:56:59Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build
+      tekton.dev/pipelineRun: sb-source
+      tekton.dev/pipelineRunUID: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+      tekton.dev/pipelineTask: gate
+    name: sb-source-gate
+    namespace: retry-inv2-invalidates-20261101-r1
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: sb-source
+      uid: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+    resourceVersion: "6866203"
+    uid: c63d65c9-d7ba-4c04-a0ca-9628bdc913bf
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          case "$(context.taskRun.name)" in *-source-*) echo INJECTED-GATE-FAILURE; exit 1;; esac
+          echo GATE-PASSED
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:57:07Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:57:07Z"
+      message: '"step-run" exited with code 1: Error'
+      reason: Failed
+      status: "False"
+      type: Succeeded
+    podName: sb-source-gate-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:56:59Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://fbc1ac0320d695cf7194f865d41b762e18e67d5305880bae234b767317dec23d
+        exitCode: 1
+        finishedAt: "2026-11-01T19:57:06Z"
+        reason: Error
+        startedAt: "2026-11-01T19:57:06Z"
+      terminationReason: Error
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          case "sb-source-gate" in *-source-*) echo INJECTED-GATE-FAILURE; exit 1;; esac
+          echo GATE-PASSED
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-11-01T19:55:05Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build
+      tekton.dev/pipelineRun: sb-source
+      tekton.dev/pipelineRunUID: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+      tekton.dev/pipelineTask: observe
+    name: sb-source-observe
+    namespace: retry-inv2-invalidates-20261101-r1
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: sb-source
+      uid: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+    resourceVersion: "6866019"
+    uid: a03f630f-1145-4c71-891b-667ca17160a4
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          echo OBSERVED
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:56:45Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:56:45Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: sb-source-observe-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:56:38Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://f8891fff532aa157e160483aaa28cb657d20dd1ee0d57fe73f7424c504a59b0d
+        exitCode: 0
+        finishedAt: "2026-11-01T19:56:44Z"
+        reason: Completed
+        startedAt: "2026-11-01T19:56:44Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          echo OBSERVED
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-2928915f4e
+      pipeline.tekton.dev/release: fcba522
+    creationTimestamp: "2026-11-01T19:56:45Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: stale-build
+      tekton.dev/pipelineRun: sb-source
+      tekton.dev/pipelineRunUID: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+      tekton.dev/pipelineTask: prepare
+    name: sb-source-prepare
+    namespace: retry-inv2-invalidates-20261101-r1
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: sb-source
+      uid: 4ed61816-6cfa-42e5-b48f-6d40927fa5f8
+    resourceVersion: "6866077"
+    uid: 20b14065-9a16-45df-a27e-485c9aa1facc
+  spec:
+    serviceAccountName: default
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          printf "input:$(context.taskRun.name):86437f26cc91a457" > $(workspaces.data.path)/source.txt
+          rm -f $(workspaces.data.path)/receipt.txt
+      workspaces:
+      - name: data
+    timeout: 1h0m0s
+    workspaces:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T19:56:52Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T19:56:52Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: sb-source-prepare-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T19:56:45Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://aaa219ac7c89498895e24b328334fc8b3ce1c568787f9a4ab3cc9ffc5804f067
+        exitCode: 0
+        finishedAt: "2026-11-01T19:56:51Z"
+        reason: Completed
+        startedAt: "2026-11-01T19:56:51Z"
+      terminationReason: Completed
+    taskSpec:
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          printf "input:sb-source-prepare:86437f26cc91a457" > /workspace/data/source.txt
+          rm -f /workspace/data/receipt.txt
+      workspaces:
+      - name: data
+kind: List
+metadata:
+  resourceVersion: ""

@@ -157,6 +157,7 @@ type Policy struct {
 
 type TaskRule struct {
 	RetryWith    []string `json:"retryWith"`
+	Invalidates  []string `json:"invalidates,omitempty"`
 	BlocksResume bool     `json:"blocksResume"`
 }
 

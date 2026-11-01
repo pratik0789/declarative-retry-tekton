@@ -133,3 +133,36 @@ func validateRetryDirections(upstream map[string][]string, rules map[string]Task
 	}
 	return nil
 }
+
+// invalidates names completed later tasks whose work a rerun of the declaring
+// task makes stale; only execution descendants may be named.
+func validateInvalidations(upstream map[string][]string, rules map[string]TaskRule) error {
+	for _, root := range sortedTaskNames(upstream) {
+		targets := rules[root].Invalidates
+		if len(targets) == 0 {
+			continue
+		}
+		later := map[string]bool{}
+		changed := true
+		for changed {
+			changed = false
+			for task, parents := range upstream {
+				if later[task] {
+					continue
+				}
+				for _, parent := range parents {
+					if parent == root || later[parent] {
+						later[task], changed = true, true
+						break
+					}
+				}
+			}
+		}
+		for _, target := range targets {
+			if !later[target] {
+				return fmt.Errorf("task %q invalidates %q, which is not a later task; only later tasks may be invalidated", root, target)
+			}
+		}
+	}
+	return nil
+}

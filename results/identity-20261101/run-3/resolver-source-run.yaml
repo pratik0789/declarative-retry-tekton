@@ -1,0 +1,194 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  creationTimestamp: "2026-11-01T19:51:17Z"
+  generation: 1
+  labels:
+    tekton.dev/pipeline: retry-params
+  name: resolver-source
+  namespace: retry-identity-20261101-s3
+  resourceVersion: "6864073"
+  uid: cc83423f-0a2f-4a0b-8d42-f0715d91b24f
+spec:
+  params:
+  - name: release
+    value: v1.4.2
+  pipelineRef:
+    params:
+    - name: kind
+      value: pipeline
+    - name: name
+      value: retry-params
+    - name: namespace
+      value: retry-identity-20261101-s3
+    resolver: cluster
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: retry-params-pvc
+status:
+  childReferences:
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: resolver-source-clone
+    pipelineTaskName: clone
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: resolver-source-build
+    pipelineTaskName: build
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: resolver-source-scan
+    pipelineTaskName: scan
+  completionTime: "2026-11-01T19:51:44Z"
+  conditions:
+  - lastTransitionTime: "2026-11-01T19:51:44Z"
+    message: 'Tasks Completed: 3 (Failed: 1, Cancelled 0), Skipped: 1'
+    reason: Failed
+    status: "False"
+    type: Succeeded
+  pipelineSpec:
+    params:
+    - name: release
+      type: string
+    - default: stable
+      name: channel
+      type: string
+    tasks:
+    - name: clone
+      taskSpec:
+        metadata: {}
+        results:
+        - name: commit
+          type: string
+        - name: digest
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            printf 'release=%s\n' "v1.4.2" > "$(workspaces.src.path)/source.txt"
+            head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' >> "$(workspaces.src.path)/source.txt"
+            head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+            sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: build
+      params:
+      - name: commit
+        value: $(tasks.clone.results.commit)
+      - name: digest
+        value: $(tasks.clone.results.digest)
+      - name: tag
+        value: v1.4.2-stable
+      runAfter:
+      - clone
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        - name: digest
+          type: string
+        - name: tag
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            f="$(workspaces.src.path)/source.txt"
+            [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+            actual=`sha256sum "$f" | cut -d' ' -f1`
+            [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+            head -n1 "$f" | grep -qx "release=v1.4.2" || { echo "RELEASE-MISMATCH"; exit 1; }
+            echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+            printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: scan
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: run
+        value: resolver-source
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: run
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(params.run)" in
+              *-source) echo "injected scan failure"; exit 1 ;;
+            esac
+            echo "scanned $(params.image)"
+    - name: deploy
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: bound
+        value: "true"
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: bound
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo "DEPLOYED $(params.image) channel=stable bound=$(params.bound)"
+    workspaces:
+    - name: shared
+  provenance:
+    featureFlags:
+      awaitSidecarReadiness: true
+      coschedule: workspaces
+      enableAPIFields: beta
+      enableProvenanceInStatus: true
+      enforceNonfalsifiability: none
+      maxResultSize: 4096
+      resultExtractionMethod: termination-message
+      runningInEnvWithInjectedSidecars: true
+      verificationNoMatchPolicy: ignore
+    refSource:
+      digest:
+        sha256: 54836e744ccc846f857d1b936da43a2938f26ed11a25a2a52d09e2b7c74eb410
+      uri: /apis/tekton.dev/v1/namespaces/retry-identity-20261101-s3/pipeline/retry-params@8d07bd64-c271-4f40-98e2-13dcc8be9e44
+  skippedTasks:
+  - name: deploy
+    reason: PipelineRun was stopping
+  startTime: "2026-11-01T19:51:17Z"

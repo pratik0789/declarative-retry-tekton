@@ -1,0 +1,124 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: clone=resolver-source-clone
+    retry.tekton.dev/policy: retry-params-policy
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"retry-params","resumeWithin":"","retryOnlyLatest":false,"tasks":{"scan":{"blocksResume":false,"retryWith":["build"]}}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:31fa3a9df2214948748d5f8cf00cba5a676a0034ca252838cf2ba940fc3775e6
+    retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+    retry.tekton.dev/shared-state-warnings-accepted: "true"
+    retry.tekton.dev/source-pipeline: retry-params
+    retry.tekton.dev/source-pipeline-run: resolver-source
+    retry.tekton.dev/source-pipeline-run-uid: c263deb2-5f00-4b09-baef-585324baf4a3
+  generateName: retry-params-retry-
+  namespace: retry-identity-20261101-s2
+spec:
+  params:
+  - name: release
+    value: v1.4.2
+  pipelineSpec:
+    params:
+    - name: release
+      type: string
+    - default: stable
+      name: channel
+      type: string
+    tasks:
+    - name: build
+      params:
+      - name: commit
+        value: a1debffc63f3
+      - name: digest
+        value: 3894481ba3b03fced7418965bfc67329f6dceb73a4e8160586bedbac17663fee
+      - name: tag
+        value: $(params.release)-$(params.channel)
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        - name: digest
+          type: string
+        - name: tag
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            f="$(workspaces.src.path)/source.txt"
+            [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+            actual=`sha256sum "$f" | cut -d' ' -f1`
+            [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+            head -n1 "$f" | grep -qx "release=$(params.release)" || { echo "RELEASE-MISMATCH"; exit 1; }
+            echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+            printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: scan
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: run
+        value: $(context.pipelineRun.name)
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: run
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(params.run)" in
+              *-source) echo "injected scan failure"; exit 1 ;;
+            esac
+            echo "scanned $(params.image)"
+    - name: deploy
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: bound
+        value: $(workspaces.shared.bound)
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: bound
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo "DEPLOYED $(params.image) channel=$(params.channel) bound=$(params.bound)"
+    workspaces:
+    - name: shared
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: retry-params-pvc
