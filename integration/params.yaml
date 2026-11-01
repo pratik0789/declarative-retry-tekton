@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retry-params-pvc
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 64Mi
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: retry-params
+spec:
+  params:
+    - name: release
+      type: string
+    - name: channel
+      type: string
+      default: stable
+  workspaces:
+    - name: shared
+  tasks:
+    - name: clone
+      workspaces: [{name: src, workspace: shared}]
+      taskSpec:
+        workspaces: [{name: src}]
+        results: [{name: commit}, {name: digest}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              set -eu
+              printf 'release=%s\n' "$(params.release)" > "$(workspaces.src.path)/source.txt"
+              head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' >> "$(workspaces.src.path)/source.txt"
+              head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+              sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+    - name: build
+      runAfter: [clone]
+      params:
+        - {name: commit, value: $(tasks.clone.results.commit)}
+        - {name: digest, value: $(tasks.clone.results.digest)}
+        - {name: tag, value: "$(params.release)-$(params.channel)"}
+      workspaces: [{name: src, workspace: shared}]
+      taskSpec:
+        params: [{name: commit}, {name: digest}, {name: tag}]
+        workspaces: [{name: src}]
+        results: [{name: image}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              set -eu
+              f="$(workspaces.src.path)/source.txt"
+              [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+              actual=`sha256sum "$f" | cut -d' ' -f1`
+              [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+              head -n1 "$f" | grep -qx "release=$(params.release)" || { echo "RELEASE-MISMATCH"; exit 1; }
+              echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+              printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+    - name: scan
+      runAfter: [build]
+      params:
+        - {name: image, value: $(tasks.build.results.image)}
+        - {name: run, value: $(context.pipelineRun.name)}
+      taskSpec:
+        params: [{name: image}, {name: run}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              case "$(params.run)" in
+                *-source) echo "injected scan failure"; exit 1 ;;
+              esac
+              echo "scanned $(params.image)"
+    - name: deploy
+      runAfter: [scan]
+      params:
+        - {name: image, value: $(tasks.build.results.image)}
+        - {name: bound, value: $(workspaces.shared.bound)}
+      taskSpec:
+        params: [{name: image}, {name: bound}]
+        steps:
+          - name: run
+            image: alpine:3.20
+            script: |
+              echo "DEPLOYED $(params.image) channel=$(params.channel) bound=$(params.bound)"

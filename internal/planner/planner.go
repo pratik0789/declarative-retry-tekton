@@ -186,7 +186,7 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	if recorded == nil {
 		return refuse("source PipelineRun does not record the Pipeline definition it ran")
 	}
-	if !definitionMatches(withoutNulls(current), withoutNulls(recorded)) {
+	if !definitionMatchesUnder(withoutNulls(current), withoutNulls(recorded), runSubstitutions(p.Metadata.Name, r, withoutNulls(recorded))) {
 		return refuse("Pipeline definition changed since the source run")
 	}
 

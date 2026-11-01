@@ -136,9 +136,14 @@ Recovery requires the complete current Pipeline specification to match the
 copy saved in the failed PipelineRun. Changed scripts, variable references,
 parameters, task lists, and other specification fields refuse recovery. This
 check applies independently of `targetParameters` and `retryOnlyLatest`.
-Variables are compared literally: if Tekton saved a resolved value instead of
-the original expression, this prototype cannot establish an exact match and
-refuses recovery. `PipelineRun.metadata.generation` is the run's own version,
+Tekton saves `status.pipelineSpec` after substituting Pipeline parameters,
+`$(context.pipelineRun.*)`/`$(context.pipeline.name)` and
+`$(workspaces.<name>.bound)`. Each string is therefore compared both as written
+and after applying the source run's own values for exactly those variables.
+Array and object parameters are not substituted; a Pipeline that expands them
+still cannot establish an exact match and is refused. Live evidence for a
+parameterized Pipeline is in `results/params-guard-20261101/`
+(`hack/params_guard.sh`). `PipelineRun.metadata.generation` is the run's own version,
 not the referenced Pipeline's version, and is not used for this comparison.
 A future controller could capture the Pipeline's UID and generation when a run
 starts; this prototype does not assume that historical runs contain them.

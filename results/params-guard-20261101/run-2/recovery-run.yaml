@@ -1,0 +1,260 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations:
+    retry.tekton.dev/inherited-taskruns: clone=retry-params-source-clone
+    retry.tekton.dev/policy: retry-params-policy
+    retry.tekton.dev/policy-generation: "1"
+    retry.tekton.dev/policy-spec: '{"pipelineRef":"retry-params","resumeWithin":"","retryOnlyLatest":false,"tasks":{"scan":{"blocksResume":false,"retryWith":["build"]}}}'
+    retry.tekton.dev/policy-spec-sha256: sha256:31fa3a9df2214948748d5f8cf00cba5a676a0034ca252838cf2ba940fc3775e6
+    retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+    retry.tekton.dev/shared-state-warnings-accepted: "true"
+    retry.tekton.dev/source-pipeline: retry-params
+    retry.tekton.dev/source-pipeline-run: retry-params-source
+    retry.tekton.dev/source-pipeline-run-uid: 792a07cd-5047-4cc1-8820-7ea31c6c47b5
+  creationTimestamp: "2026-11-01T16:44:04Z"
+  generateName: retry-params-retry-
+  generation: 1
+  labels:
+    tekton.dev/pipeline: retry-params-retry-nrp5k
+  name: retry-params-retry-nrp5k
+  namespace: retry-params-20261101-r2
+  resourceVersion: "6829856"
+  uid: 61ed0ee0-82e6-49ac-a6bf-42e0ba67aec5
+spec:
+  params:
+  - name: release
+    value: v1.4.2
+  pipelineSpec:
+    params:
+    - name: release
+      type: string
+    - default: stable
+      name: channel
+      type: string
+    tasks:
+    - name: build
+      params:
+      - name: commit
+        value: 4d05f76ef632
+      - name: digest
+        value: 09c274fc3abea6d3545bf84eaf034a48ac4309fb7306124b48016a7da6056965
+      - name: tag
+        value: $(params.release)-$(params.channel)
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        - name: digest
+          type: string
+        - name: tag
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            f="$(workspaces.src.path)/source.txt"
+            [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+            actual=`sha256sum "$f" | cut -d' ' -f1`
+            [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+            head -n1 "$f" | grep -qx "release=$(params.release)" || { echo "RELEASE-MISMATCH"; exit 1; }
+            echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+            printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: scan
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: run
+        value: $(context.pipelineRun.name)
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: run
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(params.run)" in
+              *-source) echo "injected scan failure"; exit 1 ;;
+            esac
+            echo "scanned $(params.image)"
+    - name: deploy
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: bound
+        value: $(workspaces.shared.bound)
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: bound
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo "DEPLOYED $(params.image) channel=$(params.channel) bound=$(params.bound)"
+    workspaces:
+    - name: shared
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+  - name: shared
+    persistentVolumeClaim:
+      claimName: retry-params-pvc
+status:
+  childReferences:
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-params-retry-nrp5k-build
+    pipelineTaskName: build
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-params-retry-nrp5k-scan
+    pipelineTaskName: scan
+  - apiVersion: tekton.dev/v1
+    kind: TaskRun
+    name: retry-params-retry-nrp5k-deploy
+    pipelineTaskName: deploy
+  completionTime: "2026-11-01T16:44:24Z"
+  conditions:
+  - lastTransitionTime: "2026-11-01T16:44:24Z"
+    message: 'Tasks Completed: 3 (Failed: 0, Cancelled 0), Skipped: 0'
+    reason: Succeeded
+    status: "True"
+    type: Succeeded
+  pipelineSpec:
+    params:
+    - name: release
+      type: string
+    - default: stable
+      name: channel
+      type: string
+    tasks:
+    - name: build
+      params:
+      - name: commit
+        value: 4d05f76ef632
+      - name: digest
+        value: 09c274fc3abea6d3545bf84eaf034a48ac4309fb7306124b48016a7da6056965
+      - name: tag
+        value: v1.4.2-stable
+      taskSpec:
+        metadata: {}
+        params:
+        - name: commit
+          type: string
+        - name: digest
+          type: string
+        - name: tag
+          type: string
+        results:
+        - name: image
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            set -eu
+            f="$(workspaces.src.path)/source.txt"
+            [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+            actual=`sha256sum "$f" | cut -d' ' -f1`
+            [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+            head -n1 "$f" | grep -qx "release=v1.4.2" || { echo "RELEASE-MISMATCH"; exit 1; }
+            echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+            printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+        workspaces:
+        - name: src
+      workspaces:
+      - name: src
+        workspace: shared
+    - name: scan
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: run
+        value: retry-params-retry-nrp5k
+      runAfter:
+      - build
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: run
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            case "$(params.run)" in
+              *-source) echo "injected scan failure"; exit 1 ;;
+            esac
+            echo "scanned $(params.image)"
+    - name: deploy
+      params:
+      - name: image
+        value: $(tasks.build.results.image)
+      - name: bound
+        value: "true"
+      runAfter:
+      - scan
+      taskSpec:
+        metadata: {}
+        params:
+        - name: image
+          type: string
+        - name: bound
+          type: string
+        spec: null
+        steps:
+        - computeResources: {}
+          image: alpine:3.20
+          name: run
+          script: |
+            echo "DEPLOYED $(params.image) channel=stable bound=$(params.bound)"
+    workspaces:
+    - name: shared
+  provenance:
+    featureFlags:
+      awaitSidecarReadiness: true
+      coschedule: workspaces
+      enableAPIFields: beta
+      enableProvenanceInStatus: true
+      enforceNonfalsifiability: none
+      maxResultSize: 4096
+      resultExtractionMethod: termination-message
+      runningInEnvWithInjectedSidecars: true
+      verificationNoMatchPolicy: ignore
+  startTime: "2026-11-01T16:44:04Z"

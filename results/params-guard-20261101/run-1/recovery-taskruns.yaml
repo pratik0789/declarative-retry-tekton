@@ -1,0 +1,354 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/affinity-assistant: affinity-assistant-049dd0aa74
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: clone=retry-params-source-clone
+      retry.tekton.dev/policy: retry-params-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/policy-spec: '{"pipelineRef":"retry-params","resumeWithin":"","retryOnlyLatest":false,"tasks":{"scan":{"blocksResume":false,"retryWith":["build"]}}}'
+      retry.tekton.dev/policy-spec-sha256: sha256:31fa3a9df2214948748d5f8cf00cba5a676a0034ca252838cf2ba940fc3775e6
+      retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-params
+      retry.tekton.dev/source-pipeline-run: retry-params-source
+      retry.tekton.dev/source-pipeline-run-uid: eecf8566-d706-4642-89c2-257511327cae
+    creationTimestamp: "2026-11-01T16:43:16Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-params-retry-lwzt9
+      tekton.dev/pipelineRun: retry-params-retry-lwzt9
+      tekton.dev/pipelineRunUID: 0f0ff150-7cdd-4c26-9b79-8822ee1e197a
+      tekton.dev/pipelineTask: build
+    name: retry-params-retry-lwzt9-build
+    namespace: retry-params-20261101-r1
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-params-retry-lwzt9
+      uid: 0f0ff150-7cdd-4c26-9b79-8822ee1e197a
+    resourceVersion: "6829276"
+    uid: 012a8171-a7a0-44a9-ac03-12e781b19dc0
+  spec:
+    params:
+    - name: commit
+      value: 98366779804c
+    - name: digest
+      value: b6824a3d9e93618a941e573cfae5c59eb6dcb752df0bf0e0d1dc27a88d9a8ed0
+    - name: tag
+      value: v1.4.2-stable
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      - name: tag
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          f="$(workspaces.src.path)/source.txt"
+          [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+          actual=`sha256sum "$f" | cut -d' ' -f1`
+          [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+          head -n1 "$f" | grep -qx "release=v1.4.2" || { echo "RELEASE-MISMATCH"; exit 1; }
+          echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+          printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+      workspaces:
+      - name: src
+    timeout: 1h0m0s
+    workspaces:
+    - name: src
+      persistentVolumeClaim:
+        claimName: retry-params-pvc
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T16:43:23Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T16:43:23Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-params-retry-lwzt9-build-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    results:
+    - name: image
+      type: string
+      value: img-98366779804c-v1.4.2-stable
+    startTime: "2026-11-01T16:43:17Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://06f46a243f68cde7dcf52d0fbcbfc0e9717219772f6144993493c2914acf5f6c
+        exitCode: 0
+        finishedAt: "2026-11-01T16:43:22Z"
+        message: '[{"key":"image","value":"img-98366779804c-v1.4.2-stable","type":1}]'
+        reason: Completed
+        startedAt: "2026-11-01T16:43:22Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      - name: tag
+        type: string
+      results:
+      - name: image
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          f="/workspace/src/source.txt"
+          [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+          actual=`sha256sum "$f" | cut -d' ' -f1`
+          [ "$actual" = "b6824a3d9e93618a941e573cfae5c59eb6dcb752df0bf0e0d1dc27a88d9a8ed0" ] || { echo "STATE-MISMATCH"; exit 1; }
+          head -n1 "$f" | grep -qx "release=v1.4.2" || { echo "RELEASE-MISMATCH"; exit 1; }
+          echo "STATE-VERIFIED commit 98366779804c tag v1.4.2-stable"
+          printf 'img-%s-%s' "98366779804c" "v1.4.2-stable" > "/tekton/results/image"
+      workspaces:
+      - name: src
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: clone=retry-params-source-clone
+      retry.tekton.dev/policy: retry-params-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/policy-spec: '{"pipelineRef":"retry-params","resumeWithin":"","retryOnlyLatest":false,"tasks":{"scan":{"blocksResume":false,"retryWith":["build"]}}}'
+      retry.tekton.dev/policy-spec-sha256: sha256:31fa3a9df2214948748d5f8cf00cba5a676a0034ca252838cf2ba940fc3775e6
+      retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-params
+      retry.tekton.dev/source-pipeline-run: retry-params-source
+      retry.tekton.dev/source-pipeline-run-uid: eecf8566-d706-4642-89c2-257511327cae
+    creationTimestamp: "2026-11-01T16:43:30Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-params-retry-lwzt9
+      tekton.dev/pipelineRun: retry-params-retry-lwzt9
+      tekton.dev/pipelineRunUID: 0f0ff150-7cdd-4c26-9b79-8822ee1e197a
+      tekton.dev/pipelineTask: deploy
+    name: retry-params-retry-lwzt9-deploy
+    namespace: retry-params-20261101-r1
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-params-retry-lwzt9
+      uid: 0f0ff150-7cdd-4c26-9b79-8822ee1e197a
+    resourceVersion: "6829405"
+    uid: cbf5526f-3774-4b74-96b4-974368a39d11
+  spec:
+    params:
+    - name: image
+      value: img-98366779804c-v1.4.2-stable
+    - name: bound
+      value: "true"
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      - name: bound
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          echo "DEPLOYED $(params.image) channel=stable bound=$(params.bound)"
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T16:43:38Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T16:43:38Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-params-retry-lwzt9-deploy-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T16:43:30Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://fa0d44ab513755e300799970ce03b31b51658e539441cae09f3fc094526da777
+        exitCode: 0
+        finishedAt: "2026-11-01T16:43:37Z"
+        reason: Completed
+        startedAt: "2026-11-01T16:43:37Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      - name: bound
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          echo "DEPLOYED img-98366779804c-v1.4.2-stable channel=stable bound=true"
+- apiVersion: tekton.dev/v1
+  kind: TaskRun
+  metadata:
+    annotations:
+      pipeline.tekton.dev/release: fcba522
+      retry.tekton.dev/inherited-taskruns: clone=retry-params-source-clone
+      retry.tekton.dev/policy: retry-params-policy
+      retry.tekton.dev/policy-generation: "1"
+      retry.tekton.dev/policy-spec: '{"pipelineRef":"retry-params","resumeWithin":"","retryOnlyLatest":false,"tasks":{"scan":{"blocksResume":false,"retryWith":["build"]}}}'
+      retry.tekton.dev/policy-spec-sha256: sha256:31fa3a9df2214948748d5f8cf00cba5a676a0034ca252838cf2ba940fc3775e6
+      retry.tekton.dev/shared-state-warning-codes: shared-workspace-across-closure
+      retry.tekton.dev/shared-state-warnings-accepted: "true"
+      retry.tekton.dev/source-pipeline: retry-params
+      retry.tekton.dev/source-pipeline-run: retry-params-source
+      retry.tekton.dev/source-pipeline-run-uid: eecf8566-d706-4642-89c2-257511327cae
+    creationTimestamp: "2026-11-01T16:43:23Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: tekton-pipelines
+      tekton.dev/memberOf: tasks
+      tekton.dev/pipeline: retry-params-retry-lwzt9
+      tekton.dev/pipelineRun: retry-params-retry-lwzt9
+      tekton.dev/pipelineRunUID: 0f0ff150-7cdd-4c26-9b79-8822ee1e197a
+      tekton.dev/pipelineTask: scan
+    name: retry-params-retry-lwzt9-scan
+    namespace: retry-params-20261101-r1
+    ownerReferences:
+    - apiVersion: tekton.dev/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: PipelineRun
+      name: retry-params-retry-lwzt9
+      uid: 0f0ff150-7cdd-4c26-9b79-8822ee1e197a
+    resourceVersion: "6829340"
+    uid: d3c814f8-57cb-4574-8c32-b3a9dfb38fd7
+  spec:
+    params:
+    - name: image
+      value: img-98366779804c-v1.4.2-stable
+    - name: run
+      value: retry-params-retry-lwzt9
+    serviceAccountName: default
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      - name: run
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "$(params.run)" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned $(params.image)"
+    timeout: 1h0m0s
+  status:
+    artifacts: {}
+    completionTime: "2026-11-01T16:43:30Z"
+    conditions:
+    - lastTransitionTime: "2026-11-01T16:43:30Z"
+      message: All Steps have completed executing
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+    podName: retry-params-retry-lwzt9-scan-pod
+    provenance:
+      featureFlags:
+        awaitSidecarReadiness: true
+        coschedule: workspaces
+        enableAPIFields: beta
+        enableProvenanceInStatus: true
+        enforceNonfalsifiability: none
+        maxResultSize: 4096
+        resultExtractionMethod: termination-message
+        runningInEnvWithInjectedSidecars: true
+        verificationNoMatchPolicy: ignore
+    startTime: "2026-11-01T16:43:23Z"
+    steps:
+    - container: step-run
+      imageID: docker.io/library/alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+      name: run
+      provenance: {}
+      terminated:
+        containerID: containerd://548609c9d81fe26bdd4154de66971a8abe0239a139d2e1bb24a7b165072434e5
+        exitCode: 0
+        finishedAt: "2026-11-01T16:43:29Z"
+        reason: Completed
+        startedAt: "2026-11-01T16:43:29Z"
+      terminationReason: Completed
+    taskSpec:
+      params:
+      - name: image
+        type: string
+      - name: run
+        type: string
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "retry-params-retry-lwzt9" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned img-98366779804c-v1.4.2-stable"
+kind: List
+metadata:
+  resourceVersion: ""

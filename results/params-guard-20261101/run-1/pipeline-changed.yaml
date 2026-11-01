@@ -1,0 +1,134 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"tekton.dev/v1","kind":"Pipeline","metadata":{"annotations":{},"name":"retry-params","namespace":"retry-params-20261101-r1"},"spec":{"params":[{"name":"release","type":"string"},{"default":"stable","name":"channel","type":"string"}],"tasks":[{"name":"clone","taskSpec":{"results":[{"name":"commit"},{"name":"digest"}],"steps":[{"image":"alpine:3.20","name":"run","script":"set -eu\nprintf 'release=%s\\n' \"$(params.release)\" \u003e \"$(workspaces.src.path)/source.txt\"\nhead -c 64 /dev/urandom | od -An -tx1 | tr -d ' \\n' \u003e\u003e \"$(workspaces.src.path)/source.txt\"\nhead -c 6 /dev/urandom | od -An -tx1 | tr -d ' \\n' \u003e \"$(results.commit.path)\"\nsha256sum \"$(workspaces.src.path)/source.txt\" | cut -d' ' -f1 | tr -d '\\n' \u003e \"$(results.digest.path)\"\n"}],"workspaces":[{"name":"src"}]},"workspaces":[{"name":"src","workspace":"shared"}]},{"name":"build","params":[{"name":"commit","value":"$(tasks.clone.results.commit)"},{"name":"digest","value":"$(tasks.clone.results.digest)"},{"name":"tag","value":"$(params.release)-$(params.channel)"}],"runAfter":["clone"],"taskSpec":{"params":[{"name":"commit"},{"name":"digest"},{"name":"tag"}],"results":[{"name":"image"}],"steps":[{"image":"alpine:3.20","name":"run","script":"set -eu\nf=\"$(workspaces.src.path)/source.txt\"\n[ -f \"$f\" ] || { echo \"STATE-MISSING\"; exit 1; }\nactual=`sha256sum \"$f\" | cut -d' ' -f1`\n[ \"$actual\" = \"$(params.digest)\" ] || { echo \"STATE-MISMATCH\"; exit 1; }\nhead -n1 \"$f\" | grep -qx \"release=$(params.release)\" || { echo \"RELEASE-MISMATCH\"; exit 1; }\necho \"STATE-VERIFIED commit $(params.commit) tag $(params.tag)\"\nprintf 'img-%s-%s' \"$(params.commit)\" \"$(params.tag)\" \u003e \"$(results.image.path)\"\n"}],"workspaces":[{"name":"src"}]},"workspaces":[{"name":"src","workspace":"shared"}]},{"name":"scan","params":[{"name":"image","value":"$(tasks.build.results.image)"},{"name":"run","value":"$(context.pipelineRun.name)"}],"runAfter":["build"],"taskSpec":{"params":[{"name":"image"},{"name":"run"}],"steps":[{"image":"alpine:3.20","name":"run","script":"case \"$(params.run)\" in\n  *-source) echo \"injected scan failure\"; exit 1 ;;\nesac\necho \"scanned $(params.image)\"\n"}]}},{"name":"deploy","params":[{"name":"image","value":"$(tasks.build.results.image)"},{"name":"bound","value":"$(workspaces.shared.bound)"}],"runAfter":["scan"],"taskSpec":{"params":[{"name":"image"},{"name":"bound"}],"steps":[{"image":"alpine:3.20","name":"run","script":"echo \"DEPLOYED $(params.image) channel=$(params.channel) bound=$(params.bound)\"\n"}]}}],"workspaces":[{"name":"shared"}]}}
+  creationTimestamp: "2026-11-01T16:42:53Z"
+  generation: 2
+  name: retry-params
+  namespace: retry-params-20261101-r1
+  resourceVersion: "6829413"
+  uid: 974411d3-e5a8-44ce-b5ea-e08075caf26f
+spec:
+  params:
+  - name: release
+    type: string
+  - default: stable
+    name: channel
+    type: string
+  tasks:
+  - name: clone
+    taskSpec:
+      metadata: {}
+      results:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          printf 'release=%s\n' "$(params.release)" > "$(workspaces.src.path)/source.txt"
+          head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' >> "$(workspaces.src.path)/source.txt"
+          head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n' > "$(results.commit.path)"
+          sha256sum "$(workspaces.src.path)/source.txt" | cut -d' ' -f1 | tr -d '\n' > "$(results.digest.path)"
+      workspaces:
+      - name: src
+    workspaces:
+    - name: src
+      workspace: shared
+  - name: build
+    params:
+    - name: commit
+      value: $(tasks.clone.results.commit)
+    - name: digest
+      value: $(tasks.clone.results.digest)
+    - name: tag
+      value: $(params.release)-$(params.channel)
+    runAfter:
+    - clone
+    taskSpec:
+      metadata: {}
+      params:
+      - name: commit
+        type: string
+      - name: digest
+        type: string
+      - name: tag
+        type: string
+      results:
+      - name: image
+        type: string
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          set -eu
+          f="$(workspaces.src.path)/source.txt"
+          [ -f "$f" ] || { echo "STATE-MISSING"; exit 1; }
+          actual=`sha256sum "$f" | cut -d' ' -f1`
+          [ "$actual" = "$(params.digest)" ] || { echo "STATE-MISMATCH"; exit 1; }
+          head -n1 "$f" | grep -qx "release=$(params.release)" || { echo "RELEASE-MISMATCH"; exit 1; }
+          echo "STATE-VERIFIED commit $(params.commit) tag $(params.tag)"
+          printf 'img-%s-%s' "$(params.commit)" "$(params.tag)" > "$(results.image.path)"
+      workspaces:
+      - name: src
+    workspaces:
+    - name: src
+      workspace: shared
+  - name: scan
+    params:
+    - name: image
+      value: $(tasks.build.results.image)
+    - name: run
+      value: $(context.pipelineRun.name)
+    runAfter:
+    - build
+    taskSpec:
+      metadata: {}
+      params:
+      - name: image
+        type: string
+      - name: run
+        type: string
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          case "$(params.run)" in
+            *-source) echo "injected scan failure"; exit 1 ;;
+          esac
+          echo "scanned $(params.image)"
+  - name: deploy
+    params:
+    - name: image
+      value: $(tasks.build.results.image)
+    - name: bound
+      value: $(workspaces.shared.bound)
+    runAfter:
+    - scan
+    taskSpec:
+      metadata: {}
+      params:
+      - name: image
+        type: string
+      - name: bound
+        type: string
+      spec: null
+      steps:
+      - computeResources: {}
+        image: alpine:3.20
+        name: run
+        script: |
+          echo "DEPLOYED v2 $(params.image)"
+  workspaces:
+  - name: shared
