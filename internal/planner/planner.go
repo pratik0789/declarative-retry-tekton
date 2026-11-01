@@ -276,6 +276,24 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			return refuse(err.Error())
 		}
 	}
+	// A task that never ran also executes in the recovery run, so its retryWith
+	// targets must run with it rather than be reused.
+	for changed := true; changed; {
+		changed = false
+		for _, task := range p.allTasks() {
+			if _, ran := states[task.Name]; ran || rerun[task.Name] {
+				continue
+			}
+			for _, dependency := range policy.Spec.Tasks[task.Name].RetryWith {
+				if child, ran := states[dependency]; ran && strings.EqualFold(child.Status, "Succeeded") && !rerun[dependency] {
+					if err := visit(dependency); err != nil {
+						return refuse(err.Error())
+					}
+					changed = true
+				}
+			}
+		}
+	}
 	names := make([]string, 0, len(tasks))
 	for name := range tasks {
 		names = append(names, name)

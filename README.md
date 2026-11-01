@@ -154,7 +154,7 @@ embedded spec).
 
 `invalidates` names completed later tasks that must rerun whenever the declaring task
 reruns, e.g. `prepare: {invalidates: [build]}`; only execution descendants may be named.
-The closure follows `retryWith` and `invalidates` together. Live evidence:
+The closure follows `retryWith` and `invalidates` together. `retryWith` is also followed from tasks the source run never reached, since they run in the recovery run too. Live evidence:
 `results/invalidates-20261101/` (`hack/invalidates_live.sh`).
 
 `internal/planner/konflux_release_study_test.go` and `results/konflux-release-20261101/`

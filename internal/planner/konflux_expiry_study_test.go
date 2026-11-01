@@ -139,6 +139,29 @@ func TestKonfluxExpiryStudy(t *testing.T) {
 				}
 				full[task.Name] = true
 				r.Dangling["full-restart"], r.Reruns["full-restart"] = false, len(full)
+				// retryWith derived from the documented artifact flows: each consumer retries with its producers.
+				flow := empty
+				flow.Metadata.Name = "artifact-flows"
+				flow.Spec.Tasks = map[string]TaskRule{}
+				for consumer, producers := range consumes {
+					var list []string
+					for producer := range producers {
+						list = append(list, producer)
+					}
+					sort.Strings(list)
+					flow.Spec.Tasks[consumer] = TaskRule{RetryWith: list}
+				}
+				pf, err := BuildWithSelection(pipeline, run, flow, nil, nil, time.Now())
+				if err != nil || pf.Decision != "recover" {
+					t.Fatalf("artifact-flow policy %s %s: %v %s", f, task.Name, err, pf.RefusalReason)
+				}
+				flowRerun := map[string]bool{}
+				for _, tp := range pf.Tasks {
+					if tp.Action == "rerun" {
+						flowRerun[tp.Name] = true
+					}
+				}
+				r.Dangling["artifact-flow-policy"], r.Reruns["artifact-flow-policy"] = dangling(flowRerun), len(flowRerun)
 				// resumeWithin shorter than the artifact expiry refuses every recovery after expiry.
 				policy := empty
 				policy.Metadata.Name = "window"
