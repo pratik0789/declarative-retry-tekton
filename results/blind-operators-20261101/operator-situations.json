@@ -1,0 +1,521 @@
+[
+ {
+  "pipe": "partial-write",
+  "pfile": "partial-write-pipeline.json",
+  "env": "workspace-note.md",
+  "failed": "mutate",
+  "succeeded": [
+   "observe",
+   "prepare"
+  ],
+  "notrun": [
+   "verify",
+   "publish"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "stale-build",
+  "pfile": "stale-build-pipeline.json",
+  "env": "workspace-note.md",
+  "failed": "gate",
+  "succeeded": [
+   "observe",
+   "prepare",
+   "build"
+  ],
+  "notrun": [
+   "publish"
+  ],
+  "extra": "The operator also wants recovery to rerun prepare so that it picks up fresh input; prepare is therefore already on the list."
+ },
+ {
+  "pipe": "external",
+  "pfile": "external-pipeline.json",
+  "env": "external-service.md",
+  "failed": "publish",
+  "succeeded": [
+   "warmup",
+   "acquire"
+  ],
+  "notrun": [
+   "sign",
+   "scan",
+   "deploy"
+  ],
+  "extra": "The run failed a while ago; you do not know whether the service has changed since."
+ },
+ {
+  "pipe": "external",
+  "pfile": "external-pipeline.json",
+  "env": "external-service.md",
+  "failed": "sign",
+  "succeeded": [
+   "warmup",
+   "acquire",
+   "publish"
+  ],
+  "notrun": [
+   "scan",
+   "deploy"
+  ],
+  "extra": "The run failed a while ago; you do not know whether the service has changed since."
+ },
+ {
+  "pipe": "external",
+  "pfile": "external-pipeline.json",
+  "env": "external-service.md",
+  "failed": "scan",
+  "succeeded": [
+   "warmup",
+   "acquire",
+   "publish",
+   "sign"
+  ],
+  "notrun": [
+   "deploy"
+  ],
+  "extra": "The run failed a while ago; you do not know whether the service has changed since."
+ },
+ {
+  "pipe": "oci-tagged",
+  "pfile": "oci-tagged-pipeline.json",
+  "env": "registry.md",
+  "failed": "promote",
+  "succeeded": [
+   "clone",
+   "build",
+   "retag"
+  ],
+  "notrun": [],
+  "extra": "The run failed a while ago; you do not know what has happened in the registry since."
+ },
+ {
+  "pipe": "oci-digest",
+  "pfile": "oci-digest-pipeline.json",
+  "env": "registry.md",
+  "failed": "promote",
+  "succeeded": [
+   "clone",
+   "build",
+   "retag"
+  ],
+  "notrun": [],
+  "extra": "The run failed a while ago; you do not know what has happened in the registry since."
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "init",
+  "succeeded": [],
+  "notrun": [
+   "clone-repository",
+   "prefetch-dependencies",
+   "build-container",
+   "build-image-index",
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "clone-repository",
+  "succeeded": [
+   "init"
+  ],
+  "notrun": [
+   "prefetch-dependencies",
+   "build-container",
+   "build-image-index",
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "prefetch-dependencies",
+  "succeeded": [
+   "clone-repository",
+   "init"
+  ],
+  "notrun": [
+   "build-container",
+   "build-image-index",
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "build-container",
+  "succeeded": [
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-image-index",
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "build-image-index",
+  "succeeded": [
+   "build-container",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "build-source-image",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "deprecated-base-image-check",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "clair-scan",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "ecosystem-cert-preflight-checks",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "sast-snyk-check",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "clamav-scan",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "sast-shell-check",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "sast-unicode-check",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "apply-tags",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "apply-tags",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "push-dockerfile",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "push-dockerfile",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "rpms-signature-scan"
+  ],
+  "extra": ""
+ },
+ {
+  "pipe": "konflux",
+  "pfile": "konflux-template-build.yaml",
+  "env": "none",
+  "failed": "rpms-signature-scan",
+  "succeeded": [
+   "build-container",
+   "build-image-index",
+   "clone-repository",
+   "init",
+   "prefetch-dependencies"
+  ],
+  "notrun": [
+   "build-source-image",
+   "deprecated-base-image-check",
+   "clair-scan",
+   "ecosystem-cert-preflight-checks",
+   "sast-snyk-check",
+   "clamav-scan",
+   "sast-shell-check",
+   "sast-unicode-check",
+   "apply-tags",
+   "push-dockerfile"
+  ],
+  "extra": ""
+ }
+]

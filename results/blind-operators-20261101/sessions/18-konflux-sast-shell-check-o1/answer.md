@@ -1,0 +1,5 @@
+Inferred rerun set, with one assumption about the workspace. There's no environment note, and the Pipeline doesn't say how `workspace` is bound. Konflux normally binds it with a volumeClaimTemplate, and in that case the recovery run starts with an empty source tree.
+
+`sast-shell-check` scans the cloned source in `workspace`, as do the other source-reading tasks that haven't run yet (`sast-snyk-check`, `sast-unicode-check`, `push-dockerfile`, `build-source-image`). So `clone-repository` must run again, and `prefetch-dependencies` must run again to restore its prefetched files in the same workspace. The other three can be reused: `init`'s results aren't used later, and `build-container` and `build-image-index` already pushed the image, so their copied URL/digest results are still valid. This assumes `revision` is pinned to a commit SHA (as Pipelines-as-Code sets it). If it's a branch, re-cloning could pick up a different commit than the one built, so also rerun `build-container` and `build-image-index`.
+
+RERUN: [clone-repository, prefetch-dependencies]

@@ -1,0 +1,3 @@
+Promote copies the mutable `release:latest` tag, and another pipeline may have moved it since the failure. So retag has to run again to point it back at this run's image. Retag copies by `application@<digest>`, but the retention job may have deleted that manifest. Rebuilding is the only way to make sure the digest exists and to give retag a valid `IMAGE_DIGEST`. Clone can be reused because the `source` PVC still holds the checked-out files. `copy-input` (the emptyDir) doesn't matter here, because both copy tasks get their source and destination from params rather than from a file.
+
+RERUN: [build, retag]

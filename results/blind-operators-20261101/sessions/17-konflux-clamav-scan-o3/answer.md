@@ -1,0 +1,4 @@
+Without an environment note I'm assuming the Konflux default: the `workspace` is bound with a volumeClaimTemplate, so the recovery run starts with an empty workspace.
+Tasks that haven't run yet need the source tree there: `sast-snyk-check`, `sast-shell-check`, `sast-unicode-check`, `push-dockerfile` and the optional `build-source-image`. So `clone-repository` and `prefetch-dependencies`, which fills the workspace with downloaded dependencies, must run again. Pin the revision to the commit the failed run cloned, so the rebuilt tree matches the image.
+`init`, `build-container` and `build-image-index` can be reused. The image is already in the registry, and the copied string results (IMAGE_URL/DIGEST) are all that `clamav-scan` and the other scans need.
+RERUN: [clone-repository, prefetch-dependencies]

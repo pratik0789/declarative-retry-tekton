@@ -1,0 +1,4 @@
+No environment note was present, so I couldn't confirm how the `workspace` is bound. Konflux normally uses a `volumeClaimTemplate`, and under operator-semantics.md that means the recovery run starts with an empty workspace.
+`sast-unicode-check` scans source files in that workspace, and so do `sast-snyk-check`, `sast-shell-check`, `push-dockerfile` and `build-source-image`, which never ran. So `clone-repository` has to put the source back, and `prefetch-dependencies` has to re-add the prefetched dependencies it writes into the same workspace.
+`init`, `build-container` and `build-image-index` only hand on string results (image URL and digest) and the pushed image, so reusing them is safe. This assumes `revision` is a fixed commit SHA, as it usually is in Konflux; if it's a branch, a new clone could pick up a different commit than the one the image was built from.
+RERUN: [clone-repository, prefetch-dependencies]
