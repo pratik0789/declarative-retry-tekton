@@ -13,5 +13,5 @@ declares a Workspace.
 plans every ordinary task as the failed task under the upstream and independent
 completion assumptions and counts, per rule, reruns of labelled tasks: full restart,
 all execution ancestors, every warning becomes a rerun, failed task only, and a policy
-derived from the labels (blocksResume on each labelled task, no retryWith). Offline
+derived from the labels (blocksResume and noRepeat on each labelled task, no retryWith). Offline
 plans only; no task executed.

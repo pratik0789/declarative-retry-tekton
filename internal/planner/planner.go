@@ -315,6 +315,11 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 	}
 	sort.Strings(names)
 	for _, name := range names {
+		if child, ran := states[name]; ran && rerun[name] && strings.EqualFold(child.Status, "Succeeded") && policy.Spec.Tasks[name].NoRepeat {
+			return refuse(fmt.Sprintf("task %q succeeded and declares noRepeat, but the plan would run it again", name))
+		}
+	}
+	for _, name := range names {
 		child, ran := states[name]
 		taskPlan := TaskPlan{Name: name}
 		switch {

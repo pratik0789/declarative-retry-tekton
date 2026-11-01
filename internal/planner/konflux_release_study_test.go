@@ -69,7 +69,7 @@ func TestKonfluxReleaseStudy(t *testing.T) {
 		policy.Spec.PipelineRef = pipeline.Metadata.Name
 		policy.Spec.Tasks = map[string]TaskRule{}
 		for name := range unsafe {
-			policy.Spec.Tasks[name] = TaskRule{BlocksResume: true}
+			policy.Spec.Tasks[name] = TaskRule{BlocksResume: true, NoRepeat: true}
 		}
 		empty := Policy{}
 		empty.Metadata.Name = "empty"

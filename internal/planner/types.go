@@ -159,6 +159,7 @@ type TaskRule struct {
 	RetryWith    []string `json:"retryWith"`
 	Invalidates  []string `json:"invalidates,omitempty"`
 	BlocksResume bool     `json:"blocksResume"`
+	NoRepeat     bool     `json:"noRepeat,omitempty"`
 }
 
 type Plan struct {
