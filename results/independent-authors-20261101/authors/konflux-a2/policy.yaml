@@ -1,0 +1,29 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  generation: 1
+  name: template-build-retry
+spec:
+  pipelineRef: template-build
+  tasks:
+    build-container:
+      retryWith:
+      - prefetch-dependencies
+    build-source-image:
+      retryWith:
+      - prefetch-dependencies
+    prefetch-dependencies:
+      retryWith:
+      - clone-repository
+    push-dockerfile:
+      retryWith:
+      - clone-repository
+    sast-shell-check:
+      retryWith:
+      - prefetch-dependencies
+    sast-snyk-check:
+      retryWith:
+      - prefetch-dependencies
+    sast-unicode-check:
+      retryWith:
+      - prefetch-dependencies

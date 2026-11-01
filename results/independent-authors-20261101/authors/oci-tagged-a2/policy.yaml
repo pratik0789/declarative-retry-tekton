@@ -1,0 +1,14 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  generation: 1
+  name: public-oci-tagged-retry
+spec:
+  pipelineRef: public-oci-tagged
+  tasks:
+    promote:
+      retryWith:
+      - retag
+    retag:
+      retryWith:
+      - build

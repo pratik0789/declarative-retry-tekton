@@ -1,0 +1,14 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  generation: 1
+  name: fi-1-retry
+spec:
+  pipelineRef: fi-1
+  tasks:
+    gate:
+      retryWith:
+      - build
+    publish:
+      retryWith:
+      - build
