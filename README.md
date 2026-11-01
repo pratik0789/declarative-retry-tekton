@@ -148,7 +148,7 @@ parameterized Pipeline is in `results/params-guard-20261101/`
 A run that references its Pipeline through a remote resolver has no `pipelineRef.name`;
 retryctl uses the `tekton.dev/pipeline` label Tekton sets on it. A run with an embedded
 `pipelineSpec` is matched by the exact definition comparison alone, and `retryOnlyLatest`
-refuses for such runs. Embedded recovery runs created by retryctl stay refused. Live
+refuses for such runs. Embedded recovery runs created by retryctl stay refused. When later runs are supplied, a failed recovery of the source that ran a task declaring `blocksResume` refuses further partial recovery, since that task may have partly applied. Live
 evidence: `results/identity-20261101/` (`hack/identity_live.sh`, cluster resolver and
 embedded spec).
 

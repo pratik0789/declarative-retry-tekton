@@ -7,5 +7,5 @@ pull-request PipelineRuns set `image-expires-after: 5d`. For every ordinary task
 failed one, `internal/planner/konflux_expiry_study_test.go` (run with
 `CBC=<checkout> OUT=rows.json`) checks whether a recovery planned after expiry would make an
 executing task read a `*_ARTIFACT` result of a reused producer, for: failed task only,
-every warning becomes a rerun, all execution ancestors, full restart, a retryWith policy derived from the artifact flows (each consumer retries with its producers), and a policy with
+every warning becomes a rerun, all execution ancestors, full restart, a retryWith policy derived from the artifact flows (each consumer retries with its producers), the policy-free rule that reruns the producers of every result read, an expiry-aware provenance rule restricted to *_ARTIFACT results (which computes the same plans as the artifact-flow policy), and a policy with
 `resumeWithin: 96h` (refuses every recovery requested after expiry). Offline plans only.

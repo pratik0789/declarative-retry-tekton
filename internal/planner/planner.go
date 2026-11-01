@@ -249,6 +249,21 @@ func BuildWithSelection(p Pipeline, r PipelineRun, policy Policy, newerRuns []Pi
 			return refuse(fmt.Sprintf("task %q failed and blocks resume", name))
 		}
 	}
+	// A failed recovery of this run may have executed a blocksResume task partway;
+	// the source run's own records cannot show that, so refuse.
+	for _, candidate := range newerRuns {
+		if !failedRecoveryOf(candidate, r) {
+			continue
+		}
+		for _, field := range []string{"tasks", "finally"} {
+			for _, raw := range asList(asMap(candidate.inlineDefinition)[field]) {
+				name, _ := asMap(raw)["name"].(string)
+				if policy.Spec.Tasks[name].BlocksResume {
+					return refuse(fmt.Sprintf("failed recovery %q ran task %q, which declares blocksResume", candidate.Metadata.Name, name))
+				}
+			}
+		}
+	}
 	for _, name := range selected {
 		if _, ok := tasks[name]; !ok {
 			return refuse(fmt.Sprintf("selected unknown task %q", name))

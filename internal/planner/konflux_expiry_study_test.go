@@ -14,6 +14,7 @@ import (
 )
 
 var artifactRef = regexp.MustCompile(`\$\(tasks\.([a-z0-9-]+)\.results\.([A-Z0-9_]*ARTIFACT)\)`)
+var anyResultRef = regexp.MustCompile(`\$\(tasks\.([a-z0-9-]+)\.results\.([A-Za-z0-9_-]+)`)
 
 // Offline study over Konflux container-build-catalog OCI trusted-artifact Pipelines;
 // set CBC to a checkout and OUT to the output path. After the artifacts expire, an
@@ -162,6 +163,55 @@ func TestKonfluxExpiryStudy(t *testing.T) {
 					}
 				}
 				r.Dangling["artifact-flow-policy"], r.Reruns["artifact-flow-policy"] = dangling(flowRerun), len(flowRerun)
+				// Strongest no-policy baseline: every executing task reruns the producers of every
+				// result it reads, transitively, without knowing which results expire.
+				readsAny := map[string]map[string]bool{}
+				for _, field := range []string{"tasks", "finally"} {
+					for _, raw := range asList(asMap(def)[field]) {
+						m := asMap(raw)
+						blob, _ := json.Marshal(m)
+						for _, match := range anyResultRef.FindAllStringSubmatch(string(blob), -1) {
+							name := m["name"].(string)
+							if readsAny[name] == nil {
+								readsAny[name] = map[string]bool{}
+							}
+							readsAny[name][match[1]] = true
+						}
+					}
+				}
+				resRerun := map[string]bool{task.Name: true}
+				for grow := true; grow; {
+					grow = false
+					for _, tk := range all {
+						if !(resRerun[tk.Name] || !completed[tk.Name]) {
+							continue
+						}
+						for producer := range readsAny[tk.Name] {
+							if completed[producer] && !resRerun[producer] {
+								resRerun[producer], grow = true, true
+							}
+						}
+					}
+				}
+				r.Dangling["result-producer-rule"], r.Reruns["result-producer-rule"] = dangling(resRerun), len(resRerun)
+				// Expiry-aware provenance rule: after expiry, executing tasks rerun the producers of the
+				// *_ARTIFACT results they read, transitively; it needs Konflux's naming and expiry setting.
+				prov := map[string]bool{task.Name: true}
+				for grow := true; grow; {
+					grow = false
+					for _, tk := range all {
+						if !(prov[tk.Name] || !completed[tk.Name]) {
+							continue
+						}
+						for producer := range consumes[tk.Name] {
+							if completed[producer] && !prov[producer] {
+								prov[producer], grow = true, true
+							}
+						}
+					}
+				}
+				r.Dangling["expiry-aware-provenance-rule"], r.Reruns["expiry-aware-provenance-rule"] = dangling(prov), len(prov)
+				r.Dangling["same-as-artifact-flow-policy"] = len(prov) == len(flowRerun)
 				// resumeWithin shorter than the artifact expiry refuses every recovery after expiry.
 				policy := empty
 				policy.Metadata.Name = "window"
