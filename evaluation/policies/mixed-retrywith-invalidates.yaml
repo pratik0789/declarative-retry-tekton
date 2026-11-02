@@ -1,0 +1,8 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: mixed-retrywith-invalidates}
+spec:
+  pipelineRef: delivery
+  tasks:
+    scan: {retryWith: [clone]}
+    clone: {invalidates: [build]}

@@ -1,0 +1,7 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: invalidates-earlier}
+spec:
+  pipelineRef: delivery
+  tasks:
+    build: {invalidates: [clone]}

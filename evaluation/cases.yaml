@@ -352,3 +352,59 @@ cases:
     expectedDecision: recover
     expectedWarningContains: ephemeral-workspace-across-closure
     expectedActions: {prepare: inherit, build: inherit, notify: rerun, audit: inherit}
+  - name: norepeat-via-closure-refused
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/norepeat-closure.yaml
+    expectedDecision: refuse
+    expectedReasonContains: noRepeat
+  - name: norepeat-via-selection-refused
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/norepeat-selection.yaml
+    selectedTasks: [build]
+    expectedDecision: refuse
+    expectedReasonContains: noRepeat
+  - name: norepeat-and-blocksresume-on-reused-task
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/norepeat-blocksresume.yaml
+    expectedDecision: recover
+    expectedActions:
+      clone: inherit
+      build: inherit
+      scan: rerun
+      deploy: continue
+  - name: invalidates-later-task
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/invalidates-later.yaml
+    selectedTasks: [clone]
+    expectedDecision: recover
+    expectedActions:
+      clone: rerun
+      build: rerun
+      scan: rerun
+      deploy: continue
+  - name: invalidates-earlier-task-refused
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/invalidates-earlier.yaml
+    expectedDecision: refuse
+    expectedReasonContains: not a later task
+  - name: mixed-retrywith-invalidates-path
+    pipeline: ../testdata/simple/pipeline.yaml
+    run: ../testdata/simple/run.yaml
+    taskRuns: ../testdata/simple/taskruns.yaml
+    policy: policies/mixed-retrywith-invalidates.yaml
+    expectedDecision: recover
+    expectedActions:
+      clone: rerun
+      build: rerun
+      scan: rerun
+      deploy: continue

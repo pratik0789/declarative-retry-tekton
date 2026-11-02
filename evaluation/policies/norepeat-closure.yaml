@@ -1,0 +1,8 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata: {name: norepeat-closure}
+spec:
+  pipelineRef: delivery
+  tasks:
+    scan: {retryWith: [build]}
+    build: {noRepeat: true}
