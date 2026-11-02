@@ -1,0 +1,5 @@
+Downstream tasks that haven't run yet (the sast-* checks, push-dockerfile and build-source-image) read source files from the `workspace` workspace. There's no environment note, so I'm assuming the Konflux default: `workspace` is bound by volumeClaimTemplate, which means the recovery run gets an empty volume. If it's actually a persistentVolumeClaim, the files are kept and `RERUN: []` is enough.
+On that assumption, clone-repository has to run again to restore the source, and prefetch-dependencies has to run again to restore the prefetched deps that build-source-image packages. Pin `revision` to the commit already built, so the new checkout matches the image and CHAINS-GIT_COMMIT is correct.
+build-container can be reused: its image is already pushed to the registry, and its IMAGE_URL and IMAGE_DIGEST string results are copied over, which is all build-image-index needs. init can be reused too, because nothing downstream depends on its files.
+
+RERUN: [clone-repository, prefetch-dependencies]

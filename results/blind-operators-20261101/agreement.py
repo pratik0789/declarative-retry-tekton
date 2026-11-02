@@ -3,7 +3,7 @@ import json, subprocess, sys
 B = sys.argv[1]
 A = 'results/independent-authors-20261101/authors'
 plans = {}
-for a in (1, 2, 3):
+for a in (1, 2, 3, 4, 5):
     r = json.loads(subprocess.run([B, 'replay', '--pipeline', 'evaluation/konflux/template-build.yaml', '--policy', f'{A}/konflux-a{a}/policy.yaml', '--completed', 'upstream'], capture_output=True, text=True).stdout)
     plans[a] = {row['failedTask']: tuple(sorted(row.get('rerun') or [])) for row in r['rows']}
 ops = json.load(open('results/blind-operators-20261101/operator-scores.json'))['konflux']

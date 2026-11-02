@@ -1,0 +1,26 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  generation: 1
+  name: external-recovery-retry
+spec:
+  pipelineRef: external-recovery
+  tasks:
+    deploy:
+      retryWith:
+      - scan
+      - sign
+      - publish
+      - acquire
+    publish:
+      retryWith:
+      - acquire
+    scan:
+      retryWith:
+      - sign
+      - publish
+      - acquire
+    sign:
+      retryWith:
+      - publish
+      - acquire

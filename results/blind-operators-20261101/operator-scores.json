@@ -30,9 +30,55 @@
      "empty",
      "empty"
     ]
+   ],
+   [
+    [],
+    [
+     "empty",
+     "empty",
+     "empty",
+     "empty",
+     "empty"
+    ]
+   ],
+   [
+    [],
+    [
+     "empty",
+     "empty",
+     "empty",
+     "empty",
+     "empty"
+    ]
    ]
   ],
   "stale-build:gate": [
+   [
+    [
+     "build",
+     "prepare"
+    ],
+    [
+     "closure",
+     "closure",
+     "closure",
+     "closure",
+     "closure"
+    ]
+   ],
+   [
+    [
+     "build",
+     "prepare"
+    ],
+    [
+     "closure",
+     "closure",
+     "closure",
+     "closure",
+     "closure"
+    ]
+   ],
    [
     [
      "build",
@@ -142,9 +188,107 @@
       ]
      ]
     ]
+   ],
+   [
+    [
+     "acquire"
+    ],
+    [
+     [
+      "stable",
+      "declared",
+      [
+       "acquire",
+       "publish"
+      ]
+     ],
+     [
+      "rotated",
+      "declared",
+      [
+       "acquire",
+       "publish"
+      ]
+     ]
+    ]
+   ],
+   [
+    [
+     "acquire"
+    ],
+    [
+     [
+      "stable",
+      "declared",
+      [
+       "acquire",
+       "publish"
+      ]
+     ],
+     [
+      "rotated",
+      "declared",
+      [
+       "acquire",
+       "publish"
+      ]
+     ]
+    ]
    ]
   ],
   "external:sign": [
+   [
+    [
+     "acquire",
+     "publish"
+    ],
+    [
+     [
+      "stable",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "sign"
+      ]
+     ],
+     [
+      "rotated",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "sign"
+      ]
+     ]
+    ]
+   ],
+   [
+    [
+     "acquire",
+     "publish"
+    ],
+    [
+     [
+      "stable",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "sign"
+      ]
+     ],
+     [
+      "rotated",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "sign"
+      ]
+     ]
+    ]
+   ],
    [
     [
      "acquire",
@@ -311,9 +455,119 @@
       ]
      ]
     ]
+   ],
+   [
+    [
+     "acquire",
+     "publish",
+     "sign"
+    ],
+    [
+     [
+      "stable",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "scan",
+       "sign"
+      ]
+     ],
+     [
+      "rotated",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "scan",
+       "sign"
+      ]
+     ]
+    ]
+   ],
+   [
+    [
+     "acquire",
+     "publish",
+     "sign"
+    ],
+    [
+     [
+      "stable",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "scan",
+       "sign"
+      ]
+     ],
+     [
+      "rotated",
+      "declared",
+      [
+       "acquire",
+       "publish",
+       "scan",
+       "sign"
+      ]
+     ]
+    ]
    ]
   ],
   "oci-tagged:promote": [
+   [
+    [
+     "build",
+     "retag"
+    ],
+    [
+     [
+      "tag-moved",
+      "rebuild",
+      [
+       "build",
+       "promote",
+       "retag"
+      ]
+     ],
+     [
+      "manifest-missing",
+      "rebuild",
+      [
+       "build",
+       "promote",
+       "retag"
+      ]
+     ]
+    ]
+   ],
+   [
+    [
+     "build",
+     "retag"
+    ],
+    [
+     [
+      "tag-moved",
+      "rebuild",
+      [
+       "build",
+       "promote",
+       "retag"
+      ]
+     ],
+     [
+      "manifest-missing",
+      "rebuild",
+      [
+       "build",
+       "promote",
+       "retag"
+      ]
+     ]
+    ]
+   ],
    [
     [
      "build",
@@ -457,6 +711,51 @@
       ]
      ]
     ]
+   ],
+   [
+    [
+     "build",
+     "retag"
+    ],
+    [
+     [
+      "tag-moved",
+      "unexecuted",
+      [
+       "build",
+       "promote",
+       "retag"
+      ]
+     ],
+     [
+      "manifest-missing",
+      "unexecuted",
+      [
+       "build",
+       "promote",
+       "retag"
+      ]
+     ]
+    ]
+   ],
+   [
+    [],
+    [
+     [
+      "tag-moved",
+      "empty",
+      [
+       "promote"
+      ]
+     ],
+     [
+      "manifest-missing",
+      "empty",
+      [
+       "promote"
+      ]
+     ]
+    ]
    ]
   ]
  },
@@ -464,9 +763,13 @@
   "init": [
    [],
    [],
+   [],
+   [],
    []
   ],
   "clone-repository": [
+   [],
+   [],
    [],
    [],
    []
@@ -480,9 +783,23 @@
    ],
    [
     "clone-repository"
+   ],
+   [
+    "clone-repository"
+   ],
+   [
+    "clone-repository"
    ]
   ],
   "build-container": [
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
    [
     "clone-repository",
     "prefetch-dependencies"
@@ -509,10 +826,26 @@
    [
     "clone-repository",
     "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
    ]
   ],
   "build-source-image": [
    [],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
    [
     "clone-repository",
     "prefetch-dependencies"
@@ -534,6 +867,13 @@
    [
     "clone-repository",
     "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository"
    ]
   ],
   "clair-scan": [
@@ -548,9 +888,23 @@
    [
     "clone-repository",
     "prefetch-dependencies"
+   ],
+   [
+    "clone-repository"
+   ],
+   [
+    "clone-repository"
    ]
   ],
   "ecosystem-cert-preflight-checks": [
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
    [
     "clone-repository",
     "prefetch-dependencies"
@@ -576,9 +930,25 @@
    [
     "clone-repository",
     "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
    ]
   ],
   "clamav-scan": [
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
    [
     "clone-repository",
     "prefetch-dependencies"
@@ -604,9 +974,25 @@
    [
     "clone-repository",
     "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
    ]
   ],
   "sast-unicode-check": [
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
    [
     "clone-repository",
     "prefetch-dependencies"
@@ -631,6 +1017,14 @@
    [
     "clone-repository",
     "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
    ]
   ],
   "push-dockerfile": [
@@ -645,9 +1039,24 @@
    [
     "clone-repository",
     "prefetch-dependencies"
+   ],
+   [
+    "clone-repository"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
    ]
   ],
   "rpms-signature-scan": [
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
+   [
+    "clone-repository",
+    "prefetch-dependencies"
+   ],
    [
     "clone-repository",
     "prefetch-dependencies"

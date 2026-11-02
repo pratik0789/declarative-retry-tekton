@@ -7,3 +7,4 @@ sessions decides, for one failed run, which completed tasks must rerun (`run_ope
 Konflux template positions), 69 sessions. `score_operators.py` plans each selection with an
 empty policy plus `--tasks` and matches it to executed arms. Compares deciding at every
 failure with writing the decision once; it does not measure human operators.
+Five sessions per role (authors a1-a5, operators o1-o5); Claude Code default sampling settings (not exposed by claude -p).

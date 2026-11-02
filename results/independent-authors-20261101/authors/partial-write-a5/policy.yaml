@@ -1,0 +1,14 @@
+apiVersion: retry.tekton.dev/v1alpha1
+kind: PipelineRetryPolicy
+metadata:
+  generation: 1
+  name: pw-1-retry
+spec:
+  pipelineRef: pw-1
+  tasks:
+    publish:
+      retryWith:
+      - mutate
+    verify:
+      retryWith:
+      - mutate
